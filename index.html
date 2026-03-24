@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BELLUM MUNDI — Historia Militar Universal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --gold: #C9A84C; --gold-light: #E8C97A; --gold-dark: #8B6914;
+  --crimson: #8B1A1A; --crimson-light: #C0392B; --blood: #6B0F0F;
+  --ink: #0A0806; --parchment: #F4ECD8; --parchment-dark: #D4C4A0;
+  --slate: #1A1814; --steel: #2A2822; --ash: #3D3A34;
+  --smoke: #6B6560; --mist: #9B9590; --white: #F9F5ED;
+  --emerald: #1a6b3a; --emerald-light: #27ae60;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--ink); color:var(--white); font-family:'Crimson Pro',Georgia,serif; font-size:18px; line-height:1.7; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:9998; opacity:0.4; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--ink); }
+::-webkit-scrollbar-thumb { background:var(--gold-dark); border-radius:3px; }
+
+/* ── HERO ── */
+#hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden; padding:4rem 2rem; }
+#hero-canvas { position:absolute; inset:0; z-index:0; }
+.hero-content { position:relative; z-index:2; max-width:900px; }
+.hero-ornament { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.5em; color:var(--gold); text-transform:uppercase; margin-bottom:2rem; opacity:0; animation:fadeUp 1s 0.3s forwards; }
+.hero-title { font-family:'Cinzel',serif; font-size:clamp(3.5rem,10vw,9rem); font-weight:900; color:var(--white); line-height:0.9; letter-spacing:-0.02em; text-shadow:0 0 80px rgba(201,168,76,0.3),0 4px 40px rgba(0,0,0,0.8); opacity:0; animation:fadeUp 1s 0.5s forwards; }
+.hero-title span { color:var(--gold); }
+.hero-subtitle { font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(1.1rem,2.5vw,1.6rem); color:var(--parchment-dark); margin-top:1.5rem; letter-spacing:0.05em; opacity:0; animation:fadeUp 1s 0.7s forwards; }
+.hero-rule { width:200px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:2rem auto; opacity:0; animation:fadeUp 1s 0.9s forwards; }
+.hero-meta { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.4em; color:var(--smoke); opacity:0; animation:fadeUp 1s 1.1s forwards; }
+.hero-ctas { display:flex; gap:1rem; justify-content:center; margin-top:2.5rem; flex-wrap:wrap; opacity:0; animation:fadeUp 1s 1.3s forwards; }
+.btn-primary { background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:none; cursor:pointer; transition:all 0.3s; font-weight:700; }
+.btn-primary:hover { background:var(--gold-light); transform:translateY(-2px); }
+.btn-ghost { background:transparent; color:var(--white); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:1px solid rgba(249,245,237,0.3); cursor:pointer; transition:all 0.3s; }
+.btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
+.scroll-cta { position:absolute; bottom:3rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; cursor:pointer; opacity:0; animation:fadeUp 1s 1.7s forwards; z-index:2; }
+.scroll-line { width:1px; height:60px; background:linear-gradient(180deg,var(--gold),transparent); animation:scrollPulse 2s ease-in-out infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── NAV ── */
+#nav { position:sticky; top:0; z-index:500; background:rgba(10,8,6,0.96); backdrop-filter:blur(20px); border-bottom:1px solid rgba(201,168,76,0.2); padding:0 2rem; }
+.nav-inner { max-width:1400px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; gap:1rem; }
+.nav-logo { font-family:'Cinzel',serif; font-size:1.1rem; font-weight:700; color:var(--gold); letter-spacing:0.1em; text-decoration:none; flex-shrink:0; }
+.nav-links { display:flex; gap:0; list-style:none; flex:1; justify-content:center; }
+.nav-links a { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--mist); text-decoration:none; padding:0.5rem 0.8rem; transition:color 0.3s; text-transform:uppercase; }
+.nav-links a:hover { color:var(--gold); }
+.nav-right { display:flex; align-items:center; gap:0.8rem; flex-shrink:0; }
+.nav-queries { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.1em; color:var(--smoke); border:1px solid rgba(201,168,76,0.2); padding:0.3rem 0.7rem; display:flex; align-items:center; gap:0.4rem; }
+.nav-queries .q-count { color:var(--gold); font-weight:700; }
+.nav-upgrade { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:var(--ink); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.4rem 0.9rem; border:none; cursor:pointer; font-weight:700; transition:all 0.3s; }
+.nav-upgrade:hover { opacity:0.9; transform:translateY(-1px); }
+.nav-user-btn { background:none; border:1px solid rgba(201,168,76,0.3); color:var(--gold); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s; font-family:'Cinzel',serif; }
+.nav-user-btn:hover { border-color:var(--gold); background:rgba(201,168,76,0.1); }
+.nav-user-btn.logged { background:rgba(201,168,76,0.15); }
+.nav-login-btn { background:transparent; border:1px solid rgba(201,168,76,0.3); color:var(--mist); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.4rem 0.9rem; cursor:pointer; transition:all 0.3s; }
+.nav-login-btn:hover { color:var(--gold); border-color:var(--gold); }
+.premium-badge { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:var(--ink); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.15em; padding:0.15rem 0.4rem; text-transform:uppercase; font-weight:700; }
+
+/* ── ANNOUNCEMENT BAR ── */
+#announce-bar { background:linear-gradient(135deg,var(--blood),var(--crimson)); padding:0.6rem 2rem; text-align:center; font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.2em; color:var(--parchment); position:relative; }
+#announce-bar span { color:var(--gold-light); font-weight:700; }
+.announce-close { position:absolute; right:1rem; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(244,236,216,0.5); cursor:pointer; font-size:0.9rem; }
+
+/* ── FREEMIUM BANNER ── */
+#free-banner { background:linear-gradient(135deg,rgba(26,107,58,0.15),rgba(39,174,96,0.05)); border:1px solid rgba(39,174,96,0.2); border-left:3px solid var(--emerald-light); padding:0.8rem 1.5rem; max-width:1400px; margin:1.5rem auto 0; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.free-banner-text { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; color:var(--mist); }
+.free-banner-text strong { color:var(--emerald-light); }
+.free-banner-cta { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--gold); text-transform:uppercase; cursor:pointer; border-bottom:1px solid rgba(201,168,76,0.3); padding-bottom:1px; transition:color 0.3s; background:none; border-top:none; border-left:none; border-right:none; }
+.free-banner-cta:hover { color:var(--gold-light); }
+
+/* ── SECTION HEADERS ── */
+.section-header { text-align:center; padding:5rem 2rem 3rem; }
+.section-eyebrow { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.5em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; }
+.section-title { font-family:'Playfair Display',serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:700; color:var(--white); line-height:1.1; margin-bottom:1rem; }
+.section-desc { font-family:'Crimson Pro',serif; font-size:1.15rem; color:var(--smoke); max-width:600px; margin:0 auto; font-style:italic; }
+.gold-rule { width:80px; height:2px; background:var(--gold); margin:2rem auto; }
+
+/* ── TIMELINE ── */
+#timeline-section { padding:0 2rem 5rem; max-width:1400px; margin:0 auto; }
+.timeline-nav { display:flex; overflow-x:auto; gap:0; border:1px solid rgba(201,168,76,0.2); border-radius:2px; scrollbar-width:none; margin-bottom:3rem; }
+.timeline-nav::-webkit-scrollbar { display:none; }
+.era-btn { flex:0 0 auto; padding:1.2rem 1.5rem; background:transparent; border:none; border-right:1px solid rgba(201,168,76,0.15); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; white-space:nowrap; display:flex; flex-direction:column; align-items:center; gap:0.3rem; }
+.era-btn:last-child { border-right:none; }
+.era-btn:hover { background:rgba(201,168,76,0.05); color:var(--gold-light); }
+.era-btn.active { background:rgba(201,168,76,0.1); color:var(--gold); border-bottom:2px solid var(--gold); }
+.era-btn .era-years { font-family:'Crimson Pro',serif; font-size:0.7rem; color:inherit; opacity:0.6; letter-spacing:0; }
+
+/* ── ERA CONTENT ── */
+#era-content { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:rgba(201,168,76,0.1); }
+.era-panel { background:var(--slate); padding:2rem; }
+.era-panel.full-width { grid-column:1/-1; }
+.panel-title { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; }
+.panel-title::after { content:''; flex:1; height:1px; background:rgba(201,168,76,0.2); }
+
+/* ── MAP ── */
+#battle-map { height:500px; width:100%; border:1px solid rgba(201,168,76,0.15); }
+.leaflet-tile { filter:invert(1) hue-rotate(180deg) saturate(0.7) brightness(0.8); }
+
+/* ── BATTLE CARDS ── */
+.battles-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1px; background:rgba(201,168,76,0.08); }
+.battle-card { background:var(--slate); padding:1.5rem; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden; }
+.battle-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--crimson); transform:scaleY(0); transition:transform 0.3s; transform-origin:bottom; }
+.battle-card:hover { background:var(--steel); }
+.battle-card:hover::before { transform:scaleY(1); }
+.battle-year { font-family:'Cinzel',serif; font-size:0.75rem; color:var(--gold); letter-spacing:0.2em; margin-bottom:0.4rem; }
+.battle-name { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--white); margin-bottom:0.4rem; line-height:1.2; }
+.battle-combatants { font-family:'Crimson Pro',serif; font-style:italic; font-size:0.9rem; color:var(--smoke); margin-bottom:0.8rem; }
+.battle-tag { display:inline-block; background:rgba(139,26,26,0.3); border:1px solid rgba(139,26,26,0.5); color:#E07070; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; padding:0.2rem 0.5rem; text-transform:uppercase; margin-right:0.3rem; }
+
+/* ── COMMANDERS ── */
+.commanders-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1px; background:rgba(201,168,76,0.08); }
+.commander-card { background:var(--slate); padding:1.5rem 1rem; text-align:center; cursor:pointer; transition:all 0.3s; }
+.commander-card:hover { background:var(--steel); }
+.commander-avatar { width:70px; height:70px; border-radius:50%; margin:0 auto 0.8rem; background:var(--ash); border:2px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
+.commander-name { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:700; color:var(--white); margin-bottom:0.2rem; }
+.commander-role { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--gold); text-transform:uppercase; }
+
+/* ── WEAPONS ── */
+.weapons-list { display:grid; grid-template-columns:repeat(2,1fr); gap:0.8rem; }
+.weapon-item { display:flex; align-items:center; gap:0.8rem; padding:0.8rem; background:var(--steel); border:1px solid rgba(201,168,76,0.08); cursor:pointer; transition:all 0.3s; }
+.weapon-item:hover { border-color:rgba(201,168,76,0.3); }
+.weapon-icon { font-size:1.5rem; }
+.weapon-name { font-family:'Playfair Display',serif; font-size:0.9rem; color:var(--white); }
+.weapon-period { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--smoke); }
+
+/* ── DOCS ── */
+.docs-list { display:flex; flex-direction:column; gap:0.5rem; }
+.doc-item { display:flex; align-items:flex-start; gap:1rem; padding:1rem; background:var(--steel); border-left:2px solid var(--gold-dark); cursor:pointer; transition:all 0.3s; }
+.doc-item:hover { background:var(--ash); border-left-color:var(--gold); }
+.doc-icon { font-size:1.4rem; flex-shrink:0; margin-top:0.1rem; }
+.doc-name { font-family:'Playfair Display',serif; font-size:0.95rem; color:var(--white); margin-bottom:0.2rem; }
+.doc-year { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--gold); }
+
+/* ── CIVS ── */
+.civs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1px; background:rgba(201,168,76,0.08); }
+.civ-card { background:var(--slate); padding:1.2rem; cursor:pointer; transition:all 0.3s; }
+.civ-card:hover { background:var(--steel); }
+.civ-flag { font-size:2rem; margin-bottom:0.5rem; }
+.civ-name { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--white); margin-bottom:0.2rem; }
+.civ-period { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--gold); }
+.civ-power { margin-top:0.6rem; height:2px; background:var(--ash); border-radius:1px; overflow:hidden; }
+.civ-power-fill { height:100%; background:linear-gradient(90deg,var(--crimson),var(--gold)); }
+
+/* ── TACTICS ── */
+.tactics-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(201,168,76,0.08); }
+.tactic-card { background:var(--slate); padding:1.2rem; cursor:pointer; transition:all 0.3s; text-align:center; }
+.tactic-card:hover { background:var(--steel); }
+.tactic-diagram { font-size:2rem; margin-bottom:0.5rem; }
+.tactic-name { font-family:'Playfair Display',serif; font-size:0.95rem; color:var(--white); margin-bottom:0.2rem; }
+.tactic-origin { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--gold); }
+
+/* ── STATS ── */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:rgba(201,168,76,0.08); margin:3rem 0; }
+.stat-box { background:var(--steel); padding:2rem 1.5rem; text-align:center; }
+.stat-number { font-family:'Cinzel',serif; font-size:2.5rem; font-weight:900; color:var(--gold); display:block; line-height:1; margin-bottom:0.3rem; }
+.stat-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.25em; color:var(--smoke); text-transform:uppercase; }
+
+.era-overview { padding:2rem; background:linear-gradient(135deg,rgba(139,26,26,0.1) 0%,transparent 50%); border-left:3px solid var(--crimson); margin-bottom:2rem; font-style:italic; color:var(--parchment-dark); font-size:1.05rem; }
+
+/* ── SEARCH ── */
+#search-section { padding:3rem 2rem; max-width:800px; margin:0 auto; }
+.search-bar { display:flex; gap:0; border:1px solid rgba(201,168,76,0.3); background:var(--slate); }
+.search-input { flex:1; background:transparent; border:none; padding:1rem 1.5rem; color:var(--white); font-family:'Crimson Pro',serif; font-size:1rem; outline:none; }
+.search-input::placeholder { color:var(--smoke); }
+.search-btn { background:var(--gold); border:none; padding:1rem 1.5rem; color:var(--ink); font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:background 0.3s; font-weight:700; }
+.search-btn:hover { background:var(--gold-light); }
+
+/* ── QUOTE ── */
+.war-quote { text-align:center; padding:5rem 2rem; max-width:700px; margin:0 auto; }
+.quote-text { font-family:'IM Fell English',serif; font-style:italic; font-size:clamp(1.4rem,3vw,2rem); color:var(--parchment); line-height:1.5; margin-bottom:1.5rem; }
+.quote-attr { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; }
+
+/* ── PRICING SECTION ── */
+#pricing-section { padding:5rem 2rem; background:linear-gradient(180deg,transparent,rgba(139,26,26,0.05),transparent); }
+.pricing-toggle { display:flex; align-items:center; justify-content:center; gap:1rem; margin-bottom:3rem; }
+.toggle-label { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; }
+.toggle-label.active { color:var(--gold); }
+.toggle-switch { width:50px; height:26px; background:var(--ash); border-radius:13px; cursor:pointer; position:relative; border:1px solid rgba(201,168,76,0.2); transition:background 0.3s; }
+.toggle-switch.annual { background:rgba(201,168,76,0.2); }
+.toggle-knob { position:absolute; width:20px; height:20px; background:var(--gold); border-radius:50%; top:2px; left:3px; transition:transform 0.3s; }
+.toggle-switch.annual .toggle-knob { transform:translateX(24px); }
+.save-badge { background:rgba(39,174,96,0.2); border:1px solid rgba(39,174,96,0.4); color:#5de890; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; padding:0.2rem 0.6rem; text-transform:uppercase; }
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(201,168,76,0.08); max-width:1100px; margin:0 auto; }
+.price-card { background:var(--slate); padding:2.5rem 2rem; position:relative; transition:all 0.3s; }
+.price-card.featured { background:linear-gradient(160deg,rgba(139,26,26,0.2),rgba(201,168,76,0.05)); border:1px solid rgba(201,168,76,0.3); }
+.price-card.featured::before { content:'MÁS POPULAR'; position:absolute; top:-1px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.2em; padding:0.3rem 1rem; font-weight:700; }
+.price-tier { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; }
+.price-amount { font-family:'Playfair Display',serif; font-size:3rem; font-weight:900; color:var(--white); line-height:1; }
+.price-amount sup { font-size:1.2rem; vertical-align:top; margin-top:0.5rem; color:var(--smoke); }
+.price-period { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; margin-bottom:0.3rem; }
+.price-annual-note { font-family:'Crimson Pro',serif; font-size:0.85rem; color:var(--emerald-light); font-style:italic; margin-bottom:1.5rem; min-height:1.2em; }
+.price-divider { height:1px; background:rgba(201,168,76,0.15); margin:1.5rem 0; }
+.price-features { list-style:none; margin-bottom:2rem; }
+.price-features li { font-family:'Crimson Pro',serif; font-size:0.95rem; color:var(--mist); padding:0.4rem 0; display:flex; align-items:center; gap:0.6rem; }
+.price-features li .check { color:var(--emerald-light); font-size:0.8rem; }
+.price-features li .cross { color:var(--smoke); font-size:0.8rem; opacity:0.4; }
+.price-features li.disabled { opacity:0.4; }
+.price-cta { width:100%; padding:1rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; font-weight:700; }
+.price-cta.primary { background:var(--gold); color:var(--ink); border:none; }
+.price-cta.primary:hover { background:var(--gold-light); transform:translateY(-2px); }
+.price-cta.ghost { background:transparent; color:var(--mist); border:1px solid rgba(201,168,76,0.2); }
+.price-cta.ghost:hover { border-color:var(--gold); color:var(--gold); }
+.price-cta.enterprise { background:transparent; color:var(--gold); border:1px solid rgba(201,168,76,0.4); }
+.price-cta.enterprise:hover { background:rgba(201,168,76,0.1); }
+
+/* ── NEWSLETTER ── */
+#newsletter-section { padding:4rem 2rem; border-top:1px solid rgba(201,168,76,0.1); border-bottom:1px solid rgba(201,168,76,0.1); }
+.newsletter-inner { max-width:700px; margin:0 auto; text-align:center; }
+.newsletter-badge { display:inline-block; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.3); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.25em; color:var(--gold); padding:0.3rem 0.8rem; text-transform:uppercase; margin-bottom:1.5rem; }
+.newsletter-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:var(--white); margin-bottom:0.8rem; }
+.newsletter-desc { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); margin-bottom:2rem; font-size:1.05rem; }
+.newsletter-form { display:flex; gap:0; max-width:500px; margin:0 auto 1rem; }
+.newsletter-input { flex:1; background:var(--slate); border:1px solid rgba(201,168,76,0.2); border-right:none; padding:0.9rem 1.2rem; color:var(--white); font-family:'Crimson Pro',serif; font-size:1rem; outline:none; }
+.newsletter-input::placeholder { color:var(--smoke); }
+.newsletter-btn { background:var(--gold); color:var(--ink); border:none; padding:0.9rem 1.5rem; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; font-weight:700; transition:background 0.3s; white-space:nowrap; }
+.newsletter-btn:hover { background:var(--gold-light); }
+.newsletter-social-proof { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; }
+.newsletter-social-proof span { color:var(--gold); }
+
+/* ── AFFILIATE BOOKS ── */
+.books-section { margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(201,168,76,0.15); }
+.books-title { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; }
+.books-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.6rem; }
+.book-item { display:flex; align-items:center; gap:0.7rem; padding:0.7rem; background:rgba(201,168,76,0.05); border:1px solid rgba(201,168,76,0.1); cursor:pointer; transition:all 0.3s; text-decoration:none; }
+.book-item:hover { border-color:rgba(201,168,76,0.3); background:rgba(201,168,76,0.08); }
+.book-cover { font-size:1.8rem; flex-shrink:0; }
+.book-title { font-family:'Playfair Display',serif; font-size:0.8rem; color:var(--white); line-height:1.2; margin-bottom:0.2rem; }
+.book-author { font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.1em; color:var(--smoke); text-transform:uppercase; }
+.book-affiliate-tag { font-family:'Cinzel',serif; font-size:0.45rem; letter-spacing:0.1em; color:var(--gold-dark); text-transform:uppercase; margin-top:0.2rem; }
+
+/* ── MODALS ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:flex-start; justify-content:center; padding:2rem; overflow-y:auto; backdrop-filter:blur(8px); }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--slate); border:1px solid rgba(201,168,76,0.3); max-width:800px; width:100%; position:relative; animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1); margin:auto; }
+@keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.modal-header { padding:2rem 2rem 1rem; border-bottom:1px solid rgba(201,168,76,0.15); position:relative; }
+.modal-eyebrow { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-bottom:0.5rem; }
+.modal-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--white); line-height:1.1; }
+.modal-close { position:absolute; top:1.5rem; right:1.5rem; background:none; border:1px solid rgba(201,168,76,0.3); color:var(--mist); width:36px; height:36px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+.modal-close:hover { border-color:var(--gold); color:var(--gold); }
+.modal-body { padding:2rem; font-family:'Crimson Pro',serif; font-size:1.05rem; color:var(--parchment-dark); line-height:1.8; }
+.modal-body h3 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--gold); margin:1.5rem 0 0.5rem; font-weight:700; }
+.modal-body h4 { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; margin:1rem 0 0.3rem; }
+.modal-body p { margin-bottom:1rem; }
+.modal-body ul { list-style:none; padding:0; }
+.modal-body ul li::before { content:'⚔'; color:var(--gold); margin-right:0.5rem; font-size:0.7rem; }
+.modal-body ul li { margin-bottom:0.4rem; }
+
+/* ── AI LOADING ── */
+.ai-loading { display:flex; align-items:center; gap:1rem; padding:2rem; color:var(--smoke); font-style:italic; }
+.loading-dots { display:flex; gap:4px; }
+.loading-dots span { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:dot 1.2s ease-in-out infinite; }
+.loading-dots span:nth-child(2) { animation-delay:0.2s; }
+.loading-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes dot { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+/* ── PAYWALL MODAL ── */
+#paywall-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:2000; display:none; align-items:center; justify-content:center; padding:2rem; backdrop-filter:blur(12px); }
+#paywall-overlay.open { display:flex; }
+.paywall-box { background:var(--slate); border:1px solid rgba(201,168,76,0.4); max-width:560px; width:100%; padding:3rem; text-align:center; animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
+.paywall-icon { font-size:3rem; margin-bottom:1rem; }
+.paywall-eyebrow { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-bottom:0.8rem; }
+.paywall-title { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:700; color:var(--white); margin-bottom:0.8rem; line-height:1.1; }
+.paywall-desc { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); margin-bottom:2rem; font-size:1rem; }
+.paywall-features { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:2rem; text-align:left; }
+.paywall-feat { display:flex; align-items:center; gap:0.5rem; font-family:'Crimson Pro',serif; font-size:0.9rem; color:var(--mist); }
+.paywall-feat .pf-icon { color:var(--gold); font-size:0.8rem; }
+.paywall-ctas { display:flex; flex-direction:column; gap:0.8rem; }
+.paywall-primary { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:var(--ink); border:none; padding:1.1rem 2rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; font-weight:700; transition:all 0.3s; }
+.paywall-primary:hover { opacity:0.9; transform:translateY(-2px); }
+.paywall-login-link { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; cursor:pointer; background:none; border:none; }
+.paywall-login-link span { color:var(--gold); text-decoration:underline; }
+.paywall-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--smoke); cursor:pointer; font-size:1.1rem; }
+.paywall-close:hover { color:var(--gold); }
+.paywall-price-hint { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--gold); margin-bottom:0.3rem; }
+.paywall-price-sub { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; }
+
+/* ── AUTH MODAL ── */
+#auth-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:3000; display:none; align-items:center; justify-content:center; padding:2rem; backdrop-filter:blur(12px); }
+#auth-overlay.open { display:flex; }
+.auth-box { background:var(--slate); border:1px solid rgba(201,168,76,0.3); max-width:420px; width:100%; animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
+.auth-header { padding:2rem 2rem 1.5rem; border-bottom:1px solid rgba(201,168,76,0.15); text-align:center; }
+.auth-logo { font-family:'Cinzel',serif; font-size:1.3rem; font-weight:900; color:var(--gold); letter-spacing:0.15em; margin-bottom:0.5rem; }
+.auth-subtitle { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); font-size:0.9rem; }
+.auth-tabs { display:flex; }
+.auth-tab { flex:1; padding:0.8rem; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; }
+.auth-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+.auth-body { padding:2rem; }
+.auth-field { margin-bottom:1.2rem; }
+.auth-label { display:block; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; margin-bottom:0.5rem; }
+.auth-input { width:100%; background:var(--steel); border:1px solid rgba(201,168,76,0.15); padding:0.8rem 1rem; color:var(--white); font-family:'Crimson Pro',serif; font-size:1rem; outline:none; transition:border-color 0.3s; }
+.auth-input:focus { border-color:rgba(201,168,76,0.5); }
+.auth-input::placeholder { color:var(--smoke); }
+.auth-submit { width:100%; padding:1rem; background:var(--gold); color:var(--ink); border:none; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; font-weight:700; transition:all 0.3s; margin-top:0.5rem; }
+.auth-submit:hover { background:var(--gold-light); }
+.auth-divider { text-align:center; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; margin:1rem 0; position:relative; }
+.auth-divider::before, .auth-divider::after { content:''; position:absolute; top:50%; width:40%; height:1px; background:rgba(201,168,76,0.15); }
+.auth-divider::before { left:0; }
+.auth-divider::after { right:0; }
+.auth-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--smoke); cursor:pointer; font-size:1rem; }
+.auth-close:hover { color:var(--gold); }
+.auth-terms { font-family:'Crimson Pro',serif; font-size:0.8rem; color:var(--smoke); text-align:center; margin-top:1rem; font-style:italic; }
+.auth-error { background:rgba(139,26,26,0.2); border:1px solid rgba(139,26,26,0.4); color:#E07070; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.1em; padding:0.6rem 0.8rem; margin-bottom:1rem; display:none; }
+.auth-error.show { display:block; }
+
+/* ── USER DASHBOARD MODAL ── */
+#dashboard-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:3000; display:none; align-items:flex-start; justify-content:center; padding:2rem; overflow-y:auto; backdrop-filter:blur(12px); }
+#dashboard-overlay.open { display:flex; }
+.dashboard-box { background:var(--slate); border:1px solid rgba(201,168,76,0.3); max-width:640px; width:100%; animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1); margin:auto; position:relative; }
+.dashboard-header { padding:2rem; border-bottom:1px solid rgba(201,168,76,0.15); display:flex; align-items:center; gap:1.5rem; }
+.dashboard-avatar { width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-family:'Cinzel',serif; color:var(--ink); font-weight:900; flex-shrink:0; }
+.dashboard-name { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--white); }
+.dashboard-plan { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; margin-top:0.2rem; }
+.dashboard-plan span { color:var(--gold); }
+.dashboard-body { padding:2rem; }
+.dashboard-stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(201,168,76,0.08); margin-bottom:2rem; }
+.dashboard-stat { background:var(--steel); padding:1.2rem; text-align:center; }
+.dashboard-stat-val { font-family:'Cinzel',serif; font-size:1.5rem; font-weight:900; color:var(--gold); display:block; }
+.dashboard-stat-lbl { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; }
+.usage-bar-wrap { margin-bottom:2rem; }
+.usage-bar-label { display:flex; justify-content:space-between; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; margin-bottom:0.5rem; }
+.usage-bar-label span { color:var(--gold); }
+.usage-bar { height:6px; background:var(--ash); border-radius:3px; overflow:hidden; }
+.usage-bar-fill { height:100%; background:linear-gradient(90deg,var(--crimson),var(--gold)); transition:width 0.8s ease; }
+.dashboard-actions { display:flex; flex-direction:column; gap:0.8rem; }
+.dash-action-btn { width:100%; padding:0.9rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; text-align:left; display:flex; justify-content:space-between; align-items:center; }
+.dash-action-btn.upgrade { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:var(--ink); border:none; font-weight:700; }
+.dash-action-btn.upgrade:hover { opacity:0.9; }
+.dash-action-btn.secondary { background:transparent; color:var(--mist); border:1px solid rgba(201,168,76,0.2); }
+.dash-action-btn.secondary:hover { border-color:var(--gold); color:var(--gold); }
+.dash-action-btn.danger { background:transparent; color:rgba(224,112,112,0.7); border:1px solid rgba(139,26,26,0.3); }
+.dash-action-btn.danger:hover { color:#E07070; border-color:var(--crimson); }
+.dashboard-close { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--smoke); cursor:pointer; font-size:1rem; }
+.dashboard-close:hover { color:var(--gold); }
+
+/* ── TOAST ── */
+#toast { position:fixed; bottom:2rem; right:2rem; z-index:9999; display:flex; flex-direction:column; gap:0.5rem; pointer-events:none; }
+.toast-item { background:var(--steel); border:1px solid rgba(201,168,76,0.3); border-left:3px solid var(--gold); padding:1rem 1.5rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; color:var(--white); text-transform:uppercase; animation:toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; max-width:300px; }
+.toast-item.success { border-left-color:var(--emerald-light); }
+.toast-item.error { border-left-color:var(--crimson-light); }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes toastOut { to{opacity:0;transform:translateX(20px)} }
+
+/* ── FOOTER ── */
+footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; max-width:1200px; margin:0 auto 3rem; }
+.footer-brand .footer-logo { font-family:'Cinzel',serif; font-size:1.4rem; font-weight:900; color:var(--gold); letter-spacing:0.2em; margin-bottom:0.8rem; }
+.footer-brand p { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); font-size:0.95rem; line-height:1.6; }
+.footer-col-title { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:1.2rem; }
+.footer-links { list-style:none; }
+.footer-links li { margin-bottom:0.5rem; }
+.footer-links a { font-family:'Crimson Pro',serif; color:var(--smoke); text-decoration:none; font-size:0.9rem; transition:color 0.3s; cursor:pointer; }
+.footer-links a:hover { color:var(--gold); }
+.footer-bottom { border-top:1px solid rgba(201,168,76,0.1); padding-top:2rem; display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; }
+.footer-copy { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; color:var(--smoke); text-transform:uppercase; }
+.footer-legal { display:flex; gap:1.5rem; }
+.footer-legal a { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--smoke); text-decoration:none; text-transform:uppercase; transition:color 0.3s; cursor:pointer; }
+.footer-legal a:hover { color:var(--gold); }
+
+/* ── MISC ── */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity 0.7s ease,transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+@media (max-width:900px) {
+  #era-content { grid-template-columns:1fr; }
+  .pricing-grid { grid-template-columns:1fr; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+  .tactics-grid { grid-template-columns:repeat(2,1fr); }
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .weapons-list { grid-template-columns:1fr; }
+  .paywall-features { grid-template-columns:1fr; }
+  .nav-links { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCE BAR -->
+<div id="announce-bar">
+  ⚔ Nuevo: <span>La Batalla de Waterloo</span> — Análisis completo con IA · Más de <span>1.200</span> suscriptores del newsletter esta semana
+  <button class="announce-close" onclick="this.parentElement.style.display='none'">✕</button>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">⚔ BELLUM MUNDI</a>
+    <ul class="nav-links">
+      <li><a href="#timeline-section">Eras</a></li>
+      <li><a href="#pricing-section">Premium</a></li>
+      <li><a href="#newsletter-section">Newsletter</a></li>
+    </ul>
+    <div class="nav-right" id="nav-right">
+      <!-- dynamically filled -->
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-ornament">Encyclopaedia Militaris Universalis · Est. MMXXV</div>
+    <h1 class="hero-title">BELLUM<br><span>MUNDI</span></h1>
+    <p class="hero-subtitle">Historia Militar del Mundo · De los Albores de la Civilización<br>hasta el Siglo XXI</p>
+    <div class="hero-rule"></div>
+    <p class="hero-meta">Todas las batallas · Todos los ejércitos · Todos los comandantes · Todos los tratados</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">Explorar Gratis</button>
+      <button class="btn-ghost" onclick="openPricing()">Ver Premium ⚔</button>
+    </div>
+  </div>
+  <div class="scroll-cta" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">
+    <span>Descender</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- Freemium banner -->
+  <div style="max-width:1400px;margin:0 auto;padding:0 2rem;">
+    <div id="free-banner">
+      <div class="free-banner-text" id="free-banner-text">
+        Acceso gratuito — <strong id="queries-left-banner">3 consultas</strong> de IA disponibles hoy
+      </div>
+      <button class="free-banner-cta" onclick="openPricing()">Consultas ilimitadas con Premium →</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div id="search-section" class="reveal">
+    <div class="section-eyebrow">Búsqueda Universal con IA</div>
+    <div class="search-bar">
+      <input class="search-input" type="text" id="search-input" placeholder="Busca una batalla, comandante, tratado, arma, civilización..."/>
+      <button class="search-btn" onclick="doSearch()">Buscar</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div style="max-width:1400px;margin:0 auto;padding:0 2rem;">
+    <div class="stats-row reveal">
+      <div class="stat-box"><span class="stat-number">5,000+</span><span class="stat-label">Años de Historia</span></div>
+      <div class="stat-box"><span class="stat-number">8,000+</span><span class="stat-label">Batallas Registradas</span></div>
+      <div class="stat-box"><span class="stat-number">500+</span><span class="stat-label">Civilizaciones</span></div>
+      <div class="stat-box"><span class="stat-number">1,200+</span><span class="stat-label">Comandantes</span></div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Navegación Cronológica</div>
+    <h2 class="section-title">La Historia en el Tiempo</h2>
+    <p class="section-desc">Recorre todas las eras de la historia militar, desde las primeras civilizaciones hasta el mundo contemporáneo</p>
+    <div class="gold-rule"></div>
+  </div>
+
+  <div id="timeline-section" class="reveal">
+    <div class="timeline-nav" id="era-nav"></div>
+    <div class="era-overview" id="era-overview">Selecciona una era para explorar sus guerras, batallas, ejércitos, comandantes, armas y documentos históricos.</div>
+    <div class="stats-row" id="era-stats" style="display:none;">
+      <div class="stat-box"><span class="stat-number" id="es-battles">—</span><span class="stat-label">Batallas</span></div>
+      <div class="stat-box"><span class="stat-number" id="es-years">—</span><span class="stat-label">Años de Duración</span></div>
+      <div class="stat-box"><span class="stat-number" id="es-civs">—</span><span class="stat-label">Civilizaciones</span></div>
+      <div class="stat-box"><span class="stat-number" id="es-cmds">—</span><span class="stat-label">Comandantes</span></div>
+    </div>
+    <!-- Map -->
+    <div class="era-panel full-width" style="padding:0;">
+      <div class="panel-title" style="padding:1.5rem 2rem 1rem;">Mapa de Batallas</div>
+      <div id="battle-map"></div>
+    </div>
+    <!-- Content Grid -->
+    <div id="era-content" style="margin-top:2px;">
+      <div class="era-panel full-width" id="battles-panel">
+        <div class="panel-title">Batallas Principales</div>
+        <div class="battles-grid" id="battles-grid"></div>
+      </div>
+      <div class="era-panel" id="commanders-panel">
+        <div class="panel-title">Grandes Comandantes</div>
+        <div class="commanders-grid" id="commanders-grid"></div>
+      </div>
+      <div class="era-panel" id="weapons-panel">
+        <div class="panel-title">Armamento & Tecnología</div>
+        <div class="weapons-list" id="weapons-list"></div>
+      </div>
+      <div class="era-panel full-width" id="civs-panel">
+        <div class="panel-title">Civilizaciones & Ejércitos</div>
+        <div class="civs-grid" id="civs-grid"></div>
+      </div>
+      <div class="era-panel" id="tactics-panel">
+        <div class="panel-title">Tácticas & Estrategias</div>
+        <div class="tactics-grid" id="tactics-grid"></div>
+      </div>
+      <div class="era-panel" id="docs-panel">
+        <div class="panel-title">Documentos & Tratados</div>
+        <div class="docs-list" id="docs-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- War Quote -->
+  <div class="war-quote reveal">
+    <div class="quote-text" id="rotating-quote">"El arte de la guerra es de vital importancia para el Estado."</div>
+    <div class="quote-attr" id="rotating-attr">— Sun Tzu · El Arte de la Guerra · c. 500 a.C.</div>
+  </div>
+
+  <!-- PRICING SECTION -->
+  <section id="pricing-section" class="reveal">
+    <div class="section-header" style="padding-top:0;">
+      <div class="section-eyebrow">Planes & Precios</div>
+      <h2 class="section-title">Acceso al Conocimiento Total</h2>
+      <p class="section-desc">Desde el curioso hasta el experto — elige tu nivel de acceso a la historia militar</p>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="pricing-toggle">
+      <span class="toggle-label" id="toggle-monthly-label" style="color:var(--gold)">Mensual</span>
+      <div class="toggle-switch" id="billing-toggle" onclick="toggleBilling()">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label" id="toggle-annual-label">Anual</span>
+      <span class="save-badge">AHORRA 40%</span>
+    </div>
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="price-card">
+        <div class="price-tier">Explorador</div>
+        <div class="price-amount"><sup>€</sup>0</div>
+        <div class="price-period">Siempre gratis</div>
+        <div class="price-annual-note"> </div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Navegación completa por eras</li>
+          <li><span class="check">✓</span> Mapa interactivo de batallas</li>
+          <li><span class="check">✓</span> 3 consultas IA por día</li>
+          <li class="disabled"><span class="cross">✗</span> Análisis históricos ilimitados</li>
+          <li class="disabled"><span class="cross">✗</span> Recomendaciones bibliográficas</li>
+          <li class="disabled"><span class="cross">✗</span> Newsletter premium semanal</li>
+          <li class="disabled"><span class="cross">✗</span> Sin publicidad</li>
+        </ul>
+        <button class="price-cta ghost" onclick="openAuth('register')">Crear cuenta gratis</button>
+      </div>
+      <!-- PREMIUM -->
+      <div class="price-card featured">
+        <div class="price-tier">Comandante</div>
+        <div class="price-amount" id="premium-price"><sup>€</sup>7<span style="font-size:1.2rem">.99</span></div>
+        <div class="price-period" id="premium-period">por mes</div>
+        <div class="price-annual-note" id="premium-note"> </div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Todo lo del plan Explorador</li>
+          <li><span class="check">✓</span> Consultas IA <strong style="color:var(--white)">ilimitadas</strong></li>
+          <li><span class="check">✓</span> Análisis exhaustivos completos</li>
+          <li><span class="check">✓</span> Bibliografía & libros recomendados</li>
+          <li><span class="check">✓</span> Newsletter semanal exclusivo</li>
+          <li><span class="check">✓</span> Sin publicidad nunca</li>
+          <li><span class="check">✓</span> Acceso anticipado a nuevas eras</li>
+        </ul>
+        <button class="price-cta primary" onclick="openCheckout('premium')">Comenzar ahora →</button>
+      </div>
+      <!-- INSTITUTIONAL -->
+      <div class="price-card">
+        <div class="price-tier">Institucional</div>
+        <div class="price-amount"><sup>€</sup>299</div>
+        <div class="price-period">por año / institución</div>
+        <div class="price-annual-note" style="color:var(--smoke)">Academias, museos, centros educativos</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Hasta 50 usuarios simultáneos</li>
+          <li><span class="check">✓</span> Todo el plan Comandante</li>
+          <li><span class="check">✓</span> Panel de administración</li>
+          <li><span class="check">✓</span> Exportación de contenido (PDF)</li>
+          <li><span class="check">✓</span> API de datos históricos</li>
+          <li><span class="check">✓</span> Soporte prioritario</li>
+          <li><span class="check">✓</span> Factura oficial</li>
+        </ul>
+        <button class="price-cta enterprise" onclick="showToast('Contáctanos: hola@bellummundi.com','success')">Contactar ventas →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section id="newsletter-section" class="reveal">
+    <div class="newsletter-inner">
+      <div class="newsletter-badge">📜 Newsletter Semanal · Gratis</div>
+      <h2 class="newsletter-title">La Batalla de la Semana</h2>
+      <p class="newsletter-desc">Cada martes: una batalla analizada en profundidad, un comandante olvidado, una táctica que cambió la historia. Lo que no te enseñaron en el colegio.</p>
+      <div class="newsletter-form">
+        <input class="newsletter-input" type="email" id="newsletter-email" placeholder="tu@email.com"/>
+        <button class="newsletter-btn" onclick="subscribeNewsletter()">Suscribirme</button>
+      </div>
+      <div class="newsletter-social-proof">Más de <span>2.400 suscriptores</span> en 3 meses · Sin spam · Baja cuando quieras</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">⚔ BELLUM MUNDI</div>
+      <p>La enciclopedia militar más completa en español. De Qadesh a Ucrania, pasando por todas las batallas, ejércitos y estrategas de la historia humana.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Explorar</div>
+      <ul class="footer-links">
+        <li><a onclick="selectEra('ancient')">Antigüedad</a></li>
+        <li><a onclick="selectEra('medieval')">Edad Media</a></li>
+        <li><a onclick="selectEra('ww2')">II Guerra Mundial</a></li>
+        <li><a onclick="selectEra('contemporary')">Contemporáneo</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Producto</div>
+      <ul class="footer-links">
+        <li><a onclick="openPricing()">Precios</a></li>
+        <li><a onclick="openAuth('register')">Crear cuenta</a></li>
+        <li><a href="#newsletter-section">Newsletter</a></li>
+        <li><a onclick="showToast('API próximamente','success')">API</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a>Privacidad</a></li>
+        <li><a>Términos</a></li>
+        <li><a>Cookies</a></li>
+        <li><a onclick="showToast('hola@bellummundi.com','success')">Contacto</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Bellum Mundi · Todos los derechos reservados</div>
+    <div class="footer-legal">
+      <a>Política de Privacidad</a>
+      <a>Términos de Uso</a>
+      <a>Afiliados</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Content Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event,'modal-overlay')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-eyebrow" id="modal-eyebrow">—</div>
+      <h2 class="modal-title" id="modal-title">Cargando...</h2>
+      <button class="modal-close" onclick="closeModal('modal-overlay')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="ai-loading">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <span>Consultando los archivos históricos...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Paywall Modal -->
+<div id="paywall-overlay" onclick="closeModalOnOverlay(event,'paywall-overlay')">
+  <div class="paywall-box">
+    <button class="paywall-close" onclick="closeModal('paywall-overlay')">✕</button>
+    <div class="paywall-icon">⚔️</div>
+    <div class="paywall-eyebrow">Límite alcanzado</div>
+    <h2 class="paywall-title">Has agotado tus consultas gratuitas</h2>
+    <p class="paywall-desc">Únete a Bellum Mundi Premium y accede al análisis histórico más detallado jamás creado.</p>
+    <div class="paywall-features">
+      <div class="paywall-feat"><span class="pf-icon">⚔</span> Consultas IA ilimitadas</div>
+      <div class="paywall-feat"><span class="pf-icon">📜</span> 8.000+ batallas analizadas</div>
+      <div class="paywall-feat"><span class="pf-icon">👑</span> 1.200+ comandantes</div>
+      <div class="paywall-feat"><span class="pf-icon">📚</span> Bibliografía exclusiva</div>
+      <div class="paywall-feat"><span class="pf-icon">🗺️</span> Mapas tácticos detallados</div>
+      <div class="paywall-feat"><span class="pf-icon">📧</span> Newsletter semanal</div>
+    </div>
+    <div class="paywall-price-hint">€7.99 / mes</div>
+    <div class="paywall-price-sub">O €49 al año · Cancela cuando quieras</div>
+    <div class="paywall-ctas" style="margin-top:1.5rem;">
+      <button class="paywall-primary" onclick="openCheckout('premium')">Acceso Ilimitado — Empezar →</button>
+      <button class="paywall-login-link" onclick="closeModal('paywall-overlay');openAuth('login')">¿Ya tienes cuenta? <span>Inicia sesión</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="auth-overlay" onclick="closeModalOnOverlay(event,'auth-overlay')">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeModal('auth-overlay')">✕</button>
+    <div class="auth-header">
+      <div class="auth-logo">⚔ BELLUM MUNDI</div>
+      <div class="auth-subtitle">Accede a la historia militar universal</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Crear Cuenta</button>
+    </div>
+    <div class="auth-body">
+      <div class="auth-error" id="auth-error">Error de autenticación</div>
+      <!-- Login form -->
+      <div id="form-login">
+        <div class="auth-field">
+          <label class="auth-label">Correo electrónico</label>
+          <input class="auth-input" type="email" id="login-email" placeholder="tu@email.com"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Contraseña</label>
+          <input class="auth-input" type="password" id="login-pass" placeholder="••••••••"/>
+        </div>
+        <button class="auth-submit" onclick="doLogin()">Entrar al Cuartel General →</button>
+        <div class="auth-terms">Sin cuenta todavía? <span style="color:var(--gold);cursor:pointer;" onclick="switchAuthTab('register')">Crea una gratis</span></div>
+      </div>
+      <!-- Register form -->
+      <div id="form-register" style="display:none;">
+        <div class="auth-field">
+          <label class="auth-label">Nombre</label>
+          <input class="auth-input" type="text" id="reg-name" placeholder="Tu nombre"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Correo electrónico</label>
+          <input class="auth-input" type="email" id="reg-email" placeholder="tu@email.com"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Contraseña</label>
+          <input class="auth-input" type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"/>
+        </div>
+        <button class="auth-submit" onclick="doRegister()">Crear mi cuenta →</button>
+        <p class="auth-terms">Al registrarte aceptas nuestros <span style="color:var(--gold)">Términos de Uso</span> y <span style="color:var(--gold)">Política de Privacidad</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Modal -->
+<div id="dashboard-overlay" onclick="closeModalOnOverlay(event,'dashboard-overlay')">
+  <div class="dashboard-box">
+    <button class="dashboard-close" onclick="closeModal('dashboard-overlay')">✕</button>
+    <div class="dashboard-header">
+      <div class="dashboard-avatar" id="dash-avatar">G</div>
+      <div>
+        <div class="dashboard-name" id="dash-name">General</div>
+        <div class="dashboard-plan">Plan: <span id="dash-plan-label">Explorador</span></div>
+      </div>
+    </div>
+    <div class="dashboard-body">
+      <div class="dashboard-stat-row">
+        <div class="dashboard-stat"><span class="dashboard-stat-val" id="dash-queries-used">0</span><span class="dashboard-stat-lbl">Consultas hoy</span></div>
+        <div class="dashboard-stat"><span class="dashboard-stat-val" id="dash-queries-limit">3</span><span class="dashboard-stat-lbl">Límite diario</span></div>
+        <div class="dashboard-stat"><span class="dashboard-stat-val" id="dash-total">0</span><span class="dashboard-stat-lbl">Total historial</span></div>
+      </div>
+      <div class="usage-bar-wrap">
+        <div class="usage-bar-label"><span>Uso diario de IA</span><span id="dash-usage-pct">0%</span></div>
+        <div class="usage-bar"><div class="usage-bar-fill" id="dash-usage-bar" style="width:0%"></div></div>
+      </div>
+      <div class="dashboard-actions">
+        <button class="dash-action-btn upgrade" id="dash-upgrade-btn" onclick="closeModal('dashboard-overlay');openCheckout('premium')">
+          <span>⚡ Actualizar a Premium</span><span>€7.99/mes →</span>
+        </button>
+        <button class="dash-action-btn secondary" onclick="showToast('Newsletter: próximamente','success')">
+          <span>📧 Gestionar Newsletter</span><span>→</span>
+        </button>
+        <button class="dash-action-btn danger" onclick="doLogout()">
+          <span>Cerrar sesión</span><span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal (Stripe simulation) -->
+<div class="modal-overlay" id="checkout-overlay" onclick="closeModalOnOverlay(event,'checkout-overlay')">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,rgba(139,26,26,0.2),rgba(201,168,76,0.05));">
+      <div class="modal-eyebrow">Pago Seguro · Stripe</div>
+      <h2 class="modal-title" style="font-size:1.5rem;">Plan Comandante Premium</h2>
+      <button class="modal-close" onclick="closeModal('checkout-overlay')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:1.5rem;">
+      <div style="background:var(--steel);padding:1.2rem;border:1px solid rgba(201,168,76,0.15);margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--white);margin-bottom:0.2rem;">Bellum Mundi Commander</div>
+            <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;color:var(--smoke);text-transform:uppercase;" id="checkout-period-label">Facturación mensual</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--gold);" id="checkout-price">€7.99</div>
+            <div style="font-family:'Cinzel',serif;font-size:0.55rem;color:var(--smoke);" id="checkout-period">/mes</div>
+          </div>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Correo electrónico</label>
+        <input class="auth-input" type="email" id="checkout-email" placeholder="tu@email.com"/>
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Número de tarjeta</label>
+        <input class="auth-input" type="text" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+        <div class="auth-field">
+          <label class="auth-label">Caducidad</label>
+          <input class="auth-input" type="text" placeholder="MM/AA" maxlength="5"/>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">CVV</label>
+          <input class="auth-input" type="text" placeholder="123" maxlength="3"/>
+        </div>
+      </div>
+      <button class="auth-submit" onclick="processPayment()" style="margin-top:0.5rem;">
+        🔒 Activar Premium Ahora →
+      </button>
+      <div style="text-align:center;margin-top:1rem;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.15em;color:var(--smoke);text-transform:uppercase;">
+        🔒 Pago seguro con Stripe · Cancela cuando quieras
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const FREE_QUERIES_PER_DAY = 3;
+const REGISTERED_QUERIES_PER_DAY = 5;
+
+function getState() {
+  const today = new Date().toDateString();
+  const raw = localStorage.getItem('bm_state');
+  const defaults = { user:null, queries:0, queriesDate:today, totalQueries:0 };
+  if (!raw) return defaults;
+  const s = JSON.parse(raw);
+  if (s.queriesDate !== today) { s.queries = 0; s.queriesDate = today; }
+  return { ...defaults, ...s };
+}
+function saveState(s) { localStorage.setItem('bm_state', JSON.stringify(s)); }
+
+let STATE = getState();
+
+function getQueryLimit() {
+  if (!STATE.user) return FREE_QUERIES_PER_DAY;
+  if (STATE.user.plan === 'premium') return Infinity;
+  return REGISTERED_QUERIES_PER_DAY;
+}
+function queriesLeft() { return Math.max(0, getQueryLimit() - STATE.queries); }
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function openAuth(tab='login') {
+  document.getElementById('auth-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  switchAuthTab(tab);
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('form-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display = tab==='register'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-error').classList.remove('show');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { showAuthError('Completa todos los campos'); return; }
+  const users = JSON.parse(localStorage.getItem('bm_users')||'[]');
+  const user = users.find(u => u.email===email && u.pass===btoa(pass));
+  if (!user) { showAuthError('Email o contraseña incorrectos'); return; }
+  STATE.user = { name:user.name, email:user.email, plan:user.plan||'free' };
+  saveState(STATE);
+  closeModal('auth-overlay');
+  updateNavUI();
+  showToast(`Bienvenido, ${user.name} ⚔`, 'success');
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!name||!email||!pass) { showAuthError('Completa todos los campos'); return; }
+  if (pass.length < 6) { showAuthError('La contraseña debe tener 6+ caracteres'); return; }
+  const users = JSON.parse(localStorage.getItem('bm_users')||'[]');
+  if (users.find(u=>u.email===email)) { showAuthError('Este email ya está registrado'); return; }
+  users.push({ name, email, pass:btoa(pass), plan:'free', createdAt:Date.now() });
+  localStorage.setItem('bm_users', JSON.stringify(users));
+  STATE.user = { name, email, plan:'free' };
+  saveState(STATE);
+  closeModal('auth-overlay');
+  updateNavUI();
+  showToast(`¡Bienvenido a Bellum Mundi, ${name}! ⚔`, 'success');
+}
+
+function doLogout() {
+  STATE.user = null;
+  saveState(STATE);
+  closeModal('dashboard-overlay');
+  updateNavUI();
+  showToast('Sesión cerrada · Hasta pronto, General', 'success');
+}
+
+function updateNavUI() {
+  const nav = document.getElementById('nav-right');
+  const left = queriesLeft();
+  const limit = getQueryLimit();
+  const isPremium = STATE.user?.plan === 'premium';
+
+  let html = '';
+
+  if (!isPremium) {
+    const display = limit===Infinity ? '∞' : left;
+    html += `<div class="nav-queries"><span class="q-count">${display}</span> consultas</div>`;
+    html += `<button class="nav-upgrade" onclick="openPricing()">⚡ Premium</button>`;
+  }
+
+  if (STATE.user) {
+    const initial = STATE.user.name.charAt(0).toUpperCase();
+    html += `<button class="nav-user-btn logged" onclick="openDashboard()" title="${STATE.user.name}">${initial}</button>`;
+    if (isPremium) html += `<span class="premium-badge">PREMIUM</span>`;
+  } else {
+    html += `<button class="nav-login-btn" onclick="openAuth('login')">Entrar</button>`;
+  }
+
+  nav.innerHTML = html;
+  updateFreeBanner();
+}
+
+function updateFreeBanner() {
+  const banner = document.getElementById('free-banner');
+  const text = document.getElementById('queries-left-banner');
+  const limit = getQueryLimit();
+  if (limit === Infinity) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'flex';
+    const left = queriesLeft();
+    text.textContent = `${left} consulta${left!==1?'s':''} gratuita${left!==1?'s':''}`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function openDashboard() {
+  if (!STATE.user) { openAuth('login'); return; }
+  const limit = getQueryLimit();
+  const used = STATE.queries;
+  const pct = limit===Infinity ? 0 : Math.min(100, Math.round(used/limit*100));
+
+  document.getElementById('dash-avatar').textContent = STATE.user.name.charAt(0).toUpperCase();
+  document.getElementById('dash-name').textContent = STATE.user.name;
+  document.getElementById('dash-plan-label').textContent = STATE.user.plan==='premium'?'Commander Premium ⭐':'Explorador Gratuito';
+  document.getElementById('dash-queries-used').textContent = used;
+  document.getElementById('dash-queries-limit').textContent = limit===Infinity?'∞':limit;
+  document.getElementById('dash-total').textContent = STATE.totalQueries||0;
+  document.getElementById('dash-usage-pct').textContent = limit===Infinity?'∞%':pct+'%';
+  document.getElementById('dash-usage-bar').style.width = (limit===Infinity?0:pct)+'%';
+
+  const upgradeBtn = document.getElementById('dash-upgrade-btn');
+  if (STATE.user.plan==='premium') {
+    upgradeBtn.style.display='none';
+  } else {
+    upgradeBtn.style.display='flex';
+  }
+
+  document.getElementById('dashboard-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+// ═══════════════════════════════════════════
+// PRICING & CHECKOUT
+// ═══════════════════════════════════════════
+let billingAnnual = false;
+
+function openPricing() {
+  document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'});
+}
+
+function toggleBilling() {
+  billingAnnual = !billingAnnual;
+  const toggle = document.getElementById('billing-toggle');
+  toggle.classList.toggle('annual', billingAnnual);
+  document.getElementById('toggle-monthly-label').style.color = billingAnnual?'var(--smoke)':'var(--gold)';
+  document.getElementById('toggle-annual-label').style.color = billingAnnual?'var(--gold)':'var(--smoke)';
+
+  if (billingAnnual) {
+    document.getElementById('premium-price').innerHTML = '<sup>€</sup>4<span style="font-size:1.2rem">.08</span>';
+    document.getElementById('premium-period').textContent = 'por mes';
+    document.getElementById('premium-note').textContent = '€49/año — ahorras €46.88';
+  } else {
+    document.getElementById('premium-price').innerHTML = '<sup>€</sup>7<span style="font-size:1.2rem">.99</span>';
+    document.getElementById('premium-period').textContent = 'por mes';
+    document.getElementById('premium-note').innerHTML = '&nbsp;';
+  }
+}
+
+function openCheckout(plan) {
+  if (!STATE.user) { openAuth('register'); return; }
+  const price = billingAnnual ? '€49.00' : '€7.99';
+  const period = billingAnnual ? 'Facturación anual' : 'Facturación mensual';
+  const periodShort = billingAnnual ? '/año' : '/mes';
+  document.getElementById('checkout-price').textContent = price;
+  document.getElementById('checkout-period').textContent = periodShort;
+  document.getElementById('checkout-period-label').textContent = period;
+  document.getElementById('checkout-email').value = STATE.user.email||'';
+  document.getElementById('checkout-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function processPayment() {
+  const email = document.getElementById('checkout-email').value.trim();
+  if (!email) { showToast('Introduce tu correo', 'error'); return; }
+  // Simulate payment processing
+  const btn = document.querySelector('#checkout-overlay .auth-submit');
+  btn.textContent = '⏳ Procesando...';
+  btn.disabled = true;
+  setTimeout(() => {
+    // Activate premium
+    STATE.user.plan = 'premium';
+    saveState(STATE);
+    // Update stored user
+    const users = JSON.parse(localStorage.getItem('bm_users')||'[]');
+    const idx = users.findIndex(u=>u.email===STATE.user.email);
+    if (idx>-1) { users[idx].plan='premium'; localStorage.setItem('bm_users',JSON.stringify(users)); }
+    closeModal('checkout-overlay');
+    updateNavUI();
+    btn.textContent = '🔒 Activar Premium Ahora →';
+    btn.disabled = false;
+    showToast('¡Bienvenido a Premium! Consultas ilimitadas activas ⚔', 'success');
+  }, 2000);
+}
+
+function formatCard(input) {
+  let v = input.value.replace(/\D/g,'').substring(0,16);
+  input.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+// ═══════════════════════════════════════════
+// NEWSLETTER
+// ═══════════════════════════════════════════
+function subscribeNewsletter() {
+  const email = document.getElementById('newsletter-email').value.trim();
+  if (!email || !email.includes('@')) { showToast('Introduce un email válido','error'); return; }
+  const subs = JSON.parse(localStorage.getItem('bm_newsletter')||'[]');
+  if (subs.includes(email)) { showToast('Ya estás suscrito · ¡Gracias!','success'); return; }
+  subs.push(email);
+  localStorage.setItem('bm_newsletter', JSON.stringify(subs));
+  document.getElementById('newsletter-email').value='';
+  showToast('¡Suscrito! El próximo martes recibirás La Batalla de la Semana 📜','success');
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function showToast(msg, type='') {
+  const container = document.getElementById('toast');
+  const t = document.createElement('div');
+  t.className = `toast-item ${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeModalOnOverlay(e, id) {
+  if (e.target===document.getElementById(id)) closeModal(id);
+}
+
+// ═══════════════════════════════════════════
+// AI QUERY GATE
+// ═══════════════════════════════════════════
+function canQuery() {
+  if (getQueryLimit()===Infinity) return true;
+  return queriesLeft() > 0;
+}
+
+function consumeQuery() {
+  STATE.queries++;
+  STATE.totalQueries = (STATE.totalQueries||0)+1;
+  saveState(STATE);
+  updateNavUI();
+}
+
+// ═══════════════════════════════════════════
+// AI CALL
+// ═══════════════════════════════════════════
+async function callAI(prompt) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:`Eres el historiador militar más experto y enciclopédico del mundo. Respondes en español con un estilo académico apasionante, como una entrada de enciclopedia de lujo.
+
+SIEMPRE estructura tu respuesta con estas secciones usando etiquetas HTML:
+- <h3>Contexto Histórico</h3> seguido de 2-3 párrafos detallados
+- <h3>Análisis Militar</h3> seguido de análisis táctico/estratégico profundo
+- <h3>Consecuencias e Impacto</h3> con el legado histórico
+- <h4>Datos Clave</h4> seguido de lista <ul> de datos precisos
+
+Al final SIEMPRE añade una sección de libros recomendados en este formato HTML exacto:
+<div class="books-section">
+<div class="books-title">📚 Bibliografía Recomendada</div>
+<div class="books-grid">
+<a class="book-item" href="https://www.amazon.es/s?k=[título+libro+1]&tag=bellummundi-21" target="_blank">
+<div class="book-cover">📖</div>
+<div><div class="book-title">[Título Libro 1]</div><div class="book-author">[Autor 1]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+</a>
+<a class="book-item" href="https://www.amazon.es/s?k=[título+libro+2]&tag=bellummundi-21" target="_blank">
+<div class="book-cover">📖</div>
+<div><div class="book-title">[Título Libro 2]</div><div class="book-author">[Autor 2]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+</a>
+</div>
+</div>
+
+Sé exhaustivo, preciso y dramáticamente detallado. Máximo 700 palabras.`,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  const data = await response.json();
+  return data.content[0].text;
+}
+
+function openModal(eyebrow, title) {
+  document.getElementById('modal-eyebrow').textContent = eyebrow;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+async function queryAI(eyebrow, title, prompt) {
+  if (!canQuery()) {
+    document.getElementById('paywall-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+    return;
+  }
+  openModal(eyebrow, title);
+  consumeQuery();
+  try {
+    const content = await callAI(prompt);
+    document.getElementById('modal-body').innerHTML = content;
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido. Por favor, inténtalo de nuevo.</p>';
+  }
+}
+
+async function openBattleModal(b) {
+  await queryAI('Batalla', b.name, `Explica en detalle exhaustivo la batalla de ${b.name} (${b.year}), entre ${b.combatants}. Contexto: ${b.desc}. Era: ${currentEra?.name||''}.`);
+}
+async function openCommanderModal(c) {
+  await queryAI('Comandante', c.name, `Explica en detalle la vida militar, campañas, tácticas y legado histórico de ${c.name}, ${c.role}. Era: ${currentEra?.name||''}.`);
+}
+async function openWeaponModal(w) {
+  await queryAI('Armamento', w.name, `Explica en detalle técnico e histórico el arma/tecnología militar: ${w.name}, del período ${w.period}. Incluye origen, funcionamiento, impacto táctico y evolución.`);
+}
+async function openCivModal(c) {
+  await queryAI('Civilización', c.name, `Explica en detalle el poder militar, organización del ejército, tácticas y guerras más importantes de: ${c.name}, período ${c.period}.`);
+}
+async function openTacticModal(t) {
+  await queryAI('Táctica Militar', t.name, `Explica en detalle la táctica militar "${t.name}", desarrollada por ${t.origin}. Incluye descripción, aplicación práctica en batalla, ejemplos históricos y evolución.`);
+}
+async function openDocModal(d) {
+  await queryAI('Documento Histórico', d.name, `Explica en detalle el documento/tratado histórico "${d.name}" (${d.year}). Incluye contexto, contenido, negociadores, consecuencias militares y políticas, y legado actual.`);
+}
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) return;
+  await queryAI('Búsqueda Universal', q, `El usuario busca: "${q}" en historia militar mundial. Proporciona respuesta enciclopédica completa, detallada y académica.`);
+}
+
+// Enter for search
+document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { ['modal-overlay','paywall-overlay','auth-overlay','dashboard-overlay','checkout-overlay'].forEach(id=>closeModal(id)); } });
+
+// ═══════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════
+let map, markers=[];
+function initMap() {
+  map = L.map('battle-map',{center:[30,20],zoom:2,zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
+}
+function updateMap(battles) {
+  markers.forEach(m=>m.remove()); markers=[];
+  if(!battles||!battles.length) return;
+  const bounds=[];
+  battles.forEach(b=>{
+    const m=L.circleMarker([b.lat,b.lng],{radius:8,fillColor:'#C9A84C',color:'#8B1A1A',weight:2,opacity:1,fillOpacity:0.8}).addTo(map);
+    m.bindPopup(`<div style="font-family:'Cinzel',serif;font-size:11px;color:#0A0806;"><strong style="font-family:'Playfair Display',serif;font-size:14px;">${b.name}</strong><br><span style="color:#8B6914;">${b.year}</span><br><em>${b.combatants}</em><br>${b.desc}</div>`);
+    m.on('click',()=>openBattleModal(b));
+    markers.push(m); bounds.push([b.lat,b.lng]);
+  });
+  if(bounds.length) try{map.fitBounds(bounds,{padding:[40,40],maxZoom:6})}catch(e){}
+}
+
+// ═══════════════════════════════════════════
+// ERA DATA
+// ═══════════════════════════════════════════
+const ERAS=[
+  { id:'ancient', name:'Antigüedad', years:'3000–500 a.C.', battles:280, duration:'2500', civs:45, cmds:120,
+    overview:'La invención de la escritura permite registrar por primera vez las guerras. Los grandes imperios de Mesopotamia, Egipto, Persia, Grecia y China establecen ejércitos profesionales, estrategias sofisticadas y códigos de guerra. La falange griega, los carros egipcios y los arqueros persas revolucionan el arte de la guerra.',
+    quote:{text:'Conócete a ti mismo y conoce a tu enemigo; en cien batallas nunca estarás en peligro.',attr:'— Sun Tzu · El Arte de la Guerra · 500 a.C.'},
+    battles_data:[
+      {year:'1274 a.C.',name:'Batalla de Qadesh',combatants:'Egipto vs Imperio Hitita',tag:'Bronce',lat:34.6,lng:36.5,desc:'Mayor batalla de carros de la Antigüedad'},
+      {year:'490 a.C.',name:'Batalla de Maratón',combatants:'Grecia vs Persia',tag:'Guerras Médicas',lat:38.1,lng:23.9,desc:'Victoria griega que salvó Occidente'},
+      {year:'480 a.C.',name:'Batalla de las Termópilas',combatants:'300 Espartanos vs Persia',tag:'Guerras Médicas',lat:38.8,lng:22.5,desc:'El sacrificio espartano legendario'},
+      {year:'480 a.C.',name:'Batalla de Salamina',combatants:'Grecia vs Persia',tag:'Naval',lat:37.9,lng:23.4,desc:'Derrota naval persa decisiva'},
+      {year:'331 a.C.',name:'Batalla de Gaugamela',combatants:'Macedonia vs Persia',tag:'Alejandro',lat:36.4,lng:43.3,desc:'Alejandro derrota a Darío III definitivamente'},
+      {year:'216 a.C.',name:'Batalla de Cannas',combatants:'Cartago vs Roma',tag:'Púnicas',lat:41.2,lng:16.1,desc:'Obra maestra táctica de Aníbal Barca'},
+    ],
+    commanders:[{name:'Alejandro Magno',role:'Rey de Macedonia',emoji:'👑'},{name:'Aníbal Barca',role:'General Cartaginés',emoji:'🐘'},{name:'Ciro el Grande',role:'Rey de Persia',emoji:'🏛️'},{name:'Temístocles',role:'Estratega Ateniense',emoji:'⛵'},{name:'Ramsés II',role:'Faraón-Guerrero',emoji:'🔱'},{name:'Sun Tzu',role:'Estratega Chino',emoji:'📖'}],
+    weapons:[{name:'Sarissa Macedónica',period:'IV a.C.',icon:'🗡️'},{name:'Carro de Guerra',period:'II–I milenio a.C.',icon:'🛞'},{name:'Trirreme',period:'VI–IV a.C.',icon:'⛵'},{name:'Ballesta China (Nǔ)',period:'V a.C.',icon:'🏹'},{name:'Kopis Griego',period:'VII a.C.',icon:'⚔️'},{name:'Elefantes de Guerra',period:'IV–I a.C.',icon:'🐘'}],
+    civs:[{name:'Imperio Persa Aqueménida',period:'550–330 a.C.',flag:'🦅',power:0.95},{name:'Macedonia / Grecia',period:'800–146 a.C.',flag:'🏛️',power:0.90},{name:'Egipto Nuevo Imperio',period:'1550–1070 a.C.',flag:'𓂀',power:0.85},{name:'Cartago',period:'814–146 a.C.',flag:'🌊',power:0.80},{name:'Han / Zhou China',period:'1046–206 a.C.',flag:'🐉',power:0.85},{name:'Imperio Asirio',period:'900–612 a.C.',flag:'⚡',power:0.88}],
+    tactics:[{name:'Falange Griega',origin:'Esparta / Atenas',icon:'🛡️'},{name:'Maniobra de Envolvimiento',origin:'Macedonia',icon:'🔄'},{name:'Guerra de Sitio',origin:'Asiria',icon:'🏰'}],
+    docs:[{name:'El Arte de la Guerra',year:'c. 500 a.C.',icon:'📖'},{name:'Tratado de Qadesh',year:'1259 a.C.',icon:'📜'},{name:'Las Guerras de Tucídides',year:'431–404 a.C.',icon:'📚'},{name:'Anábasis de Jenofonte',year:'401 a.C.',icon:'🗺️'}]
+  },
+  { id:'classical', name:'Era Clásica', years:'500 a.C.–500 d.C.', battles:450, duration:'1000', civs:60, cmds:200,
+    overview:'Roma construye el ejército más eficiente de la historia occidental. Sus legiones, disciplina y logística conquistan el mundo conocido. Mientras tanto, China vive la era de los Tres Reinos, los Partos resisten el avance romano y los Hunos emergen como terror de las estepas.',
+    quote:{text:'Si quieres la paz, prepárate para la guerra.',attr:'— Publio Flavio Vegecio Renato · c. 390 d.C.'},
+    battles_data:[
+      {year:'202 a.C.',name:'Batalla de Zama',combatants:'Roma vs Cartago',tag:'Segunda Púnica',lat:36.5,lng:9.0,desc:'Fin del dominio cartaginés'},
+      {year:'48 a.C.',name:'Batalla de Farsalia',combatants:'César vs Pompeyo',tag:'Guerras Civiles',lat:39.3,lng:22.3,desc:'César consolida su poder'},
+      {year:'9 d.C.',name:'Bosque de Teutoburgo',combatants:'Roma vs Germanos',tag:'Germanicum',lat:52.1,lng:8.1,desc:'Tres legiones romanas exterminadas'},
+      {year:'378 d.C.',name:'Batalla de Adrianópolis',combatants:'Visigodos vs Roma',tag:'Decadencia',lat:41.7,lng:26.6,desc:'Inicio del fin del Imperio Romano'},
+      {year:'451 d.C.',name:'Campos Cataláunicos',combatants:'Roma/Visigodos vs Atila',tag:'Hunos',lat:48.5,lng:4.3,desc:'Europa detiene a Atila'},
+    ],
+    commanders:[{name:'Julio César',role:'Dictador Romano',emoji:'🦅'},{name:'Escipión Africano',role:'General Romano',emoji:'⚔️'},{name:'Marco Aurelio',role:'Emperador-Filósofo',emoji:'📖'},{name:'Atila el Huno',role:'Señor de los Hunos',emoji:'🏹'},{name:'Aecio',role:'Último Romano',emoji:'🛡️'},{name:'Cao Cao',role:'Señor de la Guerra Chino',emoji:'🐉'}],
+    weapons:[{name:'Pilum Romano',period:'III a.C.–V d.C.',icon:'🗡️'},{name:'Gladius',period:'II a.C.–III d.C.',icon:'⚔️'},{name:'Ballista (Artillería)',period:'III a.C.',icon:'💥'},{name:'Scutum Legionario',period:'II a.C.',icon:'🛡️'}],
+    civs:[{name:'República / Imperio Romano',period:'509 a.C.–476 d.C.',flag:'🦅',power:1.0},{name:'Imperio Parto',period:'247 a.C.–224 d.C.',flag:'🌙',power:0.80},{name:'Han China',period:'206 a.C.–220 d.C.',flag:'🐉',power:0.90},{name:'Hunos',period:'IV–V d.C.',flag:'⚡',power:0.85}],
+    tactics:[{name:'Formación Testudo',origin:'Roma',icon:'🛡️'},{name:'Legión Manipular',origin:'Roma',icon:'⚔️'},{name:'Disparo Parto en Retirada',origin:'Partia',icon:'🏹'}],
+    docs:[{name:'De Bello Gallico — César',year:'58–50 a.C.',icon:'📜'},{name:'Epitoma rei militaris — Vegecio',year:'c. 390 d.C.',icon:'📚'},{name:'Historia de Roma — Tito Livio',year:'27 a.C.',icon:'🏛️'}]
+  },
+  { id:'medieval', name:'Edad Media', years:'500–1400 d.C.', battles:620, duration:'900', civs:80, cmds:350,
+    overview:'La Edad Media transforma la guerra: el caballero acorazado domina el campo de batalla europeo mientras los ejércitos islámicos expanden el califato. Las Cruzadas enfrentan dos mundos. Los vikingos aterrorizan Europa. El Imperio Mongol barre Asia. La pólvora china llega a Occidente.',
+    quote:{text:'Un ejército de ciervos liderado por un león es más temible que uno de leones liderado por un ciervo.',attr:'— Atribuido a Alejandro Magno'},
+    battles_data:[
+      {year:'732',name:'Batalla de Poitiers',combatants:'Carlos Martel vs Califato Omeya',tag:'Reconquista',lat:46.6,lng:0.3,desc:'Se detiene el avance islámico en Europa'},
+      {year:'1066',name:'Batalla de Hastings',combatants:'Guillermo el Conquistador vs Harold II',tag:'Normandía',lat:50.9,lng:0.5,desc:'Conquista normanda de Inglaterra'},
+      {year:'1187',name:'Cuernos de Hattin',combatants:'Saladino vs Cruzados',tag:'Cruzadas',lat:32.8,lng:35.5,desc:'Saladino reconquista Jerusalén'},
+      {year:'1241',name:'Batalla de Mohi',combatants:'Mongoles vs Hungría',tag:'Mongoles',lat:47.9,lng:20.7,desc:'Terror mongol en Europa Central'},
+      {year:'1346',name:'Batalla de Crécy',combatants:'Inglaterra vs Francia',tag:'100 Años',lat:50.3,lng:1.9,desc:'El longbow inglés destruye la caballería francesa'},
+    ],
+    commanders:[{name:'Carlos Martel',role:'Mayor de Palacio Franco',emoji:'⚔️'},{name:'Saladino',role:'Sultán Ayubí',emoji:'🌙'},{name:'Gengis Kan',role:'Gran Khan Mongol',emoji:'🐎'},{name:'Ricardo Corazón de León',role:'Rey de Inglaterra',emoji:'👑'},{name:'Juana de Arco',role:'Comandante Francesa',emoji:'🔥'},{name:'Tamerlán',role:'Conquistador Timúrida',emoji:'💀'}],
+    weapons:[{name:'Armadura de Placas',period:'XIV–XVI',icon:'🛡️'},{name:'Longbow Inglés',period:'XIII–XV',icon:'🏹'},{name:'Trebuchet',period:'XII–XIV',icon:'💣'},{name:'Pólvora (llegada a Europa)',period:'XIII',icon:'💥'}],
+    civs:[{name:'Imperio Mongol',period:'1206–1368',flag:'🐎',power:1.0},{name:'Califato Omeya / Abasí',period:'661–1258',flag:'🌙',power:0.90},{name:'Bizancio',period:'395–1453',flag:'🏛️',power:0.80},{name:'Sacro Imperio Romano',period:'962–1806',flag:'🦅',power:0.75}],
+    tactics:[{name:'Carga de Caballería Pesada',origin:'Europa Occidental',icon:'🐎'},{name:'Lluvia de Flechas Mongola',origin:'Mongolia',icon:'🏹'},{name:'Guerra de Asedio',origin:'Europa / Islam',icon:'🏰'}],
+    docs:[{name:'Historia Secreta — Gengis Kan',year:'1240',icon:'📜'},{name:'El Código de Caballería',year:'c. 1180',icon:'⚔️'},{name:'De Re Militari — Honorio Bonet',year:'1387',icon:'📚'}]
+  },
+  { id:'early_modern', name:'Edad Moderna', years:'1400–1750', battles:540, duration:'350', civs:55, cmds:280,
+    overview:'La pólvora transforma la guerra para siempre. Los tercios españoles dominan Europa. El Imperio Otomano alcanza su máximo esplendor. Las conquistas del Nuevo Mundo redefinen el mundo. La Guerra de los Treinta Años devastará Europa y sembrará las semillas del Estado-nación moderno.',
+    quote:{text:'La guerra es la continuación de la política por otros medios.',attr:'— Carl von Clausewitz · De la Guerra · 1832'},
+    battles_data:[
+      {year:'1453',name:'Caída de Constantinopla',combatants:'Imperio Otomano vs Bizancio',tag:'Otomanos',lat:41.0,lng:28.9,desc:'Fin del Imperio Romano de Oriente'},
+      {year:'1521',name:'Caída de Tenochtitlan',combatants:'España vs Aztecas',tag:'Conquista',lat:19.4,lng:-99.1,desc:'Hernán Cortés conquista el Imperio Azteca'},
+      {year:'1571',name:'Batalla de Lepanto',combatants:'Liga Santa vs Imperio Otomano',tag:'Naval',lat:38.2,lng:21.1,desc:'Se detiene la expansión naval otomana'},
+      {year:'1683',name:'Batalla de Viena',combatants:'Liga Cristiana vs Imperio Otomano',tag:'Otomanos',lat:48.2,lng:16.4,desc:'Fin de la expansión otomana en Europa'},
+    ],
+    commanders:[{name:'Gonzalo Fernández de Córdoba',role:'El Gran Capitán',emoji:'⚔️'},{name:'Gustavo Adolfo de Suecia',role:'León del Norte',emoji:'👑'},{name:'Mehmed II',role:'El Conquistador',emoji:'🌙'},{name:'Juan de Austria',role:'Almirante Cristiano',emoji:'⛵'}],
+    weapons:[{name:'Arcabuz',period:'XV–XVII',icon:'🔫'},{name:'Mosquete',period:'XVI–XVII',icon:'💥'},{name:'Cañón de Bronce',period:'XV–XVIII',icon:'💣'},{name:'Galeón de Guerra',period:'XV–XVII',icon:'⛵'}],
+    civs:[{name:'Imperio Español',period:'1492–1700',flag:'🇪🇸',power:1.0},{name:'Imperio Otomano',period:'1299–1922',flag:'🌙',power:0.95},{name:'Francia de los Borbones',period:'1589–1792',flag:'⚜️',power:0.88},{name:'Imperio Mogol',period:'1526–1857',flag:'🌸',power:0.80}],
+    tactics:[{name:'Los Tercios Españoles',origin:'España',icon:'⚔️'},{name:'Línea de Mosqueteros',origin:'Holanda / Suecia',icon:'🔫'},{name:'Artillería de Campaña',origin:'Francia',icon:'💣'}],
+    docs:[{name:'Paz de Westfalia',year:'1648',icon:'📜'},{name:'El Arte de la Guerra — Maquiavelo',year:'1521',icon:'📚'},{name:'Tratado de Utrecht',year:'1713',icon:'🕊️'}]
+  },
+  { id:'napoleon', name:'Napoleón', years:'1750–1815', battles:380, duration:'65', civs:30, cmds:180,
+    overview:'Napoleón Bonaparte crea el ejército moderno basado en el mérito, la movilidad y la iniciativa táctica. El sistema de cuerpos de ejército y la artillería móvil napoleónica revolucionan la estrategia occidental. Austerlitz, Trafalgar, Waterloo — las batallas más estudiadas de la historia.',
+    quote:{text:'Un ejército marcha sobre su estómago.',attr:'— Atribuido a Napoleón Bonaparte'},
+    battles_data:[
+      {year:'1805',name:'Batalla de Austerlitz',combatants:'Francia vs Austria / Rusia',tag:'Napoleón',lat:49.0,lng:16.8,desc:'Obra maestra napoleónica — Los Tres Emperadores'},
+      {year:'1805',name:'Batalla de Trafalgar',combatants:'Gran Bretaña vs Francia / España',tag:'Naval',lat:36.1,lng:-6.0,desc:'Nelson destruye la flota franco-española'},
+      {year:'1812',name:'Retirada de Moscú',combatants:'Francia vs Rusia',tag:'Campaña de Rusia',lat:55.7,lng:37.6,desc:'El principio del fin del Imperio Napoleónico'},
+      {year:'1815',name:'Batalla de Waterloo',combatants:'Napoleón vs Wellington / Blücher',tag:'Final',lat:50.7,lng:4.4,desc:'La derrota definitiva de Napoleón'},
+    ],
+    commanders:[{name:'Napoleón Bonaparte',role:'Emperador de Francia',emoji:'👑'},{name:'Wellington',role:'Duque de Wellington',emoji:'🇬🇧'},{name:'Ney',role:'El Valiente de los Valientes',emoji:'⚔️'},{name:'Nelson',role:'Almirante Británico',emoji:'⛵'},{name:'Blücher',role:'Mariscal Prusiano',emoji:'🦅'},{name:'Federico II de Prusia',role:'El Grande',emoji:'⭐'}],
+    weapons:[{name:'Fusil de Chispa',period:'1750–1840',icon:'🔫'},{name:'Cañón de 12 libras',period:'1750–1815',icon:'💣'},{name:'Sable de Caballería',period:'XVIII',icon:'⚔️'},{name:'Bayoneta Calada',period:'1700–1870',icon:'🗡️'}],
+    civs:[{name:'Francia Napoleónica',period:'1799–1815',flag:'🇫🇷',power:1.0},{name:'Gran Bretaña',period:'1707–',flag:'🇬🇧',power:0.95},{name:'Prusia / Austria',period:'1648–1866',flag:'🦅',power:0.85},{name:'Rusia Imperial',period:'1721–1917',flag:'🐻',power:0.80}],
+    tactics:[{name:'Cuerpo de Ejército Napoleónico',origin:'Francia',icon:'🎯'},{name:'Batería Grande de Artillería',origin:'Napoleón',icon:'💣'},{name:'Línea vs Columna',origin:'Europa',icon:'🔫'}],
+    docs:[{name:'De la Guerra — Clausewitz',year:'1832',icon:'📚'},{name:'Actas del Congreso de Viena',year:'1815',icon:'📜'},{name:'Código Napoleónico Militar',year:'1804',icon:'📋'}]
+  },
+  { id:'ww1', name:'I G.M.',years:'1914–1918', battles:200, duration:'4', civs:30, cmds:150,
+    overview:'La Gran Guerra redefine el horror bélico. Las trincheras del Frente Occidental se convierten en símbolo del sufrimiento industrial. Diez millones de muertos. El gas venenoso, los carros de combate, los aviones y la guerra submarina debutan. Caen cuatro imperios.',
+    quote:{text:'Esto no es la paz. Es un armisticio durante veinte años.',attr:'— Mariscal Ferdinand Foch · sobre el Tratado de Versalles · 1919'},
+    battles_data:[
+      {year:'1916',name:'Batalla de Verdún',combatants:'Francia vs Alemania',tag:'Frente Occidental',lat:49.2,lng:5.4,desc:'300.000 muertos — La picadora de carne'},
+      {year:'1916',name:'Batalla del Somme',combatants:'Gran Bretaña vs Alemania',tag:'Frente Occidental',lat:50.0,lng:2.7,desc:'57.000 bajas británicas el primer día'},
+      {year:'1916',name:'Batalla de Jutlandia',combatants:'Gran Bretaña vs Alemania',tag:'Naval',lat:57.0,lng:6.0,desc:'Mayor batalla naval de la guerra'},
+      {year:'1915',name:'Campaña de Gallipoli',combatants:'Aliados vs Imperio Otomano',tag:'Mediterráneo',lat:40.2,lng:26.3,desc:'Desastre aliado — Resistencia turca de Mustafá Kemal'},
+    ],
+    commanders:[{name:'Ferdinand Foch',role:'Comandante Supremo Aliado',emoji:'🇫🇷'},{name:'Erich Ludendorff',role:'Cuartelmaestre General Alemán',emoji:'🦅'},{name:'Haig',role:'Mariscal Británico',emoji:'🇬🇧'},{name:'Mustafá Kemal',role:'Defensor de Gallipoli',emoji:'🌙'},{name:'Brusilov',role:'General Ruso',emoji:'🐻'}],
+    weapons:[{name:'Ametralladora Maxim',period:'1914–1918',icon:'💥'},{name:'Gas Mostaza (Iperita)',period:'1917',icon:'☠️'},{name:'Tanque Mark I',period:'1916',icon:'🚜'},{name:'U-Boot Submarino',period:'1914–1918',icon:'🌊'},{name:'Caza Fokker / Sopwith',period:'1915–1918',icon:'✈️'},{name:'Big Bertha 420mm',period:'1914',icon:'💣'}],
+    civs:[{name:'Alemania Imperial',period:'1871–1918',flag:'🦅',power:0.90},{name:'Gran Bretaña y su Imperio',period:'—',flag:'🇬🇧',power:0.92},{name:'Francia (Tercera República)',period:'—',flag:'🇫🇷',power:0.85},{name:'Imperio Austro-Húngaro',period:'1867–1918',flag:'👑',power:0.75}],
+    tactics:[{name:'Guerra de Trincheras',origin:'Frente Occidental',icon:'⛏️'},{name:'Ataque en Oleadas',origin:'Todos los bandos',icon:'💀'},{name:'Táctica de Infiltración Hutier',origin:'Alemania',icon:'🎯'}],
+    docs:[{name:'Tratado de Versalles',year:'1919',icon:'📜'},{name:'Plan Schlieffen',year:'1905',icon:'🗺️'},{name:'Telegrama Zimmermann',year:'1917',icon:'📨'}]
+  },
+  { id:'ww2', name:'II G.M.',years:'1939–1945', battles:350, duration:'6', civs:50, cmds:300,
+    overview:'El mayor conflicto de la historia humana: 70-85 millones de muertos. La Blitzkrieg alemana conquista Europa. La URSS resiste en el Este. El Pacífico ve el mayor combate naval de la historia. Las bombas atómicas cambian para siempre la guerra.',
+    quote:{text:'No tengo nada que ofrecer excepto sangre, esfuerzo, lágrimas y sudor.',attr:'— Winston Churchill · Discurso al Parlamento · 13 mayo 1940'},
+    battles_data:[
+      {year:'1940',name:'Dunkerque',combatants:'Alemania vs Francia / GB',tag:'Blitzkrieg',lat:51.0,lng:2.4,desc:'Caída de Francia — Milagro de Dunkerque'},
+      {year:'1940',name:'Batalla de Inglaterra',combatants:'Luftwaffe vs RAF',tag:'Aéreo',lat:51.5,lng:-1.0,desc:'Primera batalla ganada en el aire'},
+      {year:'1942–43',name:'Batalla de Stalingrado',combatants:'URSS vs Alemania',tag:'Frente Oriental',lat:48.7,lng:44.5,desc:'Punto de inflexión definitivo de la guerra'},
+      {year:'1942',name:'Batalla de Midway',combatants:'EE.UU. vs Japón',tag:'Pacífico',lat:28.2,lng:-177.4,desc:'Japón pierde cuatro portaaviones'},
+      {year:'1942',name:'El Alamein',combatants:'GB vs Rommel',tag:'N. África',lat:30.8,lng:28.9,desc:'Fin del Afrika Korps'},
+      {year:'1944',name:'Día D — Normandía',combatants:'Aliados vs Alemania',tag:'Liberación',lat:49.4,lng:-0.5,desc:'La mayor operación anfibia de la historia'},
+    ],
+    commanders:[{name:'Dwight D. Eisenhower',role:'Comandante Supremo Aliado',emoji:'⭐'},{name:'Georgy Zhukov',role:'Mariscal Soviético',emoji:'🐻'},{name:'Erwin Rommel',role:'El Zorro del Desierto',emoji:'🦅'},{name:'Yamamoto',role:'Almirante Japonés',emoji:'🌸'},{name:'Montgomery',role:'Mariscal Británico',emoji:'🇬🇧'},{name:'Patton',role:'General EE.UU.',emoji:'🇺🇸'}],
+    weapons:[{name:'Panzer IV / Tiger / Panther',period:'1942–1945',icon:'🚜'},{name:'P-51 Mustang / Spitfire',period:'1941–1945',icon:'✈️'},{name:'Bomba Atómica',period:'1945',icon:'☢️'},{name:'V-2 Cohete Balístico',period:'1944',icon:'🚀'},{name:'Katyusha BM-13',period:'1941',icon:'💥'},{name:'Portaaviones de Flota',period:'1941–1945',icon:'⛵'}],
+    civs:[{name:'Alemania Nazi',period:'1933–1945',flag:'🦅',power:0.92},{name:'URSS',period:'1922–1991',flag:'🐻',power:0.95},{name:'EE.UU.',period:'—',flag:'🇺🇸',power:1.0},{name:'Gran Bretaña',period:'—',flag:'🇬🇧',power:0.88},{name:'Imperio Japonés',period:'1868–1945',flag:'🌸',power:0.85}],
+    tactics:[{name:'Blitzkrieg (Guerra Relámpago)',origin:'Alemania',icon:'⚡'},{name:'Defensa en Profundidad',origin:'URSS',icon:'🛡️'},{name:'Guerra de Portaaviones',origin:'EE.UU./Japón',icon:'✈️'},{name:'Bombardeo Estratégico',origin:'Aliados',icon:'💣'},{name:'Operación Anfibia',origin:'EE.UU./GB',icon:'⛵'},{name:'Guerrilla y Resistencia',origin:'Todos',icon:'🌿'}],
+    docs:[{name:'Carta del Atlántico',year:'1941',icon:'📜'},{name:'Acuerdos de Yalta',year:'1945',icon:'🌍'},{name:'Rendición Alemana',year:'8 mayo 1945',icon:'🕊️'},{name:'Juicios de Núremberg',year:'1945–1946',icon:'⚖️'},{name:'Carta de las Naciones Unidas',year:'1945',icon:'🌐'}]
+  },
+  { id:'cold_war', name:'Guerra Fría', years:'1945–1991', battles:180, duration:'46', civs:100, cmds:200,
+    overview:'Dos superpotencias nucleares en tensión permanente. Guerras por proxy en Corea, Vietnam, Angola, Afganistán. La disuasión nuclear redefine la geopolítica. Los movimientos de liberación nacional barren Asia, África y América Latina.',
+    quote:{text:'No sé con qué armas se luchará la III Guerra Mundial, pero la IV se luchará con palos y piedras.',attr:'— Atribuido a Albert Einstein'},
+    battles_data:[
+      {year:'1950–1953',name:'Guerra de Corea',combatants:'ONU vs Corea del Norte / China',tag:'Corea',lat:37.5,lng:127.0,desc:'La guerra olvidada — 3 millones de muertos'},
+      {year:'1955–1975',name:'Guerra de Vietnam',combatants:'EE.UU. vs Vietnam Norte / Vietcong',tag:'Vietnam',lat:16.0,lng:107.0,desc:'Primera derrota militar de EE.UU.'},
+      {year:'1967',name:'Guerra de los Seis Días',combatants:'Israel vs Egipto / Jordania / Siria',tag:'Oriente Medio',lat:31.8,lng:35.2,desc:'Israel cuadruplica su territorio en 6 días'},
+      {year:'1979–89',name:'Afganistán (URSS)',combatants:'URSS vs Muyahidines',tag:'Afganistán',lat:34.5,lng:69.2,desc:'El Vietnam soviético'},
+    ],
+    commanders:[{name:'Douglas MacArthur',role:'General Supremo EE.UU.',emoji:'⭐'},{name:'Vo Nguyen Giap',role:'General Vietnamita',emoji:'🌿'},{name:'Moshe Dayan',role:'Ministro Defensa Israel',emoji:'✡️'},{name:'Che Guevara',role:'Comandante Guerrillero',emoji:'🔴'}],
+    weapons:[{name:'ICBM Termonuclear',period:'1950s–',icon:'☢️'},{name:'Helicóptero UH-1 Huey',period:'1960s',icon:'🚁'},{name:'Misil Antitanque Guiado',period:'1960s',icon:'🚀'},{name:'RPG-7',period:'1961',icon:'💥'}],
+    civs:[{name:'EE.UU. / OTAN',period:'1945–1991',flag:'🇺🇸',power:1.0},{name:'URSS / Pacto de Varsovia',period:'1945–1991',flag:'☭',power:0.98},{name:'China Popular',period:'1949–',flag:'🐉',power:0.85},{name:'Israel',period:'1948–',flag:'✡️',power:0.80}],
+    tactics:[{name:'Disuasión Nuclear (MAD)',origin:'EE.UU./URSS',icon:'☢️'},{name:'Guerrilla de Liberación',origin:'Asia / África',icon:'🌿'},{name:'AirLand Battle',origin:'EE.UU.',icon:'✈️'}],
+    docs:[{name:'Tratado SALT I y II',year:'1972–1979',icon:'☢️'},{name:'Doctrina Truman',year:'1947',icon:'📜'},{name:'Tratado de No Proliferación',year:'1968',icon:'🌐'}]
+  },
+  { id:'contemporary', name:'Hoy', years:'1991–Presente', battles:120, duration:'33', civs:60, cmds:100,
+    overview:'La guerra de alta tecnología: drones, misiles de precisión, ciberarmas e inteligencia artificial. La guerra híbrida mezcla operaciones convencionales, desinformación y ciberataques. Ucrania, Gaza, Siria — el siglo XXI redefine el concepto de conflicto.',
+    quote:{text:'La guerra ha cambiado. Los drones y el ciberespacio son el nuevo campo de batalla.',attr:'— Análisis Estratégico Contemporáneo · 2024'},
+    battles_data:[
+      {year:'1991',name:'Tormenta del Desierto',combatants:'Coalición ONU vs Irak',tag:'Golfo Pérsico',lat:29.4,lng:47.5,desc:'100 horas de guerra terrestre — Revolución tecnológica'},
+      {year:'2001',name:'Invasión de Afganistán',combatants:'EE.UU. / OTAN vs Talibán',tag:'Guerra contra el Terror',lat:34.5,lng:69.2,desc:'La guerra más larga de EE.UU.'},
+      {year:'2022–',name:'Invasión Rusa de Ucrania',combatants:'Rusia vs Ucrania / Occidente',tag:'Europa',lat:48.4,lng:31.2,desc:'Mayor guerra en suelo europeo desde 1945'},
+      {year:'2023–',name:'Conflicto Israel-Gaza',combatants:'Israel vs Hamas',tag:'Oriente Medio',lat:31.5,lng:34.5,desc:'Guerra urbana de alta intensidad'},
+    ],
+    commanders:[{name:'Norman Schwarzkopf',role:'Tormenta del Desierto',emoji:'🇺🇸'},{name:'Valery Gerasimov',role:'Jefe FFAA Rusas',emoji:'🐻'},{name:'Valery Zaluzhny',role:'Comandante Ucraniano',emoji:'🇺🇦'},{name:'David Petraeus',role:'General EE.UU. / Irak',emoji:'⭐'}],
+    weapons:[{name:'Dron MQ-9 Reaper',period:'2001–',icon:'✈️'},{name:'Misil Tomahawk',period:'1983–',icon:'🚀'},{name:'Ciberarmas (Stuxnet)',period:'2010',icon:'💻'},{name:'HIMARS',period:'2022',icon:'💥'},{name:'IA en Sistemas de Armas',period:'2020s–',icon:'🧠'}],
+    civs:[{name:'EE.UU. (Hiperpotencia)',period:'1991–',flag:'🇺🇸',power:1.0},{name:'China (Ascenso)',period:'2000s–',flag:'🐉',power:0.92},{name:'Rusia',period:'1991–',flag:'🐻',power:0.85},{name:'OTAN',period:'1949–',flag:'🌐',power:0.95}],
+    tactics:[{name:'Guerra de Precisión Redes-Céntrica',origin:'EE.UU.',icon:'🎯'},{name:'Guerra Híbrida',origin:'Rusia',icon:'🎭'},{name:'Guerra Urbana (MOUT)',origin:'Israel / EE.UU.',icon:'🏙️'}],
+    docs:[{name:'Artículo 5 OTAN',year:'1949 (vigente)',icon:'🌐'},{name:'Acuerdos de Minsk I y II',year:'2014–2015',icon:'📜'},{name:'Convención sobre Armas Químicas',year:'1993',icon:'☠️'}]
+  },
+];
+
+// ═══════════════════════════════════════════
+// BUILDERS
+// ═══════════════════════════════════════════
+let currentEra=null;
+
+function buildEraNav() {
+  const nav=document.getElementById('era-nav');
+  ERAS.forEach(era=>{
+    const btn=document.createElement('button');
+    btn.className='era-btn';
+    btn.innerHTML=`${era.name}<span class="era-years">${era.years}</span>`;
+    btn.onclick=()=>selectEra(era.id);
+    nav.appendChild(btn);
+  });
+}
+
+function selectEra(eraId) {
+  const era=ERAS.find(e=>e.id===eraId);
+  if(!era) return;
+  currentEra=era;
+  document.querySelectorAll('.era-btn').forEach((btn,i)=>btn.classList.toggle('active',ERAS[i].id===eraId));
+  document.getElementById('era-overview').textContent=era.overview;
+  const stats=document.getElementById('era-stats');
+  stats.style.display='grid';
+  document.getElementById('es-battles').textContent=era.battles;
+  document.getElementById('es-years').textContent=era.duration;
+  document.getElementById('es-civs').textContent=era.civs;
+  document.getElementById('es-cmds').textContent=era.cmds;
+  updateMap(era.battles_data);
+  buildBattlesGrid(era.battles_data);
+  buildCommandersGrid(era.commanders);
+  buildWeaponsList(era.weapons);
+  buildCivsGrid(era.civs);
+  buildTacticsGrid(era.tactics);
+  buildDocsList(era.docs);
+  document.getElementById('rotating-quote').textContent=`"${era.quote.text}"`;
+  document.getElementById('rotating-attr').textContent=`— ${era.quote.attr}`;
+}
+
+function buildBattlesGrid(battles) {
+  const g=document.getElementById('battles-grid'); g.innerHTML='';
+  battles.forEach(b=>{
+    const c=document.createElement('div'); c.className='battle-card';
+    c.innerHTML=`<div class="battle-year">${b.year}</div><div class="battle-name">${b.name}</div><div class="battle-combatants">${b.combatants}</div><span class="battle-tag">${b.tag}</span><div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">${b.desc}</div>`;
+    c.onclick=()=>openBattleModal(b); g.appendChild(c);
+  });
+}
+function buildCommandersGrid(cmds) {
+  const g=document.getElementById('commanders-grid'); g.innerHTML='';
+  cmds.forEach(c=>{
+    const el=document.createElement('div'); el.className='commander-card';
+    el.innerHTML=`<div class="commander-avatar">${c.emoji}</div><div class="commander-name">${c.name}</div><div class="commander-role">${c.role}</div>`;
+    el.onclick=()=>openCommanderModal(c); g.appendChild(el);
+  });
+}
+function buildWeaponsList(weapons) {
+  const l=document.getElementById('weapons-list'); l.innerHTML='';
+  weapons.forEach(w=>{
+    const el=document.createElement('div'); el.className='weapon-item';
+    el.innerHTML=`<div class="weapon-icon">${w.icon}</div><div><div class="weapon-name">${w.name}</div><div class="weapon-period">${w.period}</div></div>`;
+    el.onclick=()=>openWeaponModal(w); l.appendChild(el);
+  });
+}
+function buildCivsGrid(civs) {
+  const g=document.getElementById('civs-grid'); g.innerHTML='';
+  civs.forEach(c=>{
+    const el=document.createElement('div'); el.className='civ-card';
+    el.innerHTML=`<div class="civ-flag">${c.flag}</div><div class="civ-name">${c.name}</div><div class="civ-period">${c.period}</div><div class="civ-power"><div class="civ-power-fill" style="width:${c.power*100}%"></div></div>`;
+    el.onclick=()=>openCivModal(c); g.appendChild(el);
+  });
+}
+function buildTacticsGrid(tactics) {
+  const g=document.getElementById('tactics-grid'); g.innerHTML='';
+  tactics.forEach(t=>{
+    const el=document.createElement('div'); el.className='tactic-card';
+    el.innerHTML=`<div class="tactic-diagram">${t.icon}</div><div class="tactic-name">${t.name}</div><div class="tactic-origin">${t.origin}</div>`;
+    el.onclick=()=>openTacticModal(t); g.appendChild(el);
+  });
+}
+function buildDocsList(docs) {
+  const l=document.getElementById('docs-list'); l.innerHTML='';
+  docs.forEach(d=>{
+    const el=document.createElement('div'); el.className='doc-item';
+    el.innerHTML=`<div class="doc-icon">${d.icon}</div><div><div class="doc-name">${d.name}</div><div class="doc-year">${d.year}</div></div>`;
+    el.onclick=()=>openDocModal(d); l.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+// HERO CANVAS
+// ═══════════════════════════════════════════
+function initHeroCanvas() {
+  const canvas=document.getElementById('hero-canvas');
+  const ctx=canvas.getContext('2d');
+  let W=canvas.width=window.innerWidth, H=canvas.height=window.innerHeight;
+  window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});
+  const P=80, pts=Array.from({length:P},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:Math.random()*1.5+0.5,a:Math.random()*0.4+0.1}));
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)/1.5);
+    g.addColorStop(0,'rgba(50,20,5,0.6)');g.addColorStop(0.5,'rgba(20,8,3,0.8)');g.addColorStop(1,'rgba(5,3,1,1)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,168,76,${p.a})`;ctx.fill();});
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(201,168,76,${0.08*(1-d/120)})`;ctx.lineWidth=0.5;ctx.stroke();}}
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ═══════════════════════════════════════════
+// SCROLL REVEAL
+// ═══════════════════════════════════════════
+function initReveal() {
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  initHeroCanvas();
+  initMap();
+  buildEraNav();
+  selectEra('ww2');
+  updateNavUI();
+  initReveal();
+});
+</script>
+</body>
+</html>
