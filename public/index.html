@@ -1176,6 +1176,33 @@ async function queryAI(eyebrow, title, prompt) {
   try {
     const content = await callAI(prompt);
     document.getElementById('modal-body').innerHTML = content;
+
+    // Cargar imágenes reales de Wikipedia para la galería
+    const gallery = document.querySelector('#modal-body .modal-gallery');
+    if (gallery) {
+      const imgs = gallery.querySelectorAll('img');
+      const terms = Array.from(imgs).map(img => img.alt).filter(Boolean);
+      if (terms.length > 0) {
+        try {
+          const imgRes = await fetch('/api/get-images', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ terms })
+          });
+          const imgData = await imgRes.json();
+          if (imgData.images && imgData.images.length > 0) {
+            imgData.images.forEach((img, i) => {
+              if (imgs[i] && img.url) {
+                imgs[i].src = img.url;
+                imgs[i].style.display = 'block';
+              }
+            });
+          }
+        } catch(e) {
+          console.log('Images not loaded:', e);
+        }
+      }
+    }
   } catch(e) {
     document.getElementById('modal-body').innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido. Por favor, inténtalo de nuevo.</p>';
   }
