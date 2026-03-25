@@ -547,6 +547,65 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 .page-eyebrow { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-bottom:0.5rem; }
 .page-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:700; color:var(--white); line-height:1.1; }
 .page-subtitle { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); font-size:1rem; margin-top:0.4rem; }
+
+/* AUTOCOMPLETE */
+.search-wrapper{position:relative;max-width:800px;margin:0 auto;}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--slate);border:1px solid rgba(201,168,76,0.3);border-top:none;z-index:200;max-height:380px;overflow-y:auto;display:none;}
+.ac-dropdown.open{display:block;}
+.ac-item{display:flex;align-items:center;gap:0.8rem;padding:0.75rem 1.2rem;cursor:pointer;border-bottom:1px solid rgba(201,168,76,0.06);transition:background 0.15s;}
+.ac-item:hover,.ac-item.ac-sel{background:var(--steel);}
+.ac-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+.ac-name{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--white);}
+.ac-name em{color:var(--gold);font-style:normal;}
+.ac-sub{font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.12em;color:var(--smoke);text-transform:uppercase;margin-top:1px;}
+.ac-badge{font-family:'Cinzel',serif;font-size:0.48rem;letter-spacing:0.1em;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.15);color:var(--gold);padding:0.12rem 0.35rem;text-transform:uppercase;flex-shrink:0;margin-left:auto;}
+.ac-hdr{font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.25em;color:var(--smoke);text-transform:uppercase;padding:0.4rem 1.2rem 0.2rem;background:rgba(0,0,0,0.25);}
+.ac-empty{font-family:'Crimson Pro',serif;font-style:italic;color:var(--smoke);padding:1rem 1.2rem;text-align:center;}
+
+/* VISUAL TIMELINE */
+.vtl-wrap{padding:1.2rem 0 2.5rem;margin-bottom:1.5rem;position:relative;}
+.vtl-track{position:relative;height:3px;background:rgba(201,168,76,0.12);margin:55px 50px 15px;border-radius:2px;}
+.vtl-fill{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,var(--crimson),var(--gold));border-radius:2px;transition:width 0.5s ease;}
+.vtl-nodes{display:flex;justify-content:space-between;position:absolute;top:-12px;left:0;right:0;}
+.vtl-node{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;transform:translateX(-50%);}
+.vtl-dot{width:24px;height:24px;border-radius:50%;background:var(--ash);border:2px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-size:0.65rem;transition:all 0.25s;}
+.vtl-node:hover .vtl-dot,.vtl-node.active .vtl-dot{background:var(--gold);border-color:var(--gold-light);transform:scale(1.35);box-shadow:0 0 14px rgba(201,168,76,0.45);}
+.vtl-lbl{position:absolute;top:30px;font-family:'Cinzel',serif;font-size:0.48rem;letter-spacing:0.08em;color:var(--smoke);text-transform:uppercase;white-space:nowrap;transition:color 0.25s;text-align:center;}
+.vtl-node.active .vtl-lbl,.vtl-node:hover .vtl-lbl{color:var(--gold);}
+.vtl-yr{position:absolute;bottom:28px;font-family:'Crimson Pro',serif;font-size:0.62rem;color:var(--smoke);white-space:nowrap;opacity:0;transition:opacity 0.25s;pointer-events:none;}
+.vtl-node:hover .vtl-yr,.vtl-node.active .vtl-yr{opacity:1;color:var(--gold-light);}
+.vtl-info{text-align:center;margin-top:0.5rem;}
+.vtl-era-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--white);}
+.vtl-era-yr{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-top:0.1rem;}
+
+/* COMPARE MODE */
+.cmp-bar{background:linear-gradient(135deg,rgba(139,26,26,0.18),rgba(201,168,76,0.04));border:1px solid rgba(201,168,76,0.18);padding:0.9rem 1.2rem;display:none;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;}
+.cmp-bar.on{display:flex;}
+.cmp-slots{display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;}
+.cmp-slot{background:var(--steel);border:1px solid rgba(201,168,76,0.18);padding:0.35rem 0.7rem;font-family:'Cinzel',serif;font-size:0.56rem;letter-spacing:0.1em;color:var(--gold);display:flex;align-items:center;gap:0.3rem;}
+.cmp-empty{color:var(--smoke);border-style:dashed;}
+.cmp-x{cursor:pointer;color:var(--smoke);}
+.cmp-x:hover{color:var(--crimson-light);}
+.cmp-vs{font-family:'Cinzel',serif;font-size:0.7rem;color:var(--gold);font-weight:700;}
+.cmp-go{background:var(--gold);color:var(--ink);border:none;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.55rem 1.1rem;cursor:pointer;font-weight:700;transition:all 0.25s;}
+.cmp-go:hover{background:var(--gold-light);}
+.cmp-go:disabled{opacity:0.4;cursor:not-allowed;}
+.cmp-toggle{background:transparent;border:1px solid rgba(201,168,76,0.22);color:var(--mist);font-family:'Cinzel',serif;font-size:0.53rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.38rem 0.7rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.cmp-toggle:hover,.cmp-toggle.on{border-color:var(--gold);color:var(--gold);}
+.cmp-selected{outline:2px solid var(--gold);}
+
+/* COMPARE VIEW */
+#compare-view .cmp-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:start;margin-bottom:1.5rem;}
+.cmp-bh{background:var(--slate);padding:1.2rem;border:1px solid rgba(201,168,76,0.18);}
+.cmp-bt{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--white);margin-bottom:0.2rem;}
+.cmp-bs{font-family:'Crimson Pro',serif;font-style:italic;font-size:0.9rem;color:var(--smoke);}
+.cmp-vs-big{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:var(--gold);text-align:center;padding-top:0.5rem;}
+.cmp-result{font-family:'Crimson Pro',serif;font-size:1.03rem;color:var(--parchment-dark);line-height:1.8;}
+.cmp-result table{width:100%;border-collapse:collapse;margin:1rem 0;}
+.cmp-result th{background:var(--steel);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase;padding:0.6rem 0.9rem;text-align:left;border:1px solid rgba(201,168,76,0.12);}
+.cmp-result td{padding:0.55rem 0.9rem;border:1px solid rgba(201,168,76,0.08);}
+.cmp-result tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+@media(max-width:700px){#compare-view .cmp-grid{grid-template-columns:1fr;}#bd-layout,#cd-layout{grid-template-columns:1fr !important;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -612,12 +671,21 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     </div>
   </div>
 
-  <!-- Search -->
+  <!-- Search Autocomplete -->
   <div id="search-section" class="reveal">
     <div class="section-eyebrow">Búsqueda Universal con IA</div>
-    <div class="search-bar">
-      <input class="search-input" type="text" id="search-input" placeholder="Busca una batalla, comandante, tratado, arma, civilización..."/>
-      <button class="search-btn" onclick="doSearch()">Buscar</button>
+    <div class="search-wrapper">
+      <div class="search-bar">
+        <input class="search-input" type="text" id="search-input"
+          placeholder="Busca batalla, comandante, civilización, tratado..."
+          autocomplete="off"
+          oninput="acInput(this.value)"
+          onkeydown="acKeydown(event)"
+          onfocus="if(this.value.length>1)acShow(this.value)"
+          onblur="setTimeout(()=>acClose(),180)"/>
+        <button class="search-btn" onclick="doSearch()">Buscar</button>
+      </div>
+      <div class="ac-dropdown" id="ac-dd"></div>
     </div>
   </div>
 
@@ -641,11 +709,16 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 
   <div id="timeline-section" class="reveal">
 
-    <!-- Era Nav with arrows -->
-    <div class="era-nav-wrapper">
-      <button class="era-nav-arrow left" onclick="scrollEraNav(-1)" title="Anterior">&#8592;</button>
-      <div class="timeline-nav" id="era-nav"></div>
-      <button class="era-nav-arrow right" onclick="scrollEraNav(1)" title="Siguiente">&#8594;</button>
+    <!-- Visual Timeline -->
+    <div class="vtl-wrap" id="vtl-wrapper">
+      <div class="vtl-track" id="vtl-track">
+        <div class="vtl-fill" id="vtl-fill" style="width:0%"></div>
+        <div class="vtl-nodes" id="vtl-nodes"></div>
+      </div>
+      <div class="vtl-info">
+        <div class="vtl-era-name" id="vtl-era-name">Selecciona una era en la línea del tiempo</div>
+        <div class="vtl-era-yr" id="vtl-era-yr"></div>
+      </div>
     </div>
 
     <!-- Era Overview + Stats -->
@@ -850,6 +923,21 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <input class="section-search-input" id="battles-search" placeholder="Buscar por nombre, año, combatientes, era..." oninput="filterBattlesIndex(this.value)">
     <button class="section-search-btn" onclick="filterBattlesIndex(document.getElementById('battles-search').value)">🔍 Buscar</button>
   </div>
+  <div style="display:flex;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
+    <div class="section-search-bar" style="flex:1;min-width:240px;margin-bottom:0;">
+      <input class="section-search-input" id="battles-search" placeholder="Buscar..." oninput="filterBattlesIndex(this.value)">
+      <button class="section-search-btn">🔍</button>
+    </div>
+    <button class="cmp-toggle" id="cmp-btn" onclick="toggleCmp()">⚖ Comparar Batallas</button>
+  </div>
+  <div class="cmp-bar" id="cmp-bar">
+    <div class="cmp-slots">
+      <div class="cmp-slot cmp-empty" id="cmp-s1">+ Primera batalla</div>
+      <div class="cmp-vs">VS</div>
+      <div class="cmp-slot cmp-empty" id="cmp-s2">+ Segunda batalla</div>
+    </div>
+    <button class="cmp-go" id="cmp-go" disabled onclick="runCmp()">⚖ Comparar →</button>
+  </div>
   <div class="filter-chips" id="battles-era-chips"></div>
   <div class="results-count" id="battles-results-count"><span id="battles-count">0</span> batallas encontradas</div>
   <div class="index-grid" id="battles-index-grid"></div>
@@ -994,6 +1082,23 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     </div>
   </div>
   <style>@media(max-width:768px){#cd-layout{grid-template-columns:1fr !important;}}</style>
+</div>
+
+<!-- ═══ COMPARE VIEW ═══ -->
+<div id="compare-view" class="section-view" style="padding:2rem;max-width:1100px;margin:0 auto;">
+  <div class="page-title-bar">
+    <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1rem;display:block;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver a Batallas</button>
+    <div class="page-eyebrow">Análisis Comparativo con IA</div>
+    <h1 class="page-title" id="cmp-title">Comparación de Batallas</h1>
+  </div>
+  <div class="cmp-grid" id="cmp-grid">
+    <div class="cmp-bh" id="cmp-left"></div>
+    <div class="cmp-vs-big">VS</div>
+    <div class="cmp-bh" id="cmp-right"></div>
+  </div>
+  <div class="cmp-result" id="cmp-result">
+    <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando...</span></div>
+  </div>
 </div>
 
 </main>
@@ -2493,16 +2598,7 @@ function switchTab(tabId) {
 }
 
 // ── ERA NAV BUILD ──
-function buildEraNav() {
-  const nav = document.getElementById('era-nav');
-  ERAS.forEach(era => {
-    const btn = document.createElement('button');
-    btn.className = 'era-btn';
-    btn.innerHTML = era.name + '<span class="era-years">' + era.years + '</span>';
-    btn.onclick = () => selectEra(era.id);
-    nav.appendChild(btn);
-  });
-}
+function buildEraNav() { buildVisualTimeline(); }
 
 // ── SELECT ERA ──
 function selectEra(eraId) {
@@ -2510,6 +2606,7 @@ function selectEra(eraId) {
   if (!era) return;
   currentEra = era;
   allBattlesShown = false;
+  vtlUpdate(eraId);
 
   // Highlight active era btn + scroll it into view
   const btns = document.querySelectorAll('.era-btn');
@@ -3308,6 +3405,199 @@ async function openCommanderDetail(commander, eraObj) {
   }
 }
 
+
+// ════════════════════════════════════════
+// FEATURE 1: URL ROUTING
+// ════════════════════════════════════════
+function slugify(s) {
+  return s.toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+function getBattleBySlug(slug) {
+  for (const era of ERAS) {
+    for (const b of era.battles_data) {
+      if (slugify(b.name) === slug) return { battle:b, era };
+    }
+  }
+  return null;
+}
+function getCommanderBySlug(slug) {
+  for (const era of ERAS) {
+    for (const c of era.commanders) {
+      if (slugify(c.name) === slug) return { commander:c, era };
+    }
+  }
+  return null;
+}
+function handleURLRouting() {
+  const path = window.location.pathname;
+  const bm = path.match(/^\/batalla\/(.+)$/);
+  const cm = path.match(/^\/comandante\/(.+)$/);
+  if (bm) { const e = getBattleBySlug(bm[1]); if (e) setTimeout(()=>openBattleDetail(e.battle,e.era),200); }
+  else if (cm) { const e = getCommanderBySlug(cm[1]); if (e) setTimeout(()=>openCommanderDetail(e.commander,e.era),200); }
+}
+window.addEventListener('popstate', () => {
+  if (!window.location.pathname.startsWith('/batalla/') && !window.location.pathname.startsWith('/comandante/')) {
+    document.title = 'Bellum Mundi — Historia Militar Universal';
+  }
+});
+
+// Patch openBattleDetail for URL
+const _bd0 = openBattleDetail;
+openBattleDetail = async function(battle, eraObj) {
+  history.pushState({}, battle.name, '/batalla/' + slugify(battle.name));
+  document.title = battle.name + ' — Bellum Mundi';
+  return _bd0(battle, eraObj);
+};
+
+// Patch openCommanderDetail for URL
+const _cd0 = openCommanderDetail;
+openCommanderDetail = async function(commander, eraObj) {
+  history.pushState({}, commander.name, '/comandante/' + slugify(commander.name));
+  document.title = commander.name + ' — Bellum Mundi';
+  return _cd0(commander, eraObj);
+};
+
+// ════════════════════════════════════════
+// FEATURE 2: AUTOCOMPLETE
+// ════════════════════════════════════════
+let acIdx = -1, acRes = [], acBuilt = false, acData = [];
+
+function buildAcData() {
+  if (acBuilt) return;
+  ERAS.forEach(era => {
+    era.battles_data.forEach(b => acData.push({type:'battle',icon:'⚔',name:b.name,sub:b.combatants,badge:era.name,era,item:b}));
+    era.commanders.forEach(c => acData.push({type:'cmd',icon:'👑',name:c.name,sub:c.role,badge:era.name,era,item:c}));
+    era.civs.forEach(c => acData.push({type:'civ',icon:'🏛️',name:c.name,sub:c.period,badge:era.name,era,item:c}));
+    era.docs.forEach(d => acData.push({type:'doc',icon:d.icon||'📜',name:d.name,sub:d.year,badge:era.name,era,item:d}));
+    era.weapons.forEach(w => acData.push({type:'wpn',icon:w.icon||'🗡️',name:w.name,sub:w.period,badge:era.name,era,item:w}));
+  });
+  acBuilt = true;
+}
+
+function acInput(q) { if (q.length >= 2) acShow(q); else acClose(); }
+
+function acShow(q) {
+  buildAcData();
+  const low = q.toLowerCase();
+  acRes = acData.filter(r => r.name.toLowerCase().includes(low) || (r.sub&&r.sub.toLowerCase().includes(low))).slice(0,12);
+  acIdx = -1;
+  const dd = document.getElementById('ac-dd');
+  if (!acRes.length) { dd.innerHTML='<div class="ac-empty">Sin resultados — pulsa Buscar para consultar la IA</div>'; dd.classList.add('open'); return; }
+  const types = {battle:'⚔ Batallas',cmd:'👑 Comandantes',civ:'🏛️ Civilizaciones',doc:'📜 Documentos',wpn:'🗡️ Armamento'};
+  let html = '', lastT = '';
+  acRes.forEach((r,i) => {
+    if (r.type !== lastT) { html += '<div class="ac-hdr">'+types[r.type]+'</div>'; lastT = r.type; }
+    const hl = r.name.replace(new RegExp('('+q.replace(/[-\\^$*+?.()|[\]{}]/g,'\\$&')+')','gi'),'<em>$1</em>');
+    html += '<div class="ac-item" onmousedown="acSelect('+i+')"><span class="ac-icon">'+r.icon+'</span><div style="flex:1;min-width:0;"><div class="ac-name">'+hl+'</div><div class="ac-sub">'+r.sub+'</div></div><div class="ac-badge">'+r.badge+'</div></div>';
+  });
+  dd.innerHTML = html; dd.classList.add('open');
+}
+
+function acSelect(i) {
+  const r = acRes[i]; if (!r) return;
+  acClose(); document.getElementById('search-input').value = r.name;
+  currentEra = r.era;
+  if (r.type==='battle') openBattleDetail(r.item, r.era);
+  else if (r.type==='cmd') openCommanderDetail(r.item, r.era);
+  else queryAI(r.type==='doc'?'Documento':r.type==='civ'?'Civilización':'Armamento', r.name, 'Explica en detalle: '+r.name+'. Era: '+r.era.name+'.');
+}
+
+function acKeydown(e) {
+  const dd = document.getElementById('ac-dd');
+  if (!dd.classList.contains('open')) { if (e.key==='Enter') doSearch(); return; }
+  const items = dd.querySelectorAll('.ac-item');
+  if (e.key==='ArrowDown') { acIdx=Math.min(acIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('ac-sel',i===acIdx)); e.preventDefault(); }
+  else if (e.key==='ArrowUp') { acIdx=Math.max(acIdx-1,-1); items.forEach((el,i)=>el.classList.toggle('ac-sel',i===acIdx)); e.preventDefault(); }
+  else if (e.key==='Enter') { if (acIdx>=0) acSelect(acIdx); else { acClose(); doSearch(); } e.preventDefault(); }
+  else if (e.key==='Escape') acClose();
+}
+function acClose() { const dd=document.getElementById('ac-dd'); if(dd) dd.classList.remove('open'); acIdx=-1; }
+
+// ════════════════════════════════════════
+// FEATURE 3: COMPARISON MODE
+// ════════════════════════════════════════
+let cmpMode = false, cmpSlots = [null, null];
+
+function toggleCmp() {
+  cmpMode = !cmpMode;
+  document.getElementById('cmp-btn').classList.toggle('on', cmpMode);
+  document.getElementById('cmp-bar').classList.toggle('on', cmpMode);
+  if (!cmpMode) { cmpSlots=[null,null]; updateCmpBar(); }
+}
+
+function updateCmpBar() {
+  const s1=document.getElementById('cmp-s1'), s2=document.getElementById('cmp-s2'), go=document.getElementById('cmp-go');
+  s1.className = cmpSlots[0]?'cmp-slot':'cmp-slot cmp-empty';
+  s1.innerHTML = cmpSlots[0] ? cmpSlots[0].name+' <span class="cmp-x" onclick="clearCmp(0)">✕</span>' : '+ Primera batalla';
+  s2.className = cmpSlots[1]?'cmp-slot':'cmp-slot cmp-empty';
+  s2.innerHTML = cmpSlots[1] ? cmpSlots[1].name+' <span class="cmp-x" onclick="clearCmp(1)">✕</span>' : '+ Segunda batalla';
+  go.disabled = !(cmpSlots[0] && cmpSlots[1]);
+}
+function clearCmp(i) { cmpSlots[i]=null; updateCmpBar(); }
+
+function addToCmp(battle, eraObj) {
+  if (!cmpMode) return false;
+  if (cmpSlots.some(s=>s&&s.name===battle.name)) return true;
+  const slot = !cmpSlots[0] ? 0 : !cmpSlots[1] ? 1 : 0;
+  if (slot===0 && cmpSlots[1] && cmpSlots[1].name===battle.name) return true;
+  cmpSlots[slot] = { name:battle.name, battle, era:eraObj };
+  if (slot===0 && cmpSlots[0]) cmpSlots[0] = { name:battle.name, battle, era:eraObj };
+  cmpSlots[slot] = { name:battle.name, battle, era:eraObj };
+  updateCmpBar(); return true;
+}
+
+async function runCmp() {
+  if (!cmpSlots[0]||!cmpSlots[1]) return;
+  const b1=cmpSlots[0].battle, b2=cmpSlots[1].battle, e1=cmpSlots[0].era, e2=cmpSlots[1].era;
+  navigationStack.push('battles');
+  document.getElementById('cmp-title').textContent = b1.name + ' vs ' + b2.name;
+  document.getElementById('cmp-left').innerHTML = '<div class="cmp-bt">'+b1.name+'</div><div class="cmp-bs">'+b1.combatants+' · '+b1.year+'</div>';
+  document.getElementById('cmp-right').innerHTML = '<div class="cmp-bt">'+b2.name+'</div><div class="cmp-bs">'+b2.combatants+' · '+b2.year+'</div>';
+  showSection('compare');
+  if (!canQuery()) { document.getElementById('paywall-overlay').classList.add('open'); return; }
+  consumeQuery();
+  const prompt = 'Compara exhaustivamente estas dos batallas:\n\nBATALLA 1: '+b1.name+' ('+b1.year+') — '+b1.combatants+' — Era: '+e1.name+'\nBATALLA 2: '+b2.name+' ('+b2.year+') — '+b2.combatants+' — Era: '+e2.name+'\n\nIncluye: <h3>Contexto y Época</h3>, <h3>Fuerzas y Recursos</h3>, <h3>Tácticas</h3>, <h3>Tabla Comparativa</h3> (HTML con columnas Aspecto/'+b1.name+'/'+b2.name+' y filas: Fecha, Efectivos, Bajas, Comandantes, Resultado, Táctica principal, Impacto histórico), <h3>¿Qué tienen en común?</h3>, <h3>Diferencias fundamentales</h3>, <h3>¿Cuál fue más decisiva y por qué?</h3>, y bibliografía. Mínimo 1200 palabras.';
+  document.getElementById('cmp-result').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando...</span></div>';
+  try { const r = await callAI(prompt); document.getElementById('cmp-result').innerHTML = r.content; }
+  catch(e) { document.getElementById('cmp-result').innerHTML = '<p style="color:var(--crimson-light);">Error. Inténtalo de nuevo.</p>'; }
+}
+
+// ════════════════════════════════════════
+// FEATURE 4: VISUAL TIMELINE
+// ════════════════════════════════════════
+const ERA_EMOJIS = {prehistoric:'🦴',ancient:'🏛️',classical:'🦅',medieval:'⚔️',early_modern:'🔫',napoleon:'👑',ww1:'⛏️',ww2:'💥',cold_war:'☢️',contemporary:'🌐'};
+
+function buildVisualTimeline() {
+  const nodes = document.getElementById('vtl-nodes');
+  if (!nodes) return;
+  nodes.innerHTML = '';
+  ERAS.forEach((era, i) => {
+    const pct = ERAS.length > 1 ? (i / (ERAS.length - 1)) * 100 : 0;
+    const nd = document.createElement('div');
+    nd.className = 'vtl-node';
+    nd.style.left = pct + '%';
+    nd.dataset.eraId = era.id;
+    nd.innerHTML = '<div class="vtl-dot">'+(ERA_EMOJIS[era.id]||'⚔️')+'</div><div class="vtl-yr">'+era.years.split('–')[0]+'</div><div class="vtl-lbl">'+era.name+'</div>';
+    nd.onclick = () => selectEra(era.id);
+    nodes.appendChild(nd);
+  });
+}
+
+function vtlUpdate(eraId) {
+  const idx = ERAS.findIndex(e => e.id === eraId);
+  if (idx < 0) return;
+  const pct = ERAS.length > 1 ? (idx / (ERAS.length - 1)) * 100 : 0;
+  const fill = document.getElementById('vtl-fill');
+  if (fill) fill.style.width = pct + '%';
+  document.querySelectorAll('.vtl-node').forEach((n,i) => n.classList.toggle('active', i === idx));
+  const era = ERAS[idx];
+  const nm = document.getElementById('vtl-era-name'), yr = document.getElementById('vtl-era-yr');
+  if (nm) nm.textContent = era.name;
+  if (yr) yr.textContent = era.years;
+}
+
 window.addEventListener('load', async () => {
   initHeroCanvas();
   initMap();
@@ -3330,6 +3620,7 @@ window.addEventListener('load', async () => {
 
   updateNavUI();
   initReveal();
+  handleURLRouting();
 });
 </script>
 </body>
