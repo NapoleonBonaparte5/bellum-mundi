@@ -48,15 +48,15 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { background:var(--ink); color:var(--white); font-family:'Crimson Pro',Georgia,serif; font-size:18px; line-height:1.7; overflow-x:hidden; }
-body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:9998; opacity:0.4; }
+body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:1; opacity:0.4; }
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:var(--ink); }
 ::-webkit-scrollbar-thumb { background:var(--gold-dark); border-radius:3px; }
 
 /* ── HERO ── */
-#hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden; padding:4rem 2rem; }
+#hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden; padding:4rem 2rem; isolation:isolate; }
 #hero-canvas { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.hero-content { position:relative; z-index:3; max-width:900px; }
+.hero-content { position:relative; z-index:10; max-width:900px; }
 .hero-ornament { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.5em; color:var(--gold); text-transform:uppercase; margin-bottom:2rem; opacity:0; animation:fadeUp 1s 0.3s forwards; }
 .hero-title { font-family:'Cinzel',serif; font-size:clamp(3.5rem,10vw,9rem); font-weight:900; color:var(--white); line-height:0.9; letter-spacing:-0.02em; text-shadow:0 0 80px rgba(201,168,76,0.3),0 4px 40px rgba(0,0,0,0.8); opacity:0; animation:fadeUp 1s 0.5s forwards; }
 .hero-title span { color:var(--gold); }
@@ -64,11 +64,11 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .hero-rule { width:200px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:2rem auto; opacity:0; animation:fadeUp 1s 0.9s forwards; position:relative; z-index:3; }
 .hero-meta { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.4em; color:var(--smoke); opacity:0; animation:fadeUp 1s 1.1s forwards; }
 .hero-ctas { display:flex; gap:1rem; justify-content:center; margin-top:2.5rem; flex-wrap:wrap; opacity:0; animation:fadeUp 1s 1.3s forwards; position:relative; z-index:3; }
-.btn-primary { background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:none; cursor:pointer; transition:all 0.3s; font-weight:700; }
+.btn-primary { background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:none; cursor:pointer; transition:all 0.3s; font-weight:700; position:relative; z-index:10; }
 .btn-primary:hover { background:var(--gold-light); transform:translateY(-2px); }
-.btn-ghost { background:transparent; color:var(--white); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:1px solid rgba(249,245,237,0.3); cursor:pointer; transition:all 0.3s; }
+.btn-ghost { background:var(--ink); color:var(--white); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; padding:1rem 2rem; border:1px solid rgba(249,245,237,0.3); cursor:pointer; transition:all 0.3s; position:relative; z-index:10; }
 .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
-.scroll-cta { position:absolute; bottom:3rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; cursor:pointer; opacity:0; animation:fadeUp 1s 1.7s forwards; z-index:3; }
+.scroll-cta { position:absolute; bottom:1rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; cursor:pointer; opacity:0; animation:fadeUp 1s 1.7s forwards; z-index:2; pointer-events:none; }
 .scroll-line { width:1px; height:60px; background:linear-gradient(180deg,var(--gold),transparent); animation:scrollPulse 2s ease-in-out infinite; }
 @keyframes scrollPulse { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
 @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
@@ -548,6 +548,48 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 .page-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:700; color:var(--white); line-height:1.1; }
 .page-subtitle { font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); font-size:1rem; margin-top:0.4rem; }
 
+
+
+/* ══ BATTLE PICKER MODAL ══ */
+#battle-picker-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+  z-index: 8000; display: none; align-items: flex-start;
+  justify-content: center; padding: 2rem; overflow-y: auto;
+  backdrop-filter: blur(6px);
+}
+#battle-picker-modal.open { display: flex; }
+.bpm-box {
+  background: var(--slate); border: 1px solid rgba(201,168,76,0.3);
+  max-width: 800px; width: 100%; margin: auto;
+  animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.bpm-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.bpm-title { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--white); }
+.bpm-close { background:none; border:1px solid rgba(201,168,76,0.2); color:var(--smoke); width:32px; height:32px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; }
+.bpm-close:hover { border-color:var(--gold); color:var(--gold); }
+.bpm-search { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.1); }
+.bpm-search input { width:100%; background:var(--steel); border:1px solid rgba(201,168,76,0.2); padding:0.7rem 1rem; color:var(--white); font-family:'Crimson Pro',serif; font-size:1rem; outline:none; }
+.bpm-search input::placeholder { color:var(--smoke); }
+.bpm-era-chips { display:flex; flex-wrap:wrap; gap:0.3rem; padding:0.8rem 1.5rem; border-bottom:1px solid rgba(201,168,76,0.08); }
+.bpm-chip { background:transparent; border:1px solid rgba(201,168,76,0.15); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.12em; padding:0.25rem 0.5rem; text-transform:uppercase; cursor:pointer; transition:all 0.18s; }
+.bpm-chip:hover { border-color:var(--gold); color:var(--gold); }
+.bpm-chip.active { background:rgba(201,168,76,0.1); border-color:var(--gold); color:var(--gold); }
+.bpm-list { max-height: 420px; overflow-y: auto; }
+.bpm-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.9rem 1.5rem; cursor: pointer;
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+  transition: background 0.15s;
+}
+.bpm-item:hover { background: var(--steel); }
+.bpm-item-year { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; color:var(--gold); text-transform:uppercase; width:90px; flex-shrink:0; }
+.bpm-item-name { font-family:'Playfair Display',serif; font-size:1rem; color:var(--white); flex:1; }
+.bpm-item-era { font-family:'Cinzel',serif; font-size:0.48rem; letter-spacing:0.1em; color:var(--smoke); background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.12); padding:0.1rem 0.35rem; text-transform:uppercase; flex-shrink:0; }
+.bpm-empty { padding:2rem; text-align:center; font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); }
 
 /* ══ FULL PAGE OVERLAY — Batalla / Comandante ══ */
 #page-overlay {
@@ -1045,9 +1087,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   </div>
   <div class="cmp-bar" id="cmp-bar">
     <div class="cmp-slots">
-      <div class="cmp-slot cmp-empty" id="cmp-s1">+ Primera batalla</div>
+      <div class="cmp-slot cmp-empty" id="cmp-s1" onclick="openPicker(0)" style="cursor:pointer;">+ Primera batalla</div>
       <div class="cmp-vs">VS</div>
-      <div class="cmp-slot cmp-empty" id="cmp-s2">+ Segunda batalla</div>
+      <div class="cmp-slot cmp-empty" id="cmp-s2" onclick="openPicker(1)" style="cursor:pointer;">+ Segunda batalla</div>
     </div>
     <button class="cmp-go" id="cmp-go" disabled onclick="runCmp()">⚖ Comparar →</button>
   </div>
@@ -3810,9 +3852,13 @@ function acKeydown(e) {
 function acClose() { const dd=document.getElementById('ac-dd'); if(dd) dd.classList.remove('open'); acIdx=-1; }
 
 // ════════════════════════════════════════
-// FEATURE 3: COMPARISON MODE
+// FEATURE 3: COMPARISON MODE WITH PICKER
 // ════════════════════════════════════════
-let cmpMode = false, cmpSlots = [null, null];
+let cmpMode = false;
+let cmpSlots = [null, null];
+let pickerSlotTarget = 0; // which slot we're filling
+let pickerEraFilter = 'all';
+let pickerAllBattles = [];
 
 function toggleCmp() {
   cmpMode = !cmpMode;
@@ -3822,25 +3868,126 @@ function toggleCmp() {
 }
 
 function updateCmpBar() {
-  const s1=document.getElementById('cmp-s1'), s2=document.getElementById('cmp-s2'), go=document.getElementById('cmp-go');
-  s1.className = cmpSlots[0]?'cmp-slot':'cmp-slot cmp-empty';
-  s1.innerHTML = cmpSlots[0] ? cmpSlots[0].name+' <span class="cmp-x" onclick="clearCmp(0)">✕</span>' : '+ Primera batalla';
-  s2.className = cmpSlots[1]?'cmp-slot':'cmp-slot cmp-empty';
-  s2.innerHTML = cmpSlots[1] ? cmpSlots[1].name+' <span class="cmp-x" onclick="clearCmp(1)">✕</span>' : '+ Segunda batalla';
-  go.disabled = !(cmpSlots[0] && cmpSlots[1]);
-}
-function clearCmp(i) { cmpSlots[i]=null; updateCmpBar(); }
+  const s1 = document.getElementById('cmp-s1');
+  const s2 = document.getElementById('cmp-s2');
+  const go = document.getElementById('cmp-go');
+  if (!s1) return;
 
-function addToCmp(battle, eraObj) {
-  if (!cmpMode) return false;
-  if (cmpSlots.some(s=>s&&s.name===battle.name)) return true;
-  const slot = !cmpSlots[0] ? 0 : !cmpSlots[1] ? 1 : 0;
-  if (slot===0 && cmpSlots[1] && cmpSlots[1].name===battle.name) return true;
-  cmpSlots[slot] = { name:battle.name, battle, era:eraObj };
-  if (slot===0 && cmpSlots[0]) cmpSlots[0] = { name:battle.name, battle, era:eraObj };
-  cmpSlots[slot] = { name:battle.name, battle, era:eraObj };
-  updateCmpBar(); return true;
+  s1.className = cmpSlots[0] ? 'cmp-slot' : 'cmp-slot cmp-empty';
+  s1.onclick = () => openPicker(0);
+  s1.innerHTML = cmpSlots[0]
+    ? cmpSlots[0].name + ' <span class="cmp-x" onclick="event.stopPropagation();clearCmp(0)">✕</span>'
+    : '+ Primera batalla';
+
+  s2.className = cmpSlots[1] ? 'cmp-slot' : 'cmp-slot cmp-empty';
+  s2.onclick = () => openPicker(1);
+  s2.innerHTML = cmpSlots[1]
+    ? cmpSlots[1].name + ' <span class="cmp-x" onclick="event.stopPropagation();clearCmp(1)">✕</span>'
+    : '+ Segunda batalla';
+
+  if (go) go.disabled = !(cmpSlots[0] && cmpSlots[1]);
 }
+
+function clearCmp(i) { cmpSlots[i] = null; updateCmpBar(); }
+
+// ── PICKER ─────────────────────────────────────────────
+function buildPickerBattles() {
+  if (pickerAllBattles.length > 0) return;
+  ERAS.forEach(era => {
+    era.battles_data.forEach(b => {
+      pickerAllBattles.push({ ...b, eraName: era.name, eraId: era.id, eraObj: era });
+    });
+  });
+}
+
+function openPicker(slotIndex) {
+  buildPickerBattles();
+  pickerSlotTarget = slotIndex;
+  pickerEraFilter = 'all';
+
+  document.getElementById('bpm-title').textContent =
+    slotIndex === 0 ? 'Elige la primera batalla' : 'Elige la segunda batalla';
+  document.getElementById('bpm-search-input').value = '';
+
+  // Build era chips
+  const chips = document.getElementById('bpm-era-chips');
+  chips.innerHTML = `<button class="bpm-chip active" onclick="pickerFilterEra('all',this)">Todas</button>`;
+  ERAS.forEach(era => {
+    const btn = document.createElement('button');
+    btn.className = 'bpm-chip';
+    btn.textContent = era.name;
+    btn.onclick = function() { pickerFilterEra(era.id, this); };
+    chips.appendChild(btn);
+  });
+
+  renderPickerList(pickerAllBattles);
+  document.getElementById('battle-picker-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('bpm-search-input').focus(), 100);
+}
+
+function closePicker() {
+  document.getElementById('battle-picker-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pickerFilterEra(eraId, btn) {
+  pickerEraFilter = eraId;
+  document.querySelectorAll('.bpm-chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterPickerList(document.getElementById('bpm-search-input').value);
+}
+
+function filterPickerList(q) {
+  const low = (q || '').toLowerCase();
+  let list = pickerAllBattles;
+  if (pickerEraFilter !== 'all') list = list.filter(b => b.eraId === pickerEraFilter);
+  if (low) list = list.filter(b =>
+    b.name.toLowerCase().includes(low) ||
+    b.combatants.toLowerCase().includes(low) ||
+    b.year.toLowerCase().includes(low) ||
+    b.tag.toLowerCase().includes(low)
+  );
+  renderPickerList(list);
+}
+
+function renderPickerList(battles) {
+  const list = document.getElementById('bpm-list');
+  if (!battles.length) {
+    list.innerHTML = '<div class="bpm-empty">No se encontraron batallas</div>';
+    return;
+  }
+  list.innerHTML = '';
+  battles.slice(0, 100).forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'bpm-item';
+    item.innerHTML = `
+      <div class="bpm-item-year">${b.year}</div>
+      <div class="bpm-item-name">${b.name}<br><span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:0.82rem;color:var(--smoke);">${b.combatants}</span></div>
+      <div class="bpm-item-era">${b.eraName}</div>
+    `;
+    item.onclick = () => {
+      cmpSlots[pickerSlotTarget] = { name: b.name, battle: b, era: b.eraObj };
+      updateCmpBar();
+      closePicker();
+      // If both slots filled, scroll compare bar into view
+      if (cmpSlots[0] && cmpSlots[1]) {
+        document.getElementById('cmp-bar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    list.appendChild(item);
+  });
+  if (battles.length > 100) {
+    const more = document.createElement('div');
+    more.className = 'bpm-empty';
+    more.textContent = `Mostrando 100 de ${battles.length} — usa el buscador para filtrar`;
+    list.appendChild(more);
+  }
+}
+
+// Dummy addToCmp — no longer used for card clicks
+function addToCmp(battle, eraObj) { return false; }
+
 
 async function runCmp() {
   if (!cmpSlots[0]||!cmpSlots[1]) return;
@@ -4011,6 +4158,21 @@ window.addEventListener('load', async () => {
     </div>
   </div>
 
+</div>
+
+<!-- ═══ BATTLE PICKER MODAL ═══ -->
+<div id="battle-picker-modal" onclick="if(event.target===this)closePicker()">
+  <div class="bpm-box">
+    <div class="bpm-header">
+      <div class="bpm-title" id="bpm-title">Elige la primera batalla</div>
+      <button class="bpm-close" onclick="closePicker()">✕</button>
+    </div>
+    <div class="bpm-search">
+      <input type="text" id="bpm-search-input" placeholder="Buscar batalla..." oninput="filterPickerList(this.value)" autocomplete="off">
+    </div>
+    <div class="bpm-era-chips" id="bpm-era-chips"></div>
+    <div class="bpm-list" id="bpm-list"></div>
+  </div>
 </div>
 </body>
 </html>
