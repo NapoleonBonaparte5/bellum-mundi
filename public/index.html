@@ -113,20 +113,68 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 
 /* ── TIMELINE ── */
 #timeline-section { padding:0 2rem 5rem; max-width:1400px; margin:0 auto; }
-.timeline-nav { display:flex; overflow-x:auto; gap:0; border:1px solid rgba(201,168,76,0.2); border-radius:2px; scrollbar-width:none; margin-bottom:3rem; }
+
+/* Era Nav con flechas */
+.era-nav-wrapper { position:relative; margin-bottom:2rem; display:flex; align-items:stretch; border:1px solid rgba(201,168,76,0.2); }
+.era-nav-arrow { flex-shrink:0; width:44px; background:rgba(10,8,6,0.95); border:none; color:var(--gold); cursor:pointer; font-size:1.2rem; transition:all 0.2s; display:flex; align-items:center; justify-content:center; z-index:2; }
+.era-nav-arrow:hover { background:rgba(201,168,76,0.1); }
+.era-nav-arrow.left { border-right:1px solid rgba(201,168,76,0.15); }
+.era-nav-arrow.right { border-left:1px solid rgba(201,168,76,0.15); }
+.timeline-nav { display:flex; overflow-x:auto; gap:0; flex:1; scrollbar-width:none; scroll-behavior:smooth; }
 .timeline-nav::-webkit-scrollbar { display:none; }
-.era-btn { flex:0 0 auto; padding:1.2rem 1.5rem; background:transparent; border:none; border-right:1px solid rgba(201,168,76,0.15); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; white-space:nowrap; display:flex; flex-direction:column; align-items:center; gap:0.3rem; }
+.era-btn { flex:0 0 auto; padding:1.1rem 1.4rem; background:transparent; border:none; border-right:1px solid rgba(201,168,76,0.1); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; white-space:nowrap; display:flex; flex-direction:column; align-items:center; gap:0.3rem; }
 .era-btn:last-child { border-right:none; }
 .era-btn:hover { background:rgba(201,168,76,0.05); color:var(--gold-light); }
-.era-btn.active { background:rgba(201,168,76,0.1); color:var(--gold); border-bottom:2px solid var(--gold); }
-.era-btn .era-years { font-family:'Crimson Pro',serif; font-size:0.7rem; color:inherit; opacity:0.6; letter-spacing:0; }
+.era-btn.active { background:rgba(201,168,76,0.12); color:var(--gold); border-bottom:2px solid var(--gold); }
+.era-btn .era-years { font-family:'Crimson Pro',serif; font-size:0.68rem; color:inherit; opacity:0.55; letter-spacing:0; }
 
-/* ── ERA CONTENT ── */
-#era-content { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:rgba(201,168,76,0.1); }
+/* Tab System */
+.era-tabs { display:flex; gap:0; border-bottom:1px solid rgba(201,168,76,0.15); margin-bottom:2px; overflow-x:auto; scrollbar-width:none; }
+.era-tabs::-webkit-scrollbar { display:none; }
+.era-tab { flex:0 0 auto; padding:0.9rem 1.4rem; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.25s; white-space:nowrap; display:flex; align-items:center; gap:0.4rem; }
+.era-tab:hover { color:var(--gold-light); background:rgba(201,168,76,0.03); }
+.era-tab.active { color:var(--gold); border-bottom-color:var(--gold); background:rgba(201,168,76,0.06); }
+.era-tab .tab-count { background:rgba(201,168,76,0.15); color:var(--gold); font-size:0.5rem; padding:0.1rem 0.35rem; border-radius:1px; }
+
+/* Tab Panels */
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ERA CONTENT */
 .era-panel { background:var(--slate); padding:2rem; }
 .era-panel.full-width { grid-column:1/-1; }
 .panel-title { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; }
 .panel-title::after { content:''; flex:1; height:1px; background:rgba(201,168,76,0.2); }
+
+/* Search within era */
+.era-search { display:flex; gap:0; margin-bottom:1.5rem; }
+.era-search-input { flex:1; background:var(--steel); border:1px solid rgba(201,168,76,0.15); border-right:none; padding:0.6rem 1rem; color:var(--white); font-family:'Crimson Pro',serif; font-size:0.9rem; outline:none; }
+.era-search-input::placeholder { color:var(--smoke); }
+.era-search-btn { background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); color:var(--gold); padding:0.6rem 1rem; font-family:'Cinzel',serif; font-size:0.6rem; cursor:pointer; transition:all 0.3s; }
+.era-search-btn:hover { background:rgba(201,168,76,0.2); }
+
+/* Filter tags */
+.filter-row { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:1rem; }
+.filter-tag { background:transparent; border:1px solid rgba(201,168,76,0.2); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.15em; padding:0.3rem 0.7rem; cursor:pointer; transition:all 0.3s; text-transform:uppercase; }
+.filter-tag:hover, .filter-tag.active { background:rgba(201,168,76,0.1); border-color:var(--gold); color:var(--gold); }
+
+/* Show more button */
+.show-more-btn { width:100%; padding:0.8rem; background:transparent; border:1px solid rgba(201,168,76,0.2); color:var(--smoke); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; margin-top:1rem; transition:all 0.3s; }
+.show-more-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.05); }
+
+/* Related items */
+.related-section { margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(201,168,76,0.1); }
+.related-title { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.3em; color:var(--smoke); text-transform:uppercase; margin-bottom:0.8rem; }
+.related-chips { display:flex; flex-wrap:wrap; gap:0.4rem; }
+.related-chip { background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.15); color:var(--gold); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.1em; padding:0.3rem 0.7rem; cursor:pointer; transition:all 0.3s; text-transform:uppercase; }
+.related-chip:hover { background:rgba(201,168,76,0.15); border-color:var(--gold); }
+
+/* Timeline map wrapper */
+.map-wrapper { background:var(--slate); }
+.map-header { padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(201,168,76,0.1); }
+.map-title { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; }
+.map-counter { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; color:var(--smoke); text-transform:uppercase; }
+.map-counter span { color:var(--gold); }
 
 /* ── MAP ── */
 #battle-map { height:500px; width:100%; border:1px solid rgba(201,168,76,0.15); }
@@ -497,7 +545,15 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   </div>
 
   <div id="timeline-section" class="reveal">
-    <div class="timeline-nav" id="era-nav"></div>
+
+    <!-- Era Nav with arrows -->
+    <div class="era-nav-wrapper">
+      <button class="era-nav-arrow left" onclick="scrollEraNav(-1)" title="Anterior">&#8592;</button>
+      <div class="timeline-nav" id="era-nav"></div>
+      <button class="era-nav-arrow right" onclick="scrollEraNav(1)" title="Siguiente">&#8594;</button>
+    </div>
+
+    <!-- Era Overview + Stats -->
     <div class="era-overview" id="era-overview">Selecciona una era para explorar sus guerras, batallas, ejércitos, comandantes, armas y documentos históricos.</div>
     <div class="stats-row" id="era-stats" style="display:none;">
       <div class="stat-box"><span class="stat-number" id="es-battles">—</span><span class="stat-label">Batallas</span></div>
@@ -505,37 +561,81 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <div class="stat-box"><span class="stat-number" id="es-civs">—</span><span class="stat-label">Civilizaciones</span></div>
       <div class="stat-box"><span class="stat-number" id="es-cmds">—</span><span class="stat-label">Comandantes</span></div>
     </div>
+
     <!-- Map -->
-    <div class="era-panel full-width" style="padding:0;">
-      <div class="panel-title" style="padding:1.5rem 2rem 1rem;">Mapa de Batallas</div>
+    <div class="map-wrapper" style="margin-top:2px;">
+      <div class="map-header">
+        <div class="map-title">⚔ Mapa de Batallas</div>
+        <div class="map-counter" id="map-counter">Selecciona una era</div>
+      </div>
       <div id="battle-map"></div>
     </div>
-    <!-- Content Grid -->
-    <div id="era-content" style="margin-top:2px;">
-      <div class="era-panel full-width" id="battles-panel">
-        <div class="panel-title">Batallas Principales</div>
+
+    <!-- Tab Navigation -->
+    <div class="era-tabs" id="era-tabs" style="margin-top:2px; background:var(--slate);">
+      <button class="era-tab active" data-tab="battles" onclick="switchTab('battles')">
+        ⚔ Batallas <span class="tab-count" id="tab-count-battles">0</span>
+      </button>
+      <button class="era-tab" data-tab="commanders" onclick="switchTab('commanders')">
+        👑 Comandantes <span class="tab-count" id="tab-count-commanders">0</span>
+      </button>
+      <button class="era-tab" data-tab="weapons" onclick="switchTab('weapons')">
+        🗡️ Armamento <span class="tab-count" id="tab-count-weapons">0</span>
+      </button>
+      <button class="era-tab" data-tab="civs" onclick="switchTab('civs')">
+        🏛️ Civilizaciones <span class="tab-count" id="tab-count-civs">0</span>
+      </button>
+      <button class="era-tab" data-tab="tactics" onclick="switchTab('tactics')">
+        🎯 Tácticas <span class="tab-count" id="tab-count-tactics">0</span>
+      </button>
+      <button class="era-tab" data-tab="docs" onclick="switchTab('docs')">
+        📜 Documentos <span class="tab-count" id="tab-count-docs">0</span>
+      </button>
+    </div>
+
+    <!-- Tab Panels -->
+    <div style="background:var(--slate); padding:2rem; margin-top:2px;">
+
+      <!-- BATALLAS -->
+      <div class="tab-panel active" id="panel-battles">
+        <div class="era-search">
+          <input class="era-search-input" id="battle-search" placeholder="Buscar batalla por nombre, fecha o combatiente..." oninput="filterBattles(this.value)">
+          <button class="era-search-btn" onclick="filterBattles(document.getElementById('battle-search').value)">🔍</button>
+        </div>
+        <div class="filter-row" id="battle-filters"></div>
         <div class="battles-grid" id="battles-grid"></div>
+        <button class="show-more-btn" id="battles-show-more" style="display:none;" onclick="showMoreBattles()">Ver más batallas →</button>
       </div>
-      <div class="era-panel" id="commanders-panel">
-        <div class="panel-title">Grandes Comandantes</div>
+
+      <!-- COMANDANTES -->
+      <div class="tab-panel" id="panel-commanders">
+        <div class="era-search">
+          <input class="era-search-input" id="cmd-search" placeholder="Buscar comandante por nombre o rol..." oninput="filterCommanders(this.value)">
+          <button class="era-search-btn" onclick="filterCommanders(document.getElementById('cmd-search').value)">🔍</button>
+        </div>
         <div class="commanders-grid" id="commanders-grid"></div>
       </div>
-      <div class="era-panel" id="weapons-panel">
-        <div class="panel-title">Armamento & Tecnología</div>
+
+      <!-- ARMAMENTO -->
+      <div class="tab-panel" id="panel-weapons">
         <div class="weapons-list" id="weapons-list"></div>
       </div>
-      <div class="era-panel full-width" id="civs-panel">
-        <div class="panel-title">Civilizaciones & Ejércitos</div>
+
+      <!-- CIVILIZACIONES -->
+      <div class="tab-panel" id="panel-civs">
         <div class="civs-grid" id="civs-grid"></div>
       </div>
-      <div class="era-panel" id="tactics-panel">
-        <div class="panel-title">Tácticas & Estrategias</div>
+
+      <!-- TÁCTICAS -->
+      <div class="tab-panel" id="panel-tactics">
         <div class="tactics-grid" id="tactics-grid"></div>
       </div>
-      <div class="era-panel" id="docs-panel">
-        <div class="panel-title">Documentos & Tratados</div>
+
+      <!-- DOCUMENTOS -->
+      <div class="tab-panel" id="panel-docs">
         <div class="docs-list" id="docs-list"></div>
       </div>
+
     </div>
   </div>
 
@@ -1982,88 +2082,242 @@ const ERAS=[
 // ═══════════════════════════════════════════
 // BUILDERS
 // ═══════════════════════════════════════════
-let currentEra=null;
+let currentEra = null;
+let allBattlesShown = false;
+const BATTLES_PAGE_SIZE = 12;
 
+// ── ERA NAV SCROLL ──
+function scrollEraNav(dir) {
+  const nav = document.getElementById('era-nav');
+  nav.scrollLeft += dir * 200;
+}
+
+// ── TAB SYSTEM ──
+function switchTab(tabId) {
+  document.querySelectorAll('.era-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
+}
+
+// ── ERA NAV BUILD ──
 function buildEraNav() {
-  const nav=document.getElementById('era-nav');
-  ERAS.forEach(era=>{
-    const btn=document.createElement('button');
-    btn.className='era-btn';
-    btn.innerHTML=`${era.name}<span class="era-years">${era.years}</span>`;
-    btn.onclick=()=>selectEra(era.id);
+  const nav = document.getElementById('era-nav');
+  ERAS.forEach(era => {
+    const btn = document.createElement('button');
+    btn.className = 'era-btn';
+    btn.innerHTML = era.name + '<span class="era-years">' + era.years + '</span>';
+    btn.onclick = () => selectEra(era.id);
     nav.appendChild(btn);
   });
 }
 
+// ── SELECT ERA ──
 function selectEra(eraId) {
-  const era=ERAS.find(e=>e.id===eraId);
-  if(!era) return;
-  currentEra=era;
-  document.querySelectorAll('.era-btn').forEach((btn,i)=>btn.classList.toggle('active',ERAS[i].id===eraId));
-  document.getElementById('era-overview').textContent=era.overview;
-  const stats=document.getElementById('era-stats');
-  stats.style.display='grid';
-  document.getElementById('es-battles').textContent=era.battles;
-  document.getElementById('es-years').textContent=era.duration;
-  document.getElementById('es-civs').textContent=era.civs_count;
-  document.getElementById('es-cmds').textContent=era.cmds;
+  const era = ERAS.find(e => e.id === eraId);
+  if (!era) return;
+  currentEra = era;
+  allBattlesShown = false;
+
+  // Highlight active era btn + scroll it into view
+  const btns = document.querySelectorAll('.era-btn');
+  btns.forEach((btn, i) => {
+    const isActive = ERAS[i].id === eraId;
+    btn.classList.toggle('active', isActive);
+    if (isActive) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+
+  // Overview + stats
+  document.getElementById('era-overview').textContent = era.overview;
+  const stats = document.getElementById('era-stats');
+  stats.style.display = 'grid';
+  document.getElementById('es-battles').textContent = era.battles;
+  document.getElementById('es-years').textContent = era.duration;
+  document.getElementById('es-civs').textContent = era.civs_count;
+  document.getElementById('es-cmds').textContent = era.cmds;
+
+  // Update tab counts
+  document.getElementById('tab-count-battles').textContent = era.battles_data.length;
+  document.getElementById('tab-count-commanders').textContent = era.commanders.length;
+  document.getElementById('tab-count-weapons').textContent = era.weapons.length;
+  document.getElementById('tab-count-civs').textContent = era.civs.length;
+  document.getElementById('tab-count-tactics').textContent = era.tactics.length;
+  document.getElementById('tab-count-docs').textContent = era.docs.length;
+
+  // Map — show ALL battles
   updateMap(era.battles_data);
+  document.getElementById('map-counter').innerHTML = '<span>' + era.battles_data.length + '</span> ubicaciones en el mapa';
+
+  // Build all panels
   buildBattlesGrid(era.battles_data);
+  buildBattleFilters(era.battles_data);
   buildCommandersGrid(era.commanders);
   buildWeaponsList(era.weapons);
   buildCivsGrid(era.civs);
   buildTacticsGrid(era.tactics);
   buildDocsList(era.docs);
-  document.getElementById('rotating-quote').textContent=`"${era.quote.text}"`;
-  document.getElementById('rotating-attr').textContent=`— ${era.quote.attr}`;
+
+  // Reset search fields
+  const bs = document.getElementById('battle-search');
+  const cs = document.getElementById('cmd-search');
+  if (bs) bs.value = '';
+  if (cs) cs.value = '';
+
+  // Quote
+  document.getElementById('rotating-quote').textContent = '"' + era.quote.text + '"';
+  document.getElementById('rotating-attr').textContent = '— ' + era.quote.attr;
+
+  // Switch to battles tab
+  switchTab('battles');
+}
+
+// ── BATTLE FILTERS ──
+function buildBattleFilters(battles) {
+  const tags = [...new Set(battles.map(b => b.tag))];
+  const row = document.getElementById('battle-filters');
+  row.innerHTML = '<button class="filter-tag active" onclick="filterByTag(this,'')">Todas</button>';
+  tags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-tag';
+    btn.textContent = tag;
+    btn.onclick = function() { filterByTag(this, tag); };
+    row.appendChild(btn);
+  });
+}
+
+function filterByTag(btn, tag) {
+  document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const battles = currentEra ? currentEra.battles_data : [];
+  const filtered = tag ? battles.filter(b => b.tag === tag) : battles;
+  renderBattleCards(filtered);
+  updateMap(filtered);
+}
+
+function filterBattles(q) {
+  if (!currentEra) return;
+  const lower = q.toLowerCase();
+  const filtered = currentEra.battles_data.filter(b =>
+    b.name.toLowerCase().includes(lower) ||
+    b.combatants.toLowerCase().includes(lower) ||
+    b.year.toLowerCase().includes(lower) ||
+    b.tag.toLowerCase().includes(lower)
+  );
+  renderBattleCards(filtered);
+}
+
+function filterCommanders(q) {
+  if (!currentEra) return;
+  const lower = q.toLowerCase();
+  const filtered = currentEra.commanders.filter(c =>
+    c.name.toLowerCase().includes(lower) || c.role.toLowerCase().includes(lower)
+  );
+  buildCommandersGrid(filtered);
+}
+
+// ── RENDER BATTLE CARDS ──
+function renderBattleCards(battles) {
+  const g = document.getElementById('battles-grid');
+  const showMore = document.getElementById('battles-show-more');
+  g.innerHTML = '';
+  const toShow = allBattlesShown ? battles : battles.slice(0, BATTLES_PAGE_SIZE);
+  toShow.forEach(b => {
+    const c = document.createElement('div');
+    c.className = 'battle-card';
+    c.innerHTML = '<div class="battle-year">' + b.year + '</div>' +
+      '<div class="battle-name">' + b.name + '</div>' +
+      '<div class="battle-combatants">' + b.combatants + '</div>' +
+      '<span class="battle-tag">' + b.tag + '</span>' +
+      '<div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">' + b.desc + '</div>';
+    c.onclick = () => openBattleModal(b);
+    g.appendChild(c);
+  });
+  if (battles.length > BATTLES_PAGE_SIZE && !allBattlesShown) {
+    showMore.style.display = 'block';
+    showMore.textContent = 'Ver las ' + (battles.length - BATTLES_PAGE_SIZE) + ' batallas restantes →';
+    showMore._battles = battles;
+  } else {
+    showMore.style.display = 'none';
+  }
+}
+
+function showMoreBattles() {
+  allBattlesShown = true;
+  const battles = document.getElementById('battles-show-more')._battles || (currentEra ? currentEra.battles_data : []);
+  renderBattleCards(battles);
 }
 
 function buildBattlesGrid(battles) {
-  const g=document.getElementById('battles-grid'); g.innerHTML='';
-  battles.forEach(b=>{
-    const c=document.createElement('div'); c.className='battle-card';
-    c.innerHTML=`<div class="battle-year">${b.year}</div><div class="battle-name">${b.name}</div><div class="battle-combatants">${b.combatants}</div><span class="battle-tag">${b.tag}</span><div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">${b.desc}</div>`;
-    c.onclick=()=>openBattleModal(b); g.appendChild(c);
-  });
+  allBattlesShown = false;
+  renderBattleCards(battles);
 }
+
 function buildCommandersGrid(cmds) {
-  const g=document.getElementById('commanders-grid'); g.innerHTML='';
-  cmds.forEach(c=>{
-    const el=document.createElement('div'); el.className='commander-card';
-    el.innerHTML=`<div class="commander-avatar">${c.emoji}</div><div class="commander-name">${c.name}</div><div class="commander-role">${c.role}</div>`;
-    el.onclick=()=>openCommanderModal(c); g.appendChild(el);
+  const g = document.getElementById('commanders-grid');
+  g.innerHTML = '';
+  cmds.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'commander-card';
+    el.innerHTML = '<div class="commander-avatar">' + c.emoji + '</div>' +
+      '<div class="commander-name">' + c.name + '</div>' +
+      '<div class="commander-role">' + c.role + '</div>';
+    el.onclick = () => openCommanderModal(c);
+    g.appendChild(el);
   });
 }
+
 function buildWeaponsList(weapons) {
-  const l=document.getElementById('weapons-list'); l.innerHTML='';
-  weapons.forEach(w=>{
-    const el=document.createElement('div'); el.className='weapon-item';
-    el.innerHTML=`<div class="weapon-icon">${w.icon}</div><div><div class="weapon-name">${w.name}</div><div class="weapon-period">${w.period}</div></div>`;
-    el.onclick=()=>openWeaponModal(w); l.appendChild(el);
+  const l = document.getElementById('weapons-list');
+  l.innerHTML = '';
+  weapons.forEach(w => {
+    const el = document.createElement('div');
+    el.className = 'weapon-item';
+    el.innerHTML = '<div class="weapon-icon">' + w.icon + '</div>' +
+      '<div><div class="weapon-name">' + w.name + '</div>' +
+      '<div class="weapon-period">' + w.period + '</div></div>';
+    el.onclick = () => openWeaponModal(w);
+    l.appendChild(el);
   });
 }
+
 function buildCivsGrid(civs) {
-  const g=document.getElementById('civs-grid'); g.innerHTML='';
-  civs.forEach(c=>{
-    const el=document.createElement('div'); el.className='civ-card';
-    el.innerHTML=`<div class="civ-flag">${c.flag}</div><div class="civ-name">${c.name}</div><div class="civ-period">${c.period}</div><div class="civ-power"><div class="civ-power-fill" style="width:${c.power*100}%"></div></div>`;
-    el.onclick=()=>openCivModal(c); g.appendChild(el);
+  const g = document.getElementById('civs-grid');
+  g.innerHTML = '';
+  civs.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'civ-card';
+    el.innerHTML = '<div class="civ-flag">' + c.flag + '</div>' +
+      '<div class="civ-name">' + c.name + '</div>' +
+      '<div class="civ-period">' + c.period + '</div>' +
+      '<div class="civ-power"><div class="civ-power-fill" style="width:' + (c.power*100) + '%"></div></div>';
+    el.onclick = () => openCivModal(c);
+    g.appendChild(el);
   });
 }
+
 function buildTacticsGrid(tactics) {
-  const g=document.getElementById('tactics-grid'); g.innerHTML='';
-  tactics.forEach(t=>{
-    const el=document.createElement('div'); el.className='tactic-card';
-    el.innerHTML=`<div class="tactic-diagram">${t.icon}</div><div class="tactic-name">${t.name}</div><div class="tactic-origin">${t.origin}</div>`;
-    el.onclick=()=>openTacticModal(t); g.appendChild(el);
+  const g = document.getElementById('tactics-grid');
+  g.innerHTML = '';
+  tactics.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tactic-card';
+    el.innerHTML = '<div class="tactic-diagram">' + t.icon + '</div>' +
+      '<div class="tactic-name">' + t.name + '</div>' +
+      '<div class="tactic-origin">' + t.origin + '</div>';
+    el.onclick = () => openTacticModal(t);
+    g.appendChild(el);
   });
 }
+
 function buildDocsList(docs) {
-  const l=document.getElementById('docs-list'); l.innerHTML='';
-  docs.forEach(d=>{
-    const el=document.createElement('div'); el.className='doc-item';
-    el.innerHTML=`<div class="doc-icon">${d.icon}</div><div><div class="doc-name">${d.name}</div><div class="doc-year">${d.year}</div></div>`;
-    el.onclick=()=>openDocModal(d); l.appendChild(el);
+  const l = document.getElementById('docs-list');
+  l.innerHTML = '';
+  docs.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'doc-item';
+    el.innerHTML = '<div class="doc-icon">' + d.icon + '</div>' +
+      '<div><div class="doc-name">' + d.name + '</div>' +
+      '<div class="doc-year">' + d.year + '</div></div>';
+    el.onclick = () => openDocModal(d);
+    l.appendChild(el);
   });
 }
 
