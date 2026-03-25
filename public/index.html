@@ -593,11 +593,20 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <div class="newsletter-badge">📜 Newsletter Semanal · Gratis</div>
       <h2 class="newsletter-title">La Batalla de la Semana</h2>
       <p class="newsletter-desc">Cada martes: una batalla analizada en profundidad, un comandante olvidado, una táctica que cambió la historia. Lo que no te enseñaron en el colegio.</p>
-      <div class="newsletter-form">
-        <input class="newsletter-input" type="email" id="newsletter-email" placeholder="tu@email.com"/>
-        <button class="newsletter-btn" onclick="subscribeNewsletter()">Suscribirme</button>
-      </div>
-      <div class="newsletter-social-proof">Más de <span>2.400 suscriptores</span> en 3 meses · Sin spam · Baja cuando quieras</div>
+
+      <!-- Beehiiv embed -->
+      <script async src="https://subscribe-forms.beehiiv.com/embed.js"></script>
+      <iframe
+        src="https://subscribe-forms.beehiiv.com/8e5fd67b-15de-4f68-a334-5c5717b166a6"
+        class="beehiiv-embed"
+        data-test-id="beehiiv-embed"
+        frameborder="0"
+        scrolling="no"
+        style="width:100%;max-width:560px;height:291px;margin:0 auto 1rem;display:block;border-radius:0;background-color:transparent;box-shadow:none;">
+      </iframe>
+      <script type="text/javascript" async src="https://subscribe-forms.beehiiv.com/attribution.js"></script>
+
+      <div class="newsletter-social-proof">Sin spam · Cada martes · Baja cuando quieras</div>
     </div>
   </section>
 
