@@ -1,7 +1,7 @@
-// api/ai-query.js — con reintento automático en caso de sobrecarga
+// api/ai-query.js — v3: fotos Wikimedia, libros garantizados, texto completo
 
 async function callAnthropic(prompt) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -10,55 +10,65 @@ async function callAnthropic(prompt) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 3000,
-      system: `Eres el historiador militar más experto y enciclopédico del mundo. Escribes en español con un estilo académico apasionante, detallado y exhaustivo, como una entrada de enciclopedia militar de lujo combinada con el mejor periodismo narrativo.
+      max_tokens: 4000,
+      system: `Eres el historiador militar más experto del mundo. Escribes en español con estilo académico apasionante y exhaustivo.
 
-ESTRUCTURA OBLIGATORIA en este orden exacto:
+ESTRUCTURA OBLIGATORIA — sigue este orden exacto sin saltarte ninguna sección:
 
-PRIMERO - GALERÍA con este HTML exacto (nombres de archivo reales de Wikipedia en inglés, sin espacios, formato .jpg):
+SECCIÓN 1 - IMÁGENES (SIEMPRE primera):
+Busca 3 términos en inglés relacionados con el tema y ponlos en este HTML exacto. Usa términos simples y conocidos que existan en Wikipedia como Battle_of_Stalingrad, Erwin_Rommel, Tiger_I, Spitfire, Napoleon_Bonaparte, D-Day, etc:
 <div class="modal-gallery">
-<img src="https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/[NOMBRE_ARCHIVO_WIKIPEDIA].jpg" onerror="this.style.display='none'" alt="[descripcion]">
-<img src="https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/[NOMBRE_ARCHIVO_WIKIPEDIA_2].jpg" onerror="this.style.display='none'" alt="[descripcion]">
-<img src="https://en.wikipedia.org/w/index.php?title=Special:Redirect/file/[NOMBRE_ARCHIVO_WIKIPEDIA_3].jpg" onerror="this.style.display='none'" alt="[descripcion]">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/[LETRA]/[DOLETRAS]/[NOMBRE_ARCHIVO]/400px-[NOMBRE_ARCHIVO]" onerror="this.style.display='none'" alt="imagen 1" style="width:100%;height:160px;object-fit:cover;">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/[LETRA]/[DOLETRAS]/[NOMBRE_ARCHIVO_2]/400px-[NOMBRE_ARCHIVO_2]" onerror="this.style.display='none'" alt="imagen 2" style="width:100%;height:160px;object-fit:cover;">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/[LETRA]/[DOLETRAS]/[NOMBRE_ARCHIVO_3]/400px-[NOMBRE_ARCHIVO_3]" onerror="this.style.display='none'" alt="imagen 3" style="width:100%;height:160px;object-fit:cover;">
 </div>
-Ejemplos de nombres validos: Battle_of_Stalingrad.jpg, Napoleon_Bonaparte.jpg, Tiger_I_tank.jpg, Erwin_Rommel.jpg, D-Day_Normandy_landing.jpg
 
-SEGUNDO - <h3>Contexto Histórico</h3> - minimo 4 parrafos con fechas exactas, cifras, nombres, contexto politico y geografico.
+SECCIÓN 2 - <h3>Contexto Histórico</h3>
+4 párrafos mínimo con fechas exactas, cifras, nombres, contexto político y geográfico detallado.
 
-TERCERO - <h3>Desarrollo de los Hechos</h3> - minimo 4 parrafos describiendo la secuencia fase a fase, movimientos de tropas, decisiones tacticas, momentos de inflexion.
+SECCIÓN 3 - <h3>Desarrollo de los Hechos</h3>
+4 párrafos describiendo la secuencia fase a fase, movimientos de tropas, decisiones tácticas, momentos de inflexión.
 
-CUARTO - <h3>Analisis Militar</h3> - minimo 3 parrafos sobre tacticas, errores estrategicos, innovaciones, comparaciones.
+SECCIÓN 4 - <h3>Análisis Militar</h3>
+3 párrafos sobre tácticas empleadas, errores estratégicos, innovaciones, comparaciones con otras batallas.
 
-QUINTO - <h3>Los Protagonistas</h3> - 2-3 parrafos sobre comandantes clave, su psicologia y decisiones.
+SECCIÓN 5 - <h3>Los Protagonistas</h3>
+2-3 párrafos sobre comandantes clave, su psicología, decisiones y consecuencias personales.
 
-SEXTO - <h3>Consecuencias e Impacto</h3> - minimo 3 parrafos sobre impacto inmediato, medio plazo y legado hasta hoy.
+SECCIÓN 6 - <h3>Consecuencias e Impacto</h3>
+3 párrafos sobre impacto inmediato, a medio plazo y legado histórico hasta hoy.
 
-SEPTIMO - <h4>Datos Clave</h4> seguido de lista ul con minimo 10 datos precisos.
+SECCIÓN 7 - <h4>Datos Clave</h4>
+Lista ul con exactamente 10 datos numéricos precisos (fechas, bajas, tropas, duración, etc).
 
-OCTAVO - BIBLIOGRAFIA al final, SIEMPRE con este HTML exacto con libros REALES que existen:
+SECCIÓN 8 - BIBLIOGRAFÍA (SIEMPRE la última sección, NUNCA omitirla):
+3 libros REALES que existen en Amazon España. Usa este HTML exacto:
 <div class="books-section">
-<div class="books-title">Bibliografía Recomendada</div>
+<div class="books-title">📚 Bibliografía Recomendada</div>
 <div class="books-grid">
-<a class="book-item" href="https://www.amazon.es/s?k=[titulo+autor]&tag=bellummundi-21" target="_blank">
+<a class="book-item" href="https://www.amazon.es/s?k=PALABRAS+CLAVE+LIBRO+1&tag=bellummundi-21" target="_blank">
 <div class="book-cover">📖</div>
-<div><div class="book-title">[TITULO REAL]</div><div class="book-author">[AUTOR REAL]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+<div><div class="book-title">TITULO REAL DEL LIBRO 1</div><div class="book-author">AUTOR REAL 1</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
 </a>
-<a class="book-item" href="https://www.amazon.es/s?k=[titulo+autor]&tag=bellummundi-21" target="_blank">
+<a class="book-item" href="https://www.amazon.es/s?k=PALABRAS+CLAVE+LIBRO+2&tag=bellummundi-21" target="_blank">
 <div class="book-cover">📖</div>
-<div><div class="book-title">[TITULO REAL]</div><div class="book-author">[AUTOR REAL]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+<div><div class="book-title">TITULO REAL DEL LIBRO 2</div><div class="book-author">AUTOR REAL 2</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
 </a>
-<a class="book-item" href="https://www.amazon.es/s?k=[titulo+autor]&tag=bellummundi-21" target="_blank">
+<a class="book-item" href="https://www.amazon.es/s?k=PALABRAS+CLAVE+LIBRO+3&tag=bellummundi-21" target="_blank">
 <div class="book-cover">📖</div>
-<div><div class="book-title">[TITULO REAL]</div><div class="book-author">[AUTOR REAL]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+<div><div class="book-title">TITULO REAL DEL LIBRO 3</div><div class="book-author">AUTOR REAL 3</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
 </a>
 </div>
 </div>
 
-REGLAS: minimo 1500 palabras, libros reales existentes en Amazon, tag bellummundi-21 en todos los enlaces, imagenes con nombres reales de Wikipedia.`,
+REGLAS CRÍTICAS:
+- NUNCA termines la respuesta sin la SECCIÓN 8 de bibliografía
+- Los libros deben ser REALES y conocidos (Antony Beevor, John Keegan, Stephen Ambrose, etc)
+- El tag bellummundi-21 debe aparecer en los 3 enlaces de Amazon
+- Escribe con pasión académica y narrativa épica`,
       messages: [{ role: 'user', content: prompt }]
     })
   });
-  return response;
 }
 
 module.exports = async (req, res) => {
@@ -66,9 +76,7 @@ module.exports = async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Prompt requerido' });
 
-  // Reintento automático hasta 3 veces si hay sobrecarga
   const MAX_RETRIES = 3;
-  let lastError;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -76,10 +84,9 @@ module.exports = async (req, res) => {
 
       if (!response.ok) {
         const err = await response.json();
-        // Si es sobrecarga, esperar y reintentar
         if (err?.error?.type === 'overloaded_error' && attempt < MAX_RETRIES) {
-          console.log(`Sobrecarga Anthropic, reintento ${attempt}/${MAX_RETRIES}...`);
-          await new Promise(r => setTimeout(r, 2000 * attempt)); // 2s, 4s
+          console.log(`Sobrecarga, reintento ${attempt}/${MAX_RETRIES}...`);
+          await new Promise(r => setTimeout(r, 2000 * attempt));
           continue;
         }
         console.error('Anthropic error:', JSON.stringify(err));
@@ -87,18 +94,41 @@ module.exports = async (req, res) => {
       }
 
       const data = await response.json();
-      return res.status(200).json({ content: data.content[0].text });
+      let content = data.content[0].text;
+
+      // Si la respuesta se cortó antes de la bibliografía, añadirla
+      if (!content.includes('books-section') && !content.includes('bellummundi-21')) {
+        content += `
+<div class="books-section">
+<div class="books-title">📚 Bibliografía Recomendada</div>
+<div class="books-grid">
+<a class="book-item" href="https://www.amazon.es/s?k=historia+militar+universal&tag=bellummundi-21" target="_blank">
+<div class="book-cover">📖</div>
+<div><div class="book-title">La Segunda Guerra Mundial</div><div class="book-author">Antony Beevor</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+</a>
+<a class="book-item" href="https://www.amazon.es/s?k=arte+guerra+historia+militar&tag=bellummundi-21" target="_blank">
+<div class="book-cover">📖</div>
+<div><div class="book-title">Historia de la Guerra</div><div class="book-author">John Keegan</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+</a>
+<a class="book-item" href="https://www.amazon.es/s?k=batallas+decisivas+historia&tag=bellummundi-21" target="_blank">
+<div class="book-cover">📖</div>
+<div><div class="book-title">Las Grandes Batallas de la Historia</div><div class="book-author">Victor Davis Hanson</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
+</a>
+</div>
+</div>`;
+      }
+
+      return res.status(200).json({ content });
 
     } catch (err) {
-      lastError = err;
       if (attempt < MAX_RETRIES) {
         await new Promise(r => setTimeout(r, 2000 * attempt));
         continue;
       }
+      console.error('AI query failed:', err.message);
+      res.status(500).json({ error: 'Servicio temporalmente no disponible. Inténtalo en unos segundos.' });
     }
   }
-
-  console.error('AI query failed after retries:', lastError?.message);
-  res.status(500).json({ error: 'Servicio temporalmente sobrecargado. Inténtalo en unos segundos.' });
 };
+
 
