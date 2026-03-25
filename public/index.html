@@ -872,7 +872,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 </div>
 
 <!-- ═══ MAPA GLOBAL VIEW ═══ -->
-<div id="worldmap-view" class="section-view">
+<div id="worldmap-view" class="section-view" style="padding:0;max-width:none;">
   <div class="worldmap-header">
     <div>
       <div class="page-eyebrow" style="margin-bottom:0.3rem;">Cartografía Histórica</div>
@@ -921,6 +921,79 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   </div>
   <div class="results-count" id="civs-results-count"><span id="civs-count">0</span> civilizaciones registradas</div>
   <div class="civ-index-grid" id="civs-index-grid"></div>
+</div>
+
+
+<!-- ═══ BATALLA DETALLE VIEW ═══ -->
+<div id="battle-detail-view" class="section-view" style="padding:0;max-width:none;">
+  <div style="background:linear-gradient(135deg,rgba(139,26,26,0.3),rgba(10,8,6,0.95));padding:3rem 2rem 2rem;border-bottom:1px solid rgba(201,168,76,0.2);">
+    <div style="max-width:1000px;margin:0 auto;">
+      <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1.5rem;transition:all 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver</button>
+      <div id="bd-era" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:0.5rem;"></div>
+      <h1 id="bd-title" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--white);line-height:1.1;margin-bottom:0.8rem;"></h1>
+      <div id="bd-combatants" style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.2rem;color:var(--parchment-dark);margin-bottom:1rem;"></div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <span id="bd-year" style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);padding:0.3rem 0.8rem;"></span>
+        <span id="bd-tag" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;color:#E07070;background:rgba(139,26,26,0.2);border:1px solid rgba(139,26,26,0.4);padding:0.3rem 0.8rem;text-transform:uppercase;"></span>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:1000px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 340px;gap:2rem;" id="bd-layout">
+    <!-- Main content -->
+    <div>
+      <div id="bd-ai-content" style="font-family:'Crimson Pro',serif;font-size:1.05rem;color:var(--parchment-dark);line-height:1.8;">
+        <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Cargando análisis histórico...</span></div>
+      </div>
+    </div>
+    <!-- Sidebar -->
+    <div>
+      <!-- Related battles -->
+      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);padding:1.5rem;margin-bottom:1rem;">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(201,168,76,0.1);">⚔ Batallas Relacionadas</div>
+        <div id="bd-related"></div>
+      </div>
+      <!-- Map mini -->
+      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;padding:1rem 1.5rem 0.5rem;">📍 Localización</div>
+        <div id="bd-mini-map" style="height:200px;"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile: stack layout -->
+  <style>
+    @media(max-width:768px) { #bd-layout { grid-template-columns:1fr !important; } }
+  </style>
+</div>
+
+<!-- ═══ COMANDANTE DETALLE VIEW ═══ -->
+<div id="commander-detail-view" class="section-view" style="padding:0;max-width:none;">
+  <div style="background:linear-gradient(135deg,rgba(26,26,139,0.2),rgba(10,8,6,0.95));padding:3rem 2rem 2rem;border-bottom:1px solid rgba(201,168,76,0.2);">
+    <div style="max-width:1000px;margin:0 auto;">
+      <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1.5rem;transition:all 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver</button>
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <div id="cd-emoji" style="font-size:4rem;"></div>
+        <div>
+          <div id="cd-era" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;"></div>
+          <h1 id="cd-name" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--white);line-height:1.1;margin-bottom:0.3rem;"></h1>
+          <div id="cd-role" style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.1rem;color:var(--parchment-dark);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:1000px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 300px;gap:2rem;" id="cd-layout">
+    <div>
+      <div id="cd-ai-content" style="font-family:'Crimson Pro',serif;font-size:1.05rem;color:var(--parchment-dark);line-height:1.8;">
+        <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Cargando análisis histórico...</span></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);padding:1.5rem;">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(201,168,76,0.1);">👑 Otros Comandantes de la Era</div>
+        <div id="cd-related"></div>
+      </div>
+    </div>
+  </div>
+  <style>@media(max-width:768px){#cd-layout{grid-template-columns:1fr !important;}}</style>
 </div>
 
 </main>
@@ -2695,8 +2768,15 @@ function showSection(sectionId) {
     a.classList.toggle('active', a.dataset.section === sectionId);
   });
 
-  // Scroll to top of main
-  document.getElementById('main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Hide hero on non-home sections, show on home
+  const hero = document.getElementById('hero');
+  if (sectionId === 'home') {
+    hero.style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    hero.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
 
   // Initialize section if needed
   switch(sectionId) {
@@ -2759,8 +2839,8 @@ function renderBattlesIndex(battles) {
       <span class="index-card-tag">${b.tag}</span>
     `;
     card.onclick = () => {
-      currentEra = ERAS.find(e => e.id === b.eraId);
-      queryAI('Batalla', b.name, `Explica en detalle exhaustivo la batalla de ${b.name} (${b.year}), entre ${b.combatants}. Contexto: ${b.desc}. Era: ${b.eraName}.`);
+      const eraObj = ERAS.find(e => e.id === b.eraId);
+      openBattleDetail(b, eraObj);
     };
     grid.appendChild(card);
   });
@@ -2848,8 +2928,8 @@ function renderCommandersIndex(cmds) {
       <div class="cmd-index-era">${c.eraName}</div>
     `;
     card.onclick = () => {
-      currentEra = ERAS.find(e => e.id === c.eraId);
-      queryAI('Comandante', c.name, `Explica en detalle la vida militar, campañas, tácticas y legado histórico de ${c.name}, ${c.role}. Era: ${c.eraName}.`);
+      const eraObj = ERAS.find(e => e.id === c.eraId);
+      openCommanderDetail(c, eraObj);
     };
     grid.appendChild(card);
   });
@@ -2943,8 +3023,7 @@ function filterWorldMap(eraFilter, chipBtn) {
         </div>
       `);
       m.on('click', () => {
-        currentEra = era;
-        queryAI('Batalla', b.name, `Explica en detalle la batalla de ${b.name} (${b.year}), entre ${b.combatants}. Era: ${era.name}.`);
+        openBattleDetail(b, era);
       });
       worldMarkers.push(m);
     });
@@ -3083,6 +3162,150 @@ function filterCivsIndex(eraId, chipBtn) {
   if (chipBtn) chipBtn.classList.add('active');
   const filtered = eraId === 'all' ? allCivsFlat : allCivsFlat.filter(c => c.eraId === eraId);
   renderCivsIndex(filtered);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// DETAIL PAGES — Battle & Commander
+// ═══════════════════════════════════════════════════════
+let navigationStack = [];
+let bdMiniMap = null;
+
+function goBack() {
+  const prev = navigationStack.pop() || 'home';
+  showSection(prev);
+}
+
+async function openBattleDetail(battle, eraObj) {
+  navigationStack.push(currentSection);
+  currentEra = eraObj;
+
+  // Fill header
+  document.getElementById('bd-era').textContent = eraObj.name + ' · Historia Militar';
+  document.getElementById('bd-title').textContent = battle.name;
+  document.getElementById('bd-combatants').textContent = battle.combatants;
+  document.getElementById('bd-year').textContent = battle.year;
+  document.getElementById('bd-tag').textContent = battle.tag;
+
+  // Related battles (same era)
+  const related = document.getElementById('bd-related');
+  related.innerHTML = '';
+  const others = eraObj.battles_data.filter(b => b.name !== battle.name).slice(0, 5);
+  others.forEach(b => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:0.6rem 0;border-bottom:1px solid rgba(201,168,76,0.08);cursor:pointer;';
+    div.innerHTML = `<div style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.15em;color:var(--gold);">${b.year}</div><div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--white);">${b.name}</div>`;
+    div.onclick = () => openBattleDetail(b, eraObj);
+    related.appendChild(div);
+  });
+
+  // Mini map
+  setTimeout(() => {
+    if (bdMiniMap) { bdMiniMap.remove(); bdMiniMap = null; }
+    if (battle.lat && battle.lng) {
+      bdMiniMap = L.map('bd-mini-map', { center: [battle.lat, battle.lng], zoom: 5, zoomControl: false, attributionControl: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bdMiniMap);
+      L.circleMarker([battle.lat, battle.lng], { radius: 8, fillColor: '#C9A84C', color: '#8B1A1A', weight: 2, fillOpacity: 0.9 }).addTo(bdMiniMap);
+    } else {
+      document.getElementById('bd-mini-map').innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--smoke);font-family:Cinzel,serif;font-size:0.6rem;">Sin coordenadas</div>';
+    }
+  }, 300);
+
+  showSection('battle-detail');
+
+  // Load AI content
+  const aiDiv = document.getElementById('bd-ai-content');
+  aiDiv.innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+
+  if (!canQuery()) {
+    document.getElementById('paywall-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  consumeQuery();
+  try {
+    const result = await callAI(`Explica en detalle exhaustivo la batalla de ${battle.name} (${battle.year}), entre ${battle.combatants}. Contexto: ${battle.desc}. Era: ${eraObj.name}.`);
+    aiDiv.innerHTML = result.content;
+    if (result.imageTerms && result.imageTerms.length > 0) {
+      try {
+        const imgRes = await fetch('/api/get-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ terms: result.imageTerms }) });
+        const imgData = await imgRes.json();
+        if (imgData.images && imgData.images.length > 0) {
+          const gallery = document.createElement('div');
+          gallery.className = 'modal-gallery';
+          gallery.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:1.5rem;';
+          imgData.images.forEach(img => {
+            const el = document.createElement('img');
+            el.src = img.url; el.alt = img.title;
+            el.style.cssText = 'width:100%;height:160px;object-fit:cover;filter:sepia(0.15);border:1px solid rgba(201,168,76,0.15);';
+            el.onerror = function() { this.style.display = 'none'; };
+            gallery.appendChild(el);
+          });
+          aiDiv.insertBefore(gallery, aiDiv.firstChild);
+        }
+      } catch(e) {}
+    }
+  } catch(e) {
+    aiDiv.innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido.</p>';
+  }
+}
+
+async function openCommanderDetail(commander, eraObj) {
+  navigationStack.push(currentSection);
+  currentEra = eraObj;
+
+  document.getElementById('cd-emoji').textContent = commander.emoji;
+  document.getElementById('cd-era').textContent = eraObj.name + ' · Historia Militar';
+  document.getElementById('cd-name').textContent = commander.name;
+  document.getElementById('cd-role').textContent = commander.role;
+
+  // Related commanders
+  const related = document.getElementById('cd-related');
+  related.innerHTML = '';
+  eraObj.commanders.filter(c => c.name !== commander.name).slice(0, 5).forEach(c => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:0.6rem 0;border-bottom:1px solid rgba(201,168,76,0.08);cursor:pointer;display:flex;align-items:center;gap:0.6rem;';
+    div.innerHTML = `<span style="font-size:1.3rem;">${c.emoji}</span><div><div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--white);">${c.name}</div><div style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.1em;color:var(--smoke);">${c.role}</div></div>`;
+    div.onclick = () => openCommanderDetail(c, eraObj);
+    related.appendChild(div);
+  });
+
+  showSection('commander-detail');
+
+  const aiDiv = document.getElementById('cd-ai-content');
+  aiDiv.innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+
+  if (!canQuery()) {
+    document.getElementById('paywall-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  consumeQuery();
+  try {
+    const result = await callAI(`Explica en detalle la vida militar, campañas, tácticas y legado histórico de ${commander.name}, ${commander.role}. Era: ${eraObj.name}.`);
+    aiDiv.innerHTML = result.content;
+    if (result.imageTerms && result.imageTerms.length > 0) {
+      try {
+        const imgRes = await fetch('/api/get-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ terms: result.imageTerms }) });
+        const imgData = await imgRes.json();
+        if (imgData.images && imgData.images.length > 0) {
+          const gallery = document.createElement('div');
+          gallery.className = 'modal-gallery';
+          gallery.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:1.5rem;';
+          imgData.images.forEach(img => {
+            const el = document.createElement('img');
+            el.src = img.url; el.alt = img.title;
+            el.style.cssText = 'width:100%;height:160px;object-fit:cover;filter:sepia(0.15);border:1px solid rgba(201,168,76,0.15);';
+            el.onerror = function() { this.style.display = 'none'; };
+            gallery.appendChild(el);
+          });
+          aiDiv.insertBefore(gallery, aiDiv.firstChild);
+        }
+      } catch(e) {}
+    }
+  } catch(e) {
+    aiDiv.innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido.</p>';
+  }
 }
 
 window.addEventListener('load', async () => {
