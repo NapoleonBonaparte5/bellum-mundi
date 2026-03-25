@@ -591,6 +591,12 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 .bpm-item-era { font-family:'Cinzel',serif; font-size:0.48rem; letter-spacing:0.1em; color:var(--smoke); background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.12); padding:0.1rem 0.35rem; text-transform:uppercase; flex-shrink:0; }
 .bpm-empty { padding:2rem; text-align:center; font-family:'Crimson Pro',serif; font-style:italic; color:var(--smoke); }
 
+
+.bp-ai table { width:100%; border-collapse:collapse; margin:1.2rem 0; font-size:0.95rem; }
+.bp-ai th { background:var(--steel); font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.18em; color:var(--gold); text-transform:uppercase; padding:0.65rem 1rem; text-align:left; border:1px solid rgba(201,168,76,0.15); }
+.bp-ai td { padding:0.6rem 1rem; border:1px solid rgba(201,168,76,0.08); vertical-align:top; }
+.bp-ai tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+
 /* ══ FULL PAGE OVERLAY — Batalla / Comandante ══ */
 #page-overlay {
   position: fixed;
@@ -1784,7 +1790,19 @@ async function queryAI(eyebrow, title, prompt) {
     document.body.style.overflow = 'hidden';
     return;
   }
-  openModal(eyebrow, title);
+  // Use full overlay instead of modal
+  document.getElementById('bpEraTag').textContent = eyebrow;
+  document.getElementById('bpTitle').textContent = title;
+  document.getElementById('bpCombatants').textContent = '';
+  document.getElementById('bpYear').textContent = '';
+  document.getElementById('bpTag').textContent = '';
+  document.getElementById('bpAiContent').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+  document.getElementById('bpRelBattles').innerHTML = '';
+  document.getElementById('bpRelCmds').innerHTML = '';
+  document.getElementById('bpRelWeapons').innerHTML = '';
+  document.getElementById('bpRelTactics').innerHTML = '';
+  document.getElementById('bpMap').innerHTML = '';
+  openPage('battle');
   consumeQuery();
   try {
     const result = await callAI(prompt);
@@ -3608,8 +3626,9 @@ let _lastFromSection = 'home';
 
 function openPage(type) {
   const overlay = document.getElementById('page-overlay');
-  document.getElementById('battle-page').style.display = type === 'battle' ? 'block' : 'none';
+  document.getElementById('battle-page').style.display    = type === 'battle'    ? 'block' : 'none';
   document.getElementById('commander-page').style.display = type === 'commander' ? 'block' : 'none';
+  document.getElementById('compare-page').style.display   = type === 'compare'   ? 'block' : 'none';
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   overlay.scrollTop = 0;
@@ -3990,19 +4009,55 @@ function addToCmp(battle, eraObj) { return false; }
 
 
 async function runCmp() {
-  if (!cmpSlots[0]||!cmpSlots[1]) return;
-  const b1=cmpSlots[0].battle, b2=cmpSlots[1].battle, e1=cmpSlots[0].era, e2=cmpSlots[1].era;
-  navigationStack.push('battles');
-  document.getElementById('cmp-title').textContent = b1.name + ' vs ' + b2.name;
-  document.getElementById('cmp-left').innerHTML = '<div class="cmp-bt">'+b1.name+'</div><div class="cmp-bs">'+b1.combatants+' · '+b1.year+'</div>';
-  document.getElementById('cmp-right').innerHTML = '<div class="cmp-bt">'+b2.name+'</div><div class="cmp-bs">'+b2.combatants+' · '+b2.year+'</div>';
-  showSection('compare');
-  if (!canQuery()) { document.getElementById('paywall-overlay').classList.add('open'); return; }
+  if (!cmpSlots[0] || !cmpSlots[1]) return;
+  const b1 = cmpSlots[0].battle, b2 = cmpSlots[1].battle;
+  const e1 = cmpSlots[0].era,   e2 = cmpSlots[1].era;
+
+  // Fill overlay header
+  document.getElementById('cmpPageTitle').textContent = b1.name + ' vs ' + b2.name;
+  document.getElementById('cmpLeft1').textContent  = e1.name + ' · ' + b1.year;
+  document.getElementById('cmpLeft2').textContent  = b1.name;
+  document.getElementById('cmpRight1').textContent = e2.name + ' · ' + b2.year;
+  document.getElementById('cmpRight2').textContent = b2.name;
+  document.getElementById('cmpAiResult').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando batallas...</span></div>';
+
+  // Show as overlay — no scroll through home
+  document.getElementById('battle-page').style.display = 'none';
+  document.getElementById('commander-page').style.display = 'none';
+  document.getElementById('compare-page').style.display = 'block';
+  const overlay = document.getElementById('page-overlay');
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+
+  if (!canQuery()) {
+    document.getElementById('paywall-overlay').classList.add('open');
+    return;
+  }
   consumeQuery();
-  const prompt = 'Compara exhaustivamente estas dos batallas:\n\nBATALLA 1: '+b1.name+' ('+b1.year+') — '+b1.combatants+' — Era: '+e1.name+'\nBATALLA 2: '+b2.name+' ('+b2.year+') — '+b2.combatants+' — Era: '+e2.name+'\n\nIncluye: <h3>Contexto y Época</h3>, <h3>Fuerzas y Recursos</h3>, <h3>Tácticas</h3>, <h3>Tabla Comparativa</h3> (HTML con columnas Aspecto/'+b1.name+'/'+b2.name+' y filas: Fecha, Efectivos, Bajas, Comandantes, Resultado, Táctica principal, Impacto histórico), <h3>¿Qué tienen en común?</h3>, <h3>Diferencias fundamentales</h3>, <h3>¿Cuál fue más decisiva y por qué?</h3>, y bibliografía. Mínimo 1200 palabras.';
-  document.getElementById('cmp-result').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando...</span></div>';
-  try { const r = await callAI(prompt); document.getElementById('cmp-result').innerHTML = r.content; }
-  catch(e) { document.getElementById('cmp-result').innerHTML = '<p style="color:var(--crimson-light);">Error. Inténtalo de nuevo.</p>'; }
+
+  const prompt = `Compara exhaustivamente estas dos batallas históricas:
+
+BATALLA 1: ${b1.name} (${b1.year}) — ${b1.combatants} — Era: ${e1.name}
+BATALLA 2: ${b2.name} (${b2.year}) — ${b2.combatants} — Era: ${e2.name}
+
+Genera un análisis comparativo EXHAUSTIVO con estas secciones:
+<h3>Contexto Histórico de Cada Batalla</h3>
+<h3>Fuerzas Enfrentadas y Recursos</h3>
+<h3>Tácticas y Estrategia Comparadas</h3>
+<h3>Tabla Comparativa</h3> — tabla HTML con columnas: Aspecto | ${b1.name} | ${b2.name} y filas: Fecha exacta, Duración, Efectivos totales, Bajas estimadas, Comandantes principales, Resultado, Táctica principal, Impacto geopolítico, Innovación militar
+<h3>¿Qué tienen en común?</h3>
+<h3>Diferencias Fundamentales</h3>
+<h3>¿Cuál fue más decisiva históricamente y por qué?</h3>
+<h3>Legado Combinado</h3>
+Y bibliografía recomendada con libros reales en Amazon (tag=bellummundi-21). Mínimo 1500 palabras.`;
+
+  try {
+    const r = await callAI(prompt);
+    document.getElementById('cmpAiResult').innerHTML = r.content;
+  } catch(e) {
+    document.getElementById('cmpAiResult').innerHTML = '<p style="color:var(--crimson-light);">Error al comparar. Inténtalo de nuevo.</p>';
+  }
 }
 
 // ════════════════════════════════════════
