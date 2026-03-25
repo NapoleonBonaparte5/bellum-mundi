@@ -1143,41 +1143,14 @@ function consumeQuery() {
 // AI CALL
 // ═══════════════════════════════════════════
 async function callAI(prompt) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
-      system:`Eres el historiador militar más experto y enciclopédico del mundo. Respondes en español con un estilo académico apasionante, como una entrada de enciclopedia de lujo.
-
-SIEMPRE estructura tu respuesta con estas secciones usando etiquetas HTML:
-- <h3>Contexto Histórico</h3> seguido de 2-3 párrafos detallados
-- <h3>Análisis Militar</h3> seguido de análisis táctico/estratégico profundo
-- <h3>Consecuencias e Impacto</h3> con el legado histórico
-- <h4>Datos Clave</h4> seguido de lista <ul> de datos precisos
-
-Al final SIEMPRE añade una sección de libros recomendados en este formato HTML exacto:
-<div class="books-section">
-<div class="books-title">📚 Bibliografía Recomendada</div>
-<div class="books-grid">
-<a class="book-item" href="https://www.amazon.es/s?k=[título+libro+1]&tag=bellummundi-21" target="_blank">
-<div class="book-cover">📖</div>
-<div><div class="book-title">[Título Libro 1]</div><div class="book-author">[Autor 1]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
-</a>
-<a class="book-item" href="https://www.amazon.es/s?k=[título+libro+2]&tag=bellummundi-21" target="_blank">
-<div class="book-cover">📖</div>
-<div><div class="book-title">[Título Libro 2]</div><div class="book-author">[Autor 2]</div><div class="book-affiliate-tag">Ver en Amazon →</div></div>
-</a>
-</div>
-</div>
-
-Sé exhaustivo, preciso y dramáticamente detallado. Máximo 700 palabras.`,
-      messages:[{role:'user',content:prompt}]
-    })
+  const response = await fetch('/api/ai-query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
   });
+  if (!response.ok) throw new Error('API error');
   const data = await response.json();
-  return data.content[0].text;
+  return data.content;
 }
 
 function openModal(eyebrow, title) {
@@ -1257,7 +1230,7 @@ function updateMap(battles) {
 // ERA DATA
 // ═══════════════════════════════════════════
 const ERAS=[
-  { id:'ancient', name:'Antigüedad', years:'3000–500 a.C.', battles:280, duration:'2500', civs:45, cmds:120,
+  { id:'ancient', name:'Antigüedad', years:'3000–500 a.C.', battles:280, duration:'2500', civs_count:45, cmds:120,
     overview:'La invención de la escritura permite registrar por primera vez las guerras. Los grandes imperios de Mesopotamia, Egipto, Persia, Grecia y China establecen ejércitos profesionales, estrategias sofisticadas y códigos de guerra. La falange griega, los carros egipcios y los arqueros persas revolucionan el arte de la guerra.',
     quote:{text:'Conócete a ti mismo y conoce a tu enemigo; en cien batallas nunca estarás en peligro.',attr:'— Sun Tzu · El Arte de la Guerra · 500 a.C.'},
     battles_data:[
@@ -1274,7 +1247,7 @@ const ERAS=[
     tactics:[{name:'Falange Griega',origin:'Esparta / Atenas',icon:'🛡️'},{name:'Maniobra de Envolvimiento',origin:'Macedonia',icon:'🔄'},{name:'Guerra de Sitio',origin:'Asiria',icon:'🏰'}],
     docs:[{name:'El Arte de la Guerra',year:'c. 500 a.C.',icon:'📖'},{name:'Tratado de Qadesh',year:'1259 a.C.',icon:'📜'},{name:'Las Guerras de Tucídides',year:'431–404 a.C.',icon:'📚'},{name:'Anábasis de Jenofonte',year:'401 a.C.',icon:'🗺️'}]
   },
-  { id:'classical', name:'Era Clásica', years:'500 a.C.–500 d.C.', battles:450, duration:'1000', civs:60, cmds:200,
+  { id:'classical', name:'Era Clásica', years:'500 a.C.–500 d.C.', battles:450, duration:'1000', civs_count:60, cmds:200,
     overview:'Roma construye el ejército más eficiente de la historia occidental. Sus legiones, disciplina y logística conquistan el mundo conocido. Mientras tanto, China vive la era de los Tres Reinos, los Partos resisten el avance romano y los Hunos emergen como terror de las estepas.',
     quote:{text:'Si quieres la paz, prepárate para la guerra.',attr:'— Publio Flavio Vegecio Renato · c. 390 d.C.'},
     battles_data:[
@@ -1290,7 +1263,7 @@ const ERAS=[
     tactics:[{name:'Formación Testudo',origin:'Roma',icon:'🛡️'},{name:'Legión Manipular',origin:'Roma',icon:'⚔️'},{name:'Disparo Parto en Retirada',origin:'Partia',icon:'🏹'}],
     docs:[{name:'De Bello Gallico — César',year:'58–50 a.C.',icon:'📜'},{name:'Epitoma rei militaris — Vegecio',year:'c. 390 d.C.',icon:'📚'},{name:'Historia de Roma — Tito Livio',year:'27 a.C.',icon:'🏛️'}]
   },
-  { id:'medieval', name:'Edad Media', years:'500–1400 d.C.', battles:620, duration:'900', civs:80, cmds:350,
+  { id:'medieval', name:'Edad Media', years:'500–1400 d.C.', battles:620, duration:'900', civs_count:80, cmds:350,
     overview:'La Edad Media transforma la guerra: el caballero acorazado domina el campo de batalla europeo mientras los ejércitos islámicos expanden el califato. Las Cruzadas enfrentan dos mundos. Los vikingos aterrorizan Europa. El Imperio Mongol barre Asia. La pólvora china llega a Occidente.',
     quote:{text:'Un ejército de ciervos liderado por un león es más temible que uno de leones liderado por un ciervo.',attr:'— Atribuido a Alejandro Magno'},
     battles_data:[
@@ -1306,7 +1279,7 @@ const ERAS=[
     tactics:[{name:'Carga de Caballería Pesada',origin:'Europa Occidental',icon:'🐎'},{name:'Lluvia de Flechas Mongola',origin:'Mongolia',icon:'🏹'},{name:'Guerra de Asedio',origin:'Europa / Islam',icon:'🏰'}],
     docs:[{name:'Historia Secreta — Gengis Kan',year:'1240',icon:'📜'},{name:'El Código de Caballería',year:'c. 1180',icon:'⚔️'},{name:'De Re Militari — Honorio Bonet',year:'1387',icon:'📚'}]
   },
-  { id:'early_modern', name:'Edad Moderna', years:'1400–1750', battles:540, duration:'350', civs:55, cmds:280,
+  { id:'early_modern', name:'Edad Moderna', years:'1400–1750', battles:540, duration:'350', civs_count:55, cmds:280,
     overview:'La pólvora transforma la guerra para siempre. Los tercios españoles dominan Europa. El Imperio Otomano alcanza su máximo esplendor. Las conquistas del Nuevo Mundo redefinen el mundo. La Guerra de los Treinta Años devastará Europa y sembrará las semillas del Estado-nación moderno.',
     quote:{text:'La guerra es la continuación de la política por otros medios.',attr:'— Carl von Clausewitz · De la Guerra · 1832'},
     battles_data:[
@@ -1321,7 +1294,7 @@ const ERAS=[
     tactics:[{name:'Los Tercios Españoles',origin:'España',icon:'⚔️'},{name:'Línea de Mosqueteros',origin:'Holanda / Suecia',icon:'🔫'},{name:'Artillería de Campaña',origin:'Francia',icon:'💣'}],
     docs:[{name:'Paz de Westfalia',year:'1648',icon:'📜'},{name:'El Arte de la Guerra — Maquiavelo',year:'1521',icon:'📚'},{name:'Tratado de Utrecht',year:'1713',icon:'🕊️'}]
   },
-  { id:'napoleon', name:'Napoleón', years:'1750–1815', battles:380, duration:'65', civs:30, cmds:180,
+  { id:'napoleon', name:'Napoleón', years:'1750–1815', battles:380, duration:'65', civs_count:30, cmds:180,
     overview:'Napoleón Bonaparte crea el ejército moderno basado en el mérito, la movilidad y la iniciativa táctica. El sistema de cuerpos de ejército y la artillería móvil napoleónica revolucionan la estrategia occidental. Austerlitz, Trafalgar, Waterloo — las batallas más estudiadas de la historia.',
     quote:{text:'Un ejército marcha sobre su estómago.',attr:'— Atribuido a Napoleón Bonaparte'},
     battles_data:[
@@ -1336,7 +1309,7 @@ const ERAS=[
     tactics:[{name:'Cuerpo de Ejército Napoleónico',origin:'Francia',icon:'🎯'},{name:'Batería Grande de Artillería',origin:'Napoleón',icon:'💣'},{name:'Línea vs Columna',origin:'Europa',icon:'🔫'}],
     docs:[{name:'De la Guerra — Clausewitz',year:'1832',icon:'📚'},{name:'Actas del Congreso de Viena',year:'1815',icon:'📜'},{name:'Código Napoleónico Militar',year:'1804',icon:'📋'}]
   },
-  { id:'ww1', name:'I G.M.',years:'1914–1918', battles:200, duration:'4', civs:30, cmds:150,
+  { id:'ww1', name:'I G.M.',years:'1914–1918', battles:200, duration:'4', civs_count:30, cmds:150,
     overview:'La Gran Guerra redefine el horror bélico. Las trincheras del Frente Occidental se convierten en símbolo del sufrimiento industrial. Diez millones de muertos. El gas venenoso, los carros de combate, los aviones y la guerra submarina debutan. Caen cuatro imperios.',
     quote:{text:'Esto no es la paz. Es un armisticio durante veinte años.',attr:'— Mariscal Ferdinand Foch · sobre el Tratado de Versalles · 1919'},
     battles_data:[
@@ -1351,7 +1324,7 @@ const ERAS=[
     tactics:[{name:'Guerra de Trincheras',origin:'Frente Occidental',icon:'⛏️'},{name:'Ataque en Oleadas',origin:'Todos los bandos',icon:'💀'},{name:'Táctica de Infiltración Hutier',origin:'Alemania',icon:'🎯'}],
     docs:[{name:'Tratado de Versalles',year:'1919',icon:'📜'},{name:'Plan Schlieffen',year:'1905',icon:'🗺️'},{name:'Telegrama Zimmermann',year:'1917',icon:'📨'}]
   },
-  { id:'ww2', name:'II G.M.',years:'1939–1945', battles:350, duration:'6', civs:50, cmds:300,
+  { id:'ww2', name:'II G.M.',years:'1939–1945', battles:350, duration:'6', civs_count:50, cmds:300,
     overview:'El mayor conflicto de la historia humana: 70-85 millones de muertos. La Blitzkrieg alemana conquista Europa. La URSS resiste en el Este. El Pacífico ve el mayor combate naval de la historia. Las bombas atómicas cambian para siempre la guerra.',
     quote:{text:'No tengo nada que ofrecer excepto sangre, esfuerzo, lágrimas y sudor.',attr:'— Winston Churchill · Discurso al Parlamento · 13 mayo 1940'},
     battles_data:[
@@ -1368,7 +1341,7 @@ const ERAS=[
     tactics:[{name:'Blitzkrieg (Guerra Relámpago)',origin:'Alemania',icon:'⚡'},{name:'Defensa en Profundidad',origin:'URSS',icon:'🛡️'},{name:'Guerra de Portaaviones',origin:'EE.UU./Japón',icon:'✈️'},{name:'Bombardeo Estratégico',origin:'Aliados',icon:'💣'},{name:'Operación Anfibia',origin:'EE.UU./GB',icon:'⛵'},{name:'Guerrilla y Resistencia',origin:'Todos',icon:'🌿'}],
     docs:[{name:'Carta del Atlántico',year:'1941',icon:'📜'},{name:'Acuerdos de Yalta',year:'1945',icon:'🌍'},{name:'Rendición Alemana',year:'8 mayo 1945',icon:'🕊️'},{name:'Juicios de Núremberg',year:'1945–1946',icon:'⚖️'},{name:'Carta de las Naciones Unidas',year:'1945',icon:'🌐'}]
   },
-  { id:'cold_war', name:'Guerra Fría', years:'1945–1991', battles:180, duration:'46', civs:100, cmds:200,
+  { id:'cold_war', name:'Guerra Fría', years:'1945–1991', battles:180, duration:'46', civs_count:100, cmds:200,
     overview:'Dos superpotencias nucleares en tensión permanente. Guerras por proxy en Corea, Vietnam, Angola, Afganistán. La disuasión nuclear redefine la geopolítica. Los movimientos de liberación nacional barren Asia, África y América Latina.',
     quote:{text:'No sé con qué armas se luchará la III Guerra Mundial, pero la IV se luchará con palos y piedras.',attr:'— Atribuido a Albert Einstein'},
     battles_data:[
@@ -1383,7 +1356,7 @@ const ERAS=[
     tactics:[{name:'Disuasión Nuclear (MAD)',origin:'EE.UU./URSS',icon:'☢️'},{name:'Guerrilla de Liberación',origin:'Asia / África',icon:'🌿'},{name:'AirLand Battle',origin:'EE.UU.',icon:'✈️'}],
     docs:[{name:'Tratado SALT I y II',year:'1972–1979',icon:'☢️'},{name:'Doctrina Truman',year:'1947',icon:'📜'},{name:'Tratado de No Proliferación',year:'1968',icon:'🌐'}]
   },
-  { id:'contemporary', name:'Hoy', years:'1991–Presente', battles:120, duration:'33', civs:60, cmds:100,
+  { id:'contemporary', name:'Hoy', years:'1991–Presente', battles:120, duration:'33', civs_count:60, cmds:100,
     overview:'La guerra de alta tecnología: drones, misiles de precisión, ciberarmas e inteligencia artificial. La guerra híbrida mezcla operaciones convencionales, desinformación y ciberataques. Ucrania, Gaza, Siria — el siglo XXI redefine el concepto de conflicto.',
     quote:{text:'La guerra ha cambiado. Los drones y el ciberespacio son el nuevo campo de batalla.',attr:'— Análisis Estratégico Contemporáneo · 2024'},
     battles_data:[
@@ -1426,7 +1399,7 @@ function selectEra(eraId) {
   stats.style.display='grid';
   document.getElementById('es-battles').textContent=era.battles;
   document.getElementById('es-years').textContent=era.duration;
-  document.getElementById('es-civs').textContent=era.civs;
+  document.getElementById('es-civs').textContent=era.civs_count;
   document.getElementById('es-cmds').textContent=era.cmds;
   updateMap(era.battles_data);
   buildBattlesGrid(era.battles_data);
