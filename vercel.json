@@ -1,7 +1,8 @@
 {
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/success", "destination": "/success.html" },
-    { "source": "/", "destination": "/index.html" }
+    { "source": "/batalla/:slug", "destination": "/index.html" },
+    { "source": "/comandante/:slug", "destination": "/index.html" },
+    { "source": "/success", "destination": "/success.html" }
   ]
 }
