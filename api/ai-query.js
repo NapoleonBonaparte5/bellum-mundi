@@ -1,29 +1,17 @@
-// api/ai-query.js
-// Proxy seguro para llamadas a la API de Claude
-// Versión extendida: más contenido, imágenes y libros garantizados
+// api/ai-query.js — con reintento automático en caso de sobrecarga
 
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { prompt } = req.body;
-  if (!prompt) {
-    return res.status(400).json({ error: 'Prompt requerido' });
-  }
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
-        system: `Eres el historiador militar más experto y enciclopédico del mundo. Escribes en español con un estilo académico apasionante, detallado y exhaustivo, como una entrada de enciclopedia militar de lujo combinada con el mejor periodismo narrativo.
+async function callAnthropic(prompt) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 3000,
+      system: `Eres el historiador militar más experto y enciclopédico del mundo. Escribes en español con un estilo académico apasionante, detallado y exhaustivo, como una entrada de enciclopedia militar de lujo combinada con el mejor periodismo narrativo.
 
 ESTRUCTURA OBLIGATORIA en este orden exacto:
 
@@ -67,21 +55,50 @@ OCTAVO - BIBLIOGRAFIA al final, SIEMPRE con este HTML exacto con libros REALES q
 </div>
 
 REGLAS: minimo 1500 palabras, libros reales existentes en Amazon, tag bellummundi-21 en todos los enlaces, imagenes con nombres reales de Wikipedia.`,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  return response;
+}
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('Anthropic error:', err);
-      return res.status(500).json({ error: 'Error en la API de IA' });
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ error: 'Prompt requerido' });
+
+  // Reintento automático hasta 3 veces si hay sobrecarga
+  const MAX_RETRIES = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await callAnthropic(prompt);
+
+      if (!response.ok) {
+        const err = await response.json();
+        // Si es sobrecarga, esperar y reintentar
+        if (err?.error?.type === 'overloaded_error' && attempt < MAX_RETRIES) {
+          console.log(`Sobrecarga Anthropic, reintento ${attempt}/${MAX_RETRIES}...`);
+          await new Promise(r => setTimeout(r, 2000 * attempt)); // 2s, 4s
+          continue;
+        }
+        console.error('Anthropic error:', JSON.stringify(err));
+        return res.status(500).json({ error: 'Error en la API de IA' });
+      }
+
+      const data = await response.json();
+      return res.status(200).json({ content: data.content[0].text });
+
+    } catch (err) {
+      lastError = err;
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, 2000 * attempt));
+        continue;
+      }
     }
-
-    const data = await response.json();
-    res.status(200).json({ content: data.content[0].text });
-
-  } catch (err) {
-    console.error('AI query error:', err.message);
-    res.status(500).json({ error: err.message });
   }
+
+  console.error('AI query failed after retries:', lastError?.message);
+  res.status(500).json({ error: 'Servicio temporalmente sobrecargado. Inténtalo en unos segundos.' });
 };
+
