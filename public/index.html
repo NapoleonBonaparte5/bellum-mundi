@@ -583,7 +583,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <!-- PREMIUM -->
       <div class="price-card featured">
         <div class="price-tier">Comandante</div>
-        <div class="price-amount" id="premium-price"><sup>€</sup>7<span style="font-size:1.2rem">.99</span></div>
+        <div class="price-amount" id="premium-price"><sup>€</sup>6<span style="font-size:1.2rem">.99</span></div>
         <div class="price-period" id="premium-period">por mes</div>
         <div class="price-annual-note" id="premium-note"> </div>
         <div class="price-divider"></div>
@@ -724,7 +724,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <div class="paywall-feat"><span class="pf-icon">🗺️</span> Mapas tácticos detallados</div>
       <div class="paywall-feat"><span class="pf-icon">📧</span> Newsletter semanal</div>
     </div>
-    <div class="paywall-price-hint">€7.99 / mes</div>
+    <div class="paywall-price-hint">€6.99 / mes</div>
     <div class="paywall-price-sub">O €49 al año · Cancela cuando quieras</div>
     <div class="paywall-ctas" style="margin-top:1.5rem;">
       <button class="paywall-primary" onclick="openCheckout('premium')">Acceso Ilimitado — Empezar →</button>
@@ -804,7 +804,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       </div>
       <div class="dashboard-actions">
         <button class="dash-action-btn upgrade" id="dash-upgrade-btn" onclick="closeModal('dashboard-overlay');openCheckout('premium')">
-          <span>⚡ Actualizar a Premium</span><span>€7.99/mes →</span>
+          <span>⚡ Actualizar a Premium</span><span>€6.99/mes →</span>
         </button>
         <button class="dash-action-btn secondary" onclick="showToast('Newsletter: próximamente','success')">
           <span>📧 Gestionar Newsletter</span><span>→</span>
@@ -1017,7 +1017,7 @@ function toggleBilling() {
   if (billingAnnual) {
     document.getElementById('premium-price').innerHTML = '<sup>€</sup>4<span style="font-size:1.2rem">.08</span>';
     document.getElementById('premium-period').textContent = 'por mes';
-    document.getElementById('premium-note').textContent = '€49/año — ahorras €46.88';
+    document.getElementById('premium-note').textContent = '€49.99/año — ahorras €46.88';
   } else {
     document.getElementById('premium-price').innerHTML = '<sup>€</sup>7<span style="font-size:1.2rem">.99</span>';
     document.getElementById('premium-period').textContent = 'por mes';
@@ -1026,8 +1026,8 @@ function toggleBilling() {
 }
 
 // IDs de precios de Stripe — sustitúyelos por los tuyos reales del dashboard
-const STRIPE_PRICE_MONTHLY = 'price_1TEcmLLQnw3S1NGV51Rownj5';
-const STRIPE_PRICE_ANNUAL  = 'price_1TEcnVLQnw3S1NGVPBHWkjZI';
+const STRIPE_PRICE_MONTHLY = 'price_1TEremLQnw3S1NGVUciHDGGH';
+const STRIPE_PRICE_ANNUAL  = 'price_1TErfcLQnw3S1NGVNa7flWZ7';
 
 async function openCheckout(plan) {
   if (!STATE.user) { openAuth('register'); return; }
