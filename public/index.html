@@ -267,7 +267,7 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(201,168,76,0.08); max-width:1100px; margin:0 auto; }
 .price-card { background:var(--slate); padding:2.5rem 2rem; position:relative; transition:all 0.3s; }
 .price-card.featured { background:linear-gradient(160deg,rgba(139,26,26,0.2),rgba(201,168,76,0.05)); border:1px solid rgba(201,168,76,0.3); }
-.price-card.featured::before { content:'MÁS POPULAR'; position:absolute; top:-1px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.2em; padding:0.3rem 1rem; font-weight:700; }
+.price-card.featured::before { content:attr(data-popular-label); position:absolute; top:-1px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--ink); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.2em; padding:0.3rem 1rem; font-weight:700; }
 .price-tier { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; }
 .price-amount { font-family:'Playfair Display',serif; font-size:3rem; font-weight:900; color:var(--white); line-height:1; }
 .price-amount sup { font-size:1.2rem; vertical-align:top; margin-top:0.5rem; color:var(--smoke); }
@@ -446,7 +446,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 .footer-legal a:hover { color:var(--gold); }
 
 /* ── MISC ── */
-.reveal { opacity:0; transform:translateY(20px); transition:opacity 0.7s ease,transform 0.7s ease; }
+.reveal { opacity:0; transform:translateY(10px); transition:opacity 0.4s ease,transform 0.4s ease; }
 .reveal.visible { opacity:1; transform:translateY(0); }
 @media (max-width:900px) {
   #era-content { grid-template-columns:1fr; }
@@ -1115,7 +1115,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
         <button class="price-cta ghost" id="cta-free" onclick="openAuth('register')">Crear cuenta gratis</button>
       </div>
       <!-- PREMIUM -->
-      <div class="price-card featured">
+      <div class="price-card featured" id="featured-card" data-popular-label="MÁS POPULAR">
         <div class="price-tier" id="tier-premium">Comandante</div>
         <div class="price-amount" id="premium-price"><sup>€</sup>6<span style="font-size:1.2rem">.99</span></div>
         <div class="price-period" id="premium-period">por mes</div>
@@ -1291,10 +1291,10 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <div>
       <div class="footer-col-title" id="footer-explore-title">Explorar</div>
       <ul class="footer-links">
-        <li><a onclick="selectEra('ancient')">Antigüedad</a></li>
-        <li><a onclick="selectEra('medieval')">Edad Media</a></li>
-        <li><a onclick="selectEra('ww2')">II Guerra Mundial</a></li>
-        <li><a onclick="selectEra('contemporary')">Contemporáneo</a></li>
+        <li><a onclick="selectEra('ancient')" data-era="ancient" class="footer-era-link">Antigüedad</a></li>
+        <li><a onclick="selectEra('medieval')" data-era="medieval" class="footer-era-link">Edad Media</a></li>
+        <li><a onclick="selectEra('ww2')" data-era="ww2" class="footer-era-link">II Guerra Mundial</a></li>
+        <li><a onclick="selectEra('contemporary')" data-era="contemporary" class="footer-era-link">Contemporáneo</a></li>
       </ul>
     </div>
     <div>
@@ -1878,8 +1878,8 @@ async function openWeaponModal(w) {
 async function openCivModal(c) {
   await queryAI('Civilización', c.name, `Explica en detalle el poder militar, organización del ejército, tácticas y guerras más importantes de: ${c.name}, período ${c.period}.`);
 }
-async function openTacticModal(t) {
-  await queryAI('Táctica Militar', t.name, `Explica en detalle la táctica militar "${t.name}", desarrollada por ${t.origin}. Incluye descripción, aplicación práctica en batalla, ejemplos históricos y evolución.`);
+async function openTacticModal(tac) {
+  await queryAI('Táctica Militar', tac.name, `Explica en detalle la táctica militar "${tac.name}", desarrollada por ${tac.origin}. Incluye descripción, aplicación práctica en batalla, ejemplos históricos y evolución.`);
 }
 async function openDocModal(d) {
   await queryAI('Documento Histórico', d.name, `Explica en detalle el documento/tratado histórico "${d.name}" (${d.year}). Incluye contexto, contenido, negociadores, consecuencias militares y políticas, y legado actual.`);
@@ -3178,8 +3178,8 @@ function initReveal() {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.05 });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-  // Fallback: after 2s, reveal anything still hidden
-  setTimeout(revealAll, 2000);
+  // Fallback: reveal anything still hidden after 300ms (not 2s)
+  setTimeout(revealAll, 300);
 }
 
 // ═══════════════════════════════════════════
@@ -3203,7 +3203,11 @@ function showSection(sectionId) {
 
   // Show target
   const target = document.getElementById(sectionId + '-view');
-  if (target) target.classList.add('active');
+  if (target) {
+    target.classList.add('active');
+    // Reveal any hidden .reveal elements in this view
+    target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  }
   currentSection = sectionId;
 
   // Update nav active state
@@ -3711,7 +3715,7 @@ function fillSidebarBattles(containerId, battles, eraObj, currentName, currentYe
     filtered.sort((a, b) => Math.abs(parseYear(a.year) - cy) - Math.abs(parseYear(b.year) - cy));
   }
   filtered.slice(0, 6).forEach(b => {
-    c.appendChild(makeSidebarItem('⚔', b.name, b.year, tagName(b.tag),
+    c.appendChild(makeSidebarItem('⚔', battleNameEN(b.name), b.year, tagName(b.tag),
       () => openBattleDetail(b, eraObj)));
   });
 }
@@ -3742,7 +3746,7 @@ function fillSidebarTactics(containerId, tactics, eraObj) {
   c.innerHTML = '';
   tactics.slice(0, 5).forEach(tac => {
     c.appendChild(makeSidebarItem(tac.icon || '🎯', tac.name, tac.origin, null,
-      () => queryAI('Táctica', t.name, `Explica la táctica "${t.name}" usada por ${t.origin}. Era: ${eraObj.name}.`)));
+      () => queryAI('Táctica', tac.name, `Explica la táctica "${tac.name}" usada por ${tac.origin}. Era: ${eraObj.name}.`)));
   });
 }
 
@@ -3768,8 +3772,8 @@ async function openBattleDetail(battle, eraObj) {
   document.querySelectorAll('.bp-back').forEach(b => b.textContent = t('back_btn'));
   document.getElementById('bpYear').textContent = battle.year;
   document.getElementById('bpTag').textContent = tagName(battle.tag);
-  document.getElementById('bpTitle').textContent = battle.name;
-  document.getElementById('bpCombatants').textContent = battle.combatants;
+  document.getElementById('bpTitle').textContent = battleNameEN(battle.name);
+  document.getElementById('bpCombatants').textContent = translateCombatants(battle.combatants);
   document.getElementById('bpYear').textContent = battle.year;
   document.getElementById('bpTag').textContent = battle.tag;
 
@@ -3880,8 +3884,8 @@ let acIdx = -1, acRes = [], acBuilt = false, acData = [];
 function buildAcData() {
   if (acBuilt) return;
   ERAS.forEach(era => {
-    era.battles_data.forEach(b => acData.push({type:'battle',icon:'⚔',name:b.name,sub:b.combatants,badge:era.name,era,item:b}));
-    era.commanders.forEach(c => acData.push({type:'cmd',icon:'👑',name:c.name,sub:c.role,badge:era.name,era,item:c}));
+    era.battles_data.forEach(b => acData.push({type:'battle',icon:'⚔',name:b.name,sub:b.combatants,badge:eraName(era),era,item:b}));
+    era.commanders.forEach(c => acData.push({type:'cmd',icon:'👑',name:c.name,sub:roleName(c.role),badge:eraName(era),era,item:c}));
     era.civs.forEach(c => acData.push({type:'civ',icon:'🏛️',name:c.name,sub:c.period,badge:era.name,era,item:c}));
     era.docs.forEach(d => acData.push({type:'doc',icon:d.icon||'📜',name:d.name,sub:d.year,badge:era.name,era,item:d}));
     era.weapons.forEach(w => acData.push({type:'wpn',icon:w.icon||'🗡️',name:w.name,sub:w.period,badge:era.name,era,item:w}));
@@ -3894,7 +3898,9 @@ function acInput(q) { if (q.length >= 2) acShow(q); else acClose(); }
 function acShow(q) {
   buildAcData();
   const low = q.toLowerCase();
-  acRes = acData.filter(r => r.name.toLowerCase().includes(low) || (r.sub&&r.sub.toLowerCase().includes(low))).slice(0,12);
+  // Build display names for search
+  acData.forEach(r => { r.dispName = r.type==='battle' ? battleNameEN(r.name) : r.name; });
+  acRes = acData.filter(r => r.dispName.toLowerCase().includes(low) || r.name.toLowerCase().includes(low) || (r.sub&&r.sub.toLowerCase().includes(low))).slice(0,12);
   acIdx = -1;
   const dd = document.getElementById('ac-dd');
   if (!acRes.length) { dd.innerHTML='<div class="ac-empty">Sin resultados — pulsa Buscar para consultar la IA</div>'; dd.classList.add('open'); return; }
@@ -4043,8 +4049,8 @@ function renderPickerList(battles) {
     item.className = 'bpm-item';
     item.innerHTML = `
       <div class="bpm-item-year">${b.year}</div>
-      <div class="bpm-item-name">${b.name}<br><span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:0.82rem;color:var(--smoke);">${b.combatants}</span></div>
-      <div class="bpm-item-era">${b.eraName}</div>
+      <div class="bpm-item-name">${battleNameEN(b.name)}<br><span style="font-family:'Crimson Pro',serif;font-style:italic;font-size:0.82rem;color:var(--smoke);">${translateCombatants(b.combatants)}</span></div>
+      <div class="bpm-item-era">${LANG==='en'?(ERA_NAMES_EN[b.eraId]||b.eraName):b.eraName}</div>
     `;
     item.onclick = () => {
       cmpSlots[pickerSlotTarget] = { name: b.name, battle: b, era: b.eraObj };
@@ -4075,12 +4081,12 @@ async function runCmp() {
   const e1 = cmpSlots[0].era,   e2 = cmpSlots[1].era;
 
   // Fill overlay header
-  document.getElementById('cmpPageTitle').textContent = b1.name + ' vs ' + b2.name;
+  document.getElementById('cmpPageTitle').textContent = battleNameEN(b1.name) + ' vs ' + battleNameEN(b2.name);
   document.querySelectorAll('.bp-back').forEach(b => b.textContent = t('back_btn'));
   document.getElementById('cmpLeft1').textContent  = e1.name + ' · ' + b1.year;
-  document.getElementById('cmpLeft2').textContent  = b1.name;
+  document.getElementById('cmpLeft2').textContent  = battleNameEN(b1.name);
   document.getElementById('cmpRight1').textContent = e2.name + ' · ' + b2.year;
-  document.getElementById('cmpRight2').textContent = b2.name;
+  document.getElementById('cmpRight2').textContent = battleNameEN(b2.name);
   document.getElementById('cmpAiResult').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_compare')}</span></div>`;
   openPage('compare');
 
@@ -4091,6 +4097,7 @@ async function runCmp() {
   consumeQuery();
 
   const cmpLangNote = LANG === 'en' ? 'Write the entire analysis in English.' : '';
+  const bn1 = battleNameEN(b1.name), bn2 = battleNameEN(b2.name);
   const prompt = `Compara exhaustivamente estas dos batallas históricas (${cmpLangNote}):
 
 BATALLA 1: ${b1.name} (${b1.year}) — ${b1.combatants} — Era: ${e1.name}
@@ -4594,6 +4601,7 @@ function setLang(lang) {
   if (codeEl) codeEl.textContent = lang === 'en' ? 'EN' : 'ES';
   applyTranslations();
   // Rebuild all dynamic content
+  acBuilt = false; acData = []; // Reset autocomplete for new lang
   buildEraNav();
   updateNavUI();
   if (currentEra) selectEra(currentEra.id);
@@ -4782,14 +4790,21 @@ function applyTranslations() {
     if (m) { const era = ERAS.find(e => e.id === m[1]); if (era) a.textContent = eraName(era); }
   });
 
-  // War quote — update from current era if selected
+  // War quote — translate if EN
   if (typeof currentEra !== 'undefined' && currentEra) {
     const qt = currentEra.quote;
     if (qt) {
       const qel = document.getElementById('rotating-quote');
       const ael = document.getElementById('rotating-attr');
-      if (qel) qel.textContent = '"' + qt.text + '"';
-      if (ael) ael.textContent = '— ' + qt.attr;
+      if (qel && ael) {
+        if (LANG === 'en' && QUOTE_EN[currentEra.id]) {
+          qel.textContent = '"' + QUOTE_EN[currentEra.id].text + '"';
+          ael.textContent = '— ' + QUOTE_EN[currentEra.id].attr;
+        } else {
+          qel.textContent = '"' + qt.text + '"';
+          ael.textContent = '— ' + qt.attr;
+        }
+      }
     }
   }
 
@@ -4797,6 +4812,9 @@ function applyTranslations() {
 }
 
 function translatePricingFeatures() {
+  // Update "Most Popular" badge
+  const fc = document.getElementById('featured-card');
+  if (fc) fc.setAttribute('data-popular-label', LANG === 'en' ? 'MOST POPULAR' : 'MÁS POPULAR');
   // Free plan features
   const freeFeatures = LANG === 'en' ? [
     '✓ Full navigation through eras',
@@ -5130,7 +5148,193 @@ function eraOverview(era) {
   return LANG === 'en' ? (ERA_OVERVIEWS_EN[era.id] || era.overview) : era.overview;
 }
 
+
+// ═══ ENGLISH QUOTES PER ERA ═══
+const QUOTE_EN = {
+  prehistoric: { text: 'Where there are men, there is conflict.', attr: '— Ancient Proverb' },
+  ancient: { text: 'Know yourself and know your enemy; in a hundred battles you will never be in danger.', attr: '— Sun Tzu · The Art of War · 500 BC' },
+  classical: { text: 'If you want peace, prepare for war.', attr: '— Vegetius · Epitoma rei militaris · c. 390 AD' },
+  medieval: { text: 'There is nothing more tender than a warrior when he weeps, nor more fierce when he fights.', attr: '— Medieval description of the knight' },
+  early_modern: { text: 'War is the continuation of politics by other means.', attr: '— Carl von Clausewitz · On War' },
+  napoleon: { text: 'An army marches on its stomach.', attr: '— Napoleon Bonaparte' },
+  ww1: { text: 'This is not peace. It is an armistice for twenty years.', attr: '— Marshal Foch · on the Treaty of Versailles · 1919' },
+  ww2: { text: 'I have nothing to offer but blood, toil, tears and sweat.', attr: '— Winston Churchill · Speech to Parliament · 13 May 1940' },
+  cold_war: { text: 'I do not know with what weapons World War III will be fought, but World War IV will be fought with sticks and stones.', attr: '— Attributed to Albert Einstein' },
+  contemporary: { text: 'In the future, wars will be won by those who control the data, not those who have the most tanks.', attr: '— Contemporary Strategic Analysis · 2024' }
+};
+
+// ═══ COMBATANTS & COUNTRY NAME TRANSLATOR ═══
+const COUNTRY_EN = {
+  'Alemania':'Germany', 'Francia':'France', 'España':'Spain', 'Italia':'Italy',
+  'Polonia':'Poland', 'Rusia':'Russia', 'Gran Bretaña':'Great Britain', 'GB':'GB',
+  'EE.UU.':'USA', 'Japón':'Japan', 'Austria':'Austria', 'Turquía':'Turkey',
+  'Grecia':'Greece', 'Hungría':'Hungary', 'Suecia':'Sweden', 'Dinamarca':'Denmark',
+  'Noruega':'Norway', 'Finlandia':'Finland', 'Bélgica':'Belgium',
+  'Países Bajos':'Netherlands', 'Holanda':'Netherlands', 'Portugal':'Portugal',
+  'China':'China', 'India':'India', 'Persia':'Persia', 'Egipto':'Egypt',
+  'Israel':'Israel', 'Irak':'Iraq', 'Irán':'Iran', 'Siria':'Syria',
+  'Turquía':'Turkey', 'Cartago':'Carthage', 'Roma':'Rome', 'Macedonia':'Macedonia',
+  'Atenas':'Athens', 'Esparta':'Sparta', 'Bizancio':'Byzantium',
+  'Imperio Romano':'Roman Empire', 'Imperio Persa':'Persian Empire',
+  'Imperio Otomano':'Ottoman Empire', 'Imperio Mongol':'Mongol Empire',
+  'Imperio Austriaco':'Austrian Empire', 'URSS':'USSR', 'NATO':'NATO',
+  'Aliados':'Allies', 'Coalición':'Coalition', 'Cruzados':'Crusaders',
+  'Wehrmacht':'Wehrmacht', 'Luftwaffe':'Luftwaffe', 'Kriegsmarine':'Kriegsmarine',
+  'Vikingos':'Vikings', 'Normandos':'Normans', 'Mongoles':'Mongols',
+  'Otomanos':'Ottomans', 'Sarracenos':'Saracens', 'Moros':'Moors',
+  'Visigotos':'Visigoths', 'Francos':'Franks', 'Sajones':'Saxons',
+  'Africano':'African', 'del Norte':'of the North', 'Oriental':'Eastern',
+  'Occidental':'Western', 'Imperial':'Imperial', 'Real':'Royal'
+};
+
+function translateCombatants(str) {
+  if (!str || LANG !== 'en') return str;
+  let result = str;
+  Object.entries(COUNTRY_EN).forEach(([es, en]) => {
+    result = result.replace(new RegExp('\\b' + es + '\\b', 'g'), en);
+  });
+  return result;
+}
+
+// ═══ BATTLE NAME TRANSLATOR ═══
+const BATTLE_NAME_EN = {
+  'Masacre de Jebel Sahaba': 'Jebel Sahaba Massacre',
+  'Conquistas de Sargón de Acad': 'Conquests of Sargon of Akkad',
+  'Batalla de Megido': 'Battle of Megiddo',
+  'Batalla de Qadesh': 'Battle of Kadesh',
+  'Caída de Nínive': 'Fall of Nineveh',
+  'Batalla de Maratón': 'Battle of Marathon',
+  'Batalla de las Termópilas': 'Battle of Thermopylae',
+  'Batalla de Salamina': 'Battle of Salamis',
+  'Batalla de Platea': 'Battle of Plataea',
+  'Batalla de Leuctra': 'Battle of Leuctra',
+  'Batalla de Gaugamela': 'Battle of Gaugamela',
+  'Batalla de Cannas': 'Battle of Cannae',
+  'Batalla de Zama': 'Battle of Zama',
+  'Batalla de Heraclea': 'Battle of Heraclea',
+  'Batalla de la Trebia': 'Battle of the Trebia',
+  'Batalla del Lago Trasimeno': 'Battle of Lake Trasimene',
+  'Batalla de Farsalia': 'Battle of Pharsalus',
+  'Batalla del Bosque de Teutoburgo': 'Battle of Teutoburg Forest',
+  'Batalla de Adrianópolis': 'Battle of Adrianople',
+  'Batalla de los Campos Cataláunicos': 'Battle of the Catalaunian Plains',
+  'Batalla de Qadisiya': 'Battle of al-Qadisiyyah',
+  'Batalla del Yarmuk': 'Battle of the Yarmuk',
+  'Batalla de Poitiers / Tours': 'Battle of Tours / Poitiers',
+  'Batalla de Hastings': 'Battle of Hastings',
+  'Batalla de Manzikert': 'Battle of Manzikert',
+  'Batalla de los Cuernos de Hattin': 'Battle of the Horns of Hattin',
+  'Saqueo de Constantinopla': 'Sack of Constantinople',
+  'Batalla de Ain Yalut': 'Battle of Ain Jalut',
+  'Batalla de Bannockburn': 'Battle of Bannockburn',
+  'Batalla de Crécy': 'Battle of Crécy',
+  'Batalla de Agincourt': 'Battle of Agincourt',
+  'Caída de Constantinopla': 'Fall of Constantinople',
+  'Batalla de Ceriñola': 'Battle of Cerignola',
+  'Conquista de Tenochtitlan': 'Conquest of Tenochtitlan',
+  'Batalla de Mohács': 'Battle of Mohács',
+  'Gran Asedio de Malta': 'Great Siege of Malta',
+  'Batalla de Lepanto': 'Battle of Lepanto',
+  'Armada Invencible': 'Spanish Armada',
+  'Batalla de Breitenfeld': 'Battle of Breitenfeld',
+  'Batalla de Viena': 'Battle of Vienna',
+  'Batalla de Blenheim': 'Battle of Blenheim',
+  'Batalla de Poltava': 'Battle of Poltava',
+  'Batalla de Narva': 'Battle of Narva',
+  'Batalla de Rossbach': 'Battle of Rossbach',
+  'Batalla de Leuthen': 'Battle of Leuthen',
+  'Batalla de Austerlitz': 'Battle of Austerlitz',
+  'Batalla de Trafalgar': 'Battle of Trafalgar',
+  'Batalla de Jena-Auerstedt': 'Battle of Jena-Auerstedt',
+  'Batalla de Borodinó': 'Battle of Borodino',
+  'Batalla de Leipzig (Batalla de las Naciones)': 'Battle of Leipzig (Battle of the Nations)',
+  'Batalla de Waterloo': 'Battle of Waterloo',
+  'Batalla de Salamanca': 'Battle of Salamanca',
+  'Batalla de Vitoria': 'Battle of Vitoria',
+  'Batalla de Marengo': 'Battle of Marengo',
+  'Batalla de las Fronteras': 'Battle of the Frontiers',
+  'Primera Batalla del Marne': 'First Battle of the Marne',
+  'Batalla de Verdún': 'Battle of Verdun',
+  'Batalla del Somme': 'Battle of the Somme',
+  'Batalla de Jutlandia': 'Battle of Jutland',
+  'Ofensiva Brusilov': 'Brusilov Offensive',
+  'Batalla de Tannenberg': 'Battle of Tannenberg',
+  'Batalla de Caporetto': 'Battle of Caporetto',
+  'Campaña de Gallipoli': 'Gallipoli Campaign',
+  'Invasión de Polonia': 'Invasion of Poland',
+  'Guerra de Invierno': 'Winter War',
+  'Batalla de Francia y Dunkerque': 'Battle of France and Dunkirk',
+  'Batalla de Inglaterra': 'Battle of Britain',
+  'Operación Barbarroja': 'Operation Barbarossa',
+  'Ataque a Pearl Harbor': 'Attack on Pearl Harbor',
+  'Batalla de Midway': 'Battle of Midway',
+  'Segunda Batalla de El Alamein': 'Second Battle of El Alamein',
+  'Batalla de Stalingrado': 'Battle of Stalingrad',
+  'Operación Cidadela — Kursk': 'Operation Citadel — Kursk',
+  'Día D — Operación Overlord': 'D-Day — Operation Overlord',
+  'Batalla de las Ardenas': 'Battle of the Bulge',
+  'Batalla de Berlín': 'Battle of Berlin',
+  'Batalla de Okinawa': 'Battle of Okinawa',
+  'Hiroshima y Nagasaki': 'Hiroshima and Nagasaki',
+  'Caída de Francia': 'Fall of France',
+  'Batalla del Norte de África': 'North Africa Campaign',
+  'Invasión de Sicilia': 'Invasion of Sicily',
+  'Campaña de Noruega': 'Norway Campaign',
+  'Operación Bagration': 'Operation Bagration',
+  'El Blitz — Bombardeo de Londres': 'The Blitz — Bombing of London',
+  'Asedio de Leningrado': 'Siege of Leningrad',
+  'Batalla de Moscú': 'Battle of Moscow',
+  'Invasión Italiana de Grecia': 'Italian Invasion of Greece',
+  'Batalla de Creta': 'Battle of Crete',
+  'Guadalcanal': 'Guadalcanal',
+  'Guerra de Corea': 'Korean War',
+  'Guerra de Vietnam': 'Vietnam War',
+  'Crisis de Suez': 'Suez Crisis',
+  'Invasión de Bahía de Cochinos': 'Bay of Pigs Invasion',
+  'Guerra de los Seis Días': 'Six-Day War',
+  'Ofensiva del Tet': 'Tet Offensive',
+  'Guerra del Yom Kippur': 'Yom Kippur War',
+  'Guerra Soviético-Afgana': 'Soviet–Afghan War',
+  'Guerra de las Malvinas': 'Falklands War',
+  'Guerra del Golfo (Operación Tormenta del Desierto)': 'Gulf War (Operation Desert Storm)',
+  'Tormenta del Desierto': 'Desert Storm',
+  'Guerra de Bosnia': 'Bosnian War',
+  'Invasión de Afganistán': 'Invasion of Afghanistan',
+  'Invasión de Irak': 'Invasion of Iraq',
+  'II Guerra del Líbano': 'Second Lebanon War',
+  'Guerra Civil Siria': 'Syrian Civil War',
+  'Invasión Rusa de Ucrania': 'Russian Invasion of Ukraine',
+  'Guerra Israel-Hamas (Gaza)': 'Israel-Hamas War (Gaza)',
+  'Cruce de los Alpes de Aníbal': "Hannibal's Crossing of the Alps",
+  'Guerras de las Galias': 'Gallic Wars',
+  'Revuelta de Espartaco': 'Slave Revolt of Spartacus',
+  'Rebelión de Boudica': "Boudica's Revolt",
+  'Batalla del Puente Milvio': 'Battle of Milvian Bridge',
+  'Revolución Húngara': 'Hungarian Revolution',
+  'Primera Guerra de Chechenia': 'First Chechen War',
+  'Segunda Guerra de Chechenia': 'Second Chechen War',
+  'Batalla de Mosul (ISIS)': 'Battle of Mosul (ISIS)',
+  'Anexión de Crimea': 'Annexation of Crimea',
+  'Guerra del Donbás': 'War in Donbas',
+  'Batalla de Kyiv': 'Battle of Kyiv',
+  'Batalla de Mariupol': 'Battle of Mariupol',
+};
+
+function battleNameEN(name) {
+  if (LANG !== 'en') return name;
+  return BATTLE_NAME_EN[name] || name;
+}
+
 window.addEventListener('load', async () => {
+  // Restore language flag+code on reload
+  const flagEl = document.getElementById('lang-flag');
+  const codeEl = document.getElementById('lang-code');
+  if (flagEl) flagEl.textContent = LANG === 'en' ? '🇬🇧' : '🇪🇸';
+  if (codeEl) codeEl.textContent = LANG === 'en' ? 'EN' : 'ES';
+  document.querySelectorAll('.lang-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === LANG);
+  });
+
   // Run non-blocking UI first
   initHeroCanvas();
   initMap();
