@@ -876,7 +876,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <li><a onclick="showSection('library')" class="nav-link" data-section="library">📜 Biblioteca</a></li>
       <li><a onclick="showSection('civilizations')" class="nav-link" data-section="civilizations">🏛️ Civilizaciones</a></li>
       <li><a onclick="openPricing()" class="nav-link">Premium</a></li>
-      <li><a href="#newsletter-section" class="nav-link">Newsletter</a></li>
+      <li><a onclick="document.getElementById('newsletter-section').scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname);" class="nav-link" style="cursor:pointer;">Newsletter</a></li>
     </ul>
     <div class="nav-right" id="nav-right"></div>
     <div class="lang-switcher" id="lang-switcher">
@@ -1297,7 +1297,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <ul class="footer-links">
         <li><a id="footer-prices-link" onclick="openPricing()">Precios</a></li>
         <li><a id="footer-register-link" onclick="openAuth('register')">Crear cuenta</a></li>
-        <li><a href="#newsletter-section">Newsletter</a></li>
+        <li><a onclick="document.getElementById('newsletter-section').scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname);" style="cursor:pointer;">Newsletter</a></li>
         <li><a onclick="showToast('API próximamente','success')">API</a></li>
       </ul>
     </div>
@@ -3207,6 +3207,10 @@ function showSection(sectionId) {
   // Instant scroll to top — no flash of previous content
   document.documentElement.style.scrollBehavior = 'auto';
   window.scrollTo(0, 0);
+  // Clean URL — remove any hash or battle/commander path
+  if (!window.location.pathname.startsWith('/batalla/') && !window.location.pathname.startsWith('/comandante/')) {
+    history.replaceState(null, '', '/');
+  }
 
   // Hide all views immediately
   document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
@@ -5764,8 +5768,9 @@ function battleNameEN(name) {
 function autoTranslateDesc(text) {
   if (!text || LANG !== 'en') return text;
   let t = text;
-  const replacements = [
-    // Full phrase translations first
+
+  // ── FULL PHRASE TRANSLATIONS (longest first, no risk of partial match) ──
+  const phrases = [
     ['La Blitzkrieg en acción — Polonia entre dos fuegos','Blitzkrieg in action — Poland caught between two fires'],
     ['Finlandia resiste heroicamente 3 meses contra la URSS','Finland heroically resists the USSR for 3 months'],
     ['Primera operación aerotransportada de la historia','First airborne operation in history'],
@@ -5777,137 +5782,148 @@ function autoTranslateDesc(text) {
     ['Primer uso masivo del gas cloro — 6.000 bajas en 10 minutos','First mass use of chlorine gas — 6,000 casualties in 10 minutes'],
     ['Los australianos y neozelandeses desembarcan bajo fuego — nacimiento de una identidad nacional','Australians and New Zealanders land under fire — birth of a national identity'],
     ['476 tanques atacan en masa — primera vez en la historia','476 tanks attack en masse — first time in history'],
-    ['Hungría se rinde en 13 días — India captura 93.000 prisioneros','Hungary surrenders in 13 days — India captures 93,000 prisoners'],
+    ['Hungría se rinde en 13 días — India captura 93.000 prisioneros','Bangladesh surrenders in 13 days — India captures 93,000 prisoners'],
     ['Fin de la presencia americana','End of the American presence'],
-    // Partial phrase translations
-    ['primer tratado de paz', 'first peace treaty'],
-    ['primera ciudad amurallada', 'first walled city'],
-    ['primera aldea permanente', 'first permanent village'],
-    ['primera vez en la historia', 'first time in history'],
-    ['por primera vez', 'for the first time'],
-    ['Primera vez', 'First time'],
-    ['primera batalla', 'first battle'],
-    ['punto de inflexión', 'turning point'],
-    ['el mayor conflicto', 'the greatest conflict'],
-    ['mayor derrota', 'greatest defeat'],
-    ['mayor victoria', 'greatest victory'],
-    ['la mayor', 'the greatest'],
-    ['el mayor', 'the greatest'],
-    ['obra maestra', 'masterpiece'],
-    ['muertos de hambre', 'died of starvation'],
-    ['civiles muertos', 'civilians killed'],
-    ['bajas', 'casualties'],
-    ['muertos', 'killed'],
-    ['soldados muertos', 'soldiers killed'],
-    ['soldados capturados', 'soldiers captured'],
-    ['prisioneros', 'prisoners'],
-    ['rendición', 'surrender'],
-    ['conquista', 'conquest'],
-    ['victoria decisiva', 'decisive victory'],
-    ['victoria pírrica', 'Pyrrhic victory'],
-    ['derrota decisiva', 'decisive defeat'],
-    ['derrota humillante', 'humiliating defeat'],
-    ['cambia la historia', 'changes history'],
-    ['cambió la historia', 'changed history'],
-    ['nace el concepto de', 'marks the birth of the concept of'],
-    ['nace ', 'is born '],
-    ['nacen ', 'are born '],
-    ['fin del', 'end of the'],
-    ['fin de la', 'end of the'],
-    ['inicio del', 'beginning of the'],
-    ['inicio de la', 'beginning of the'],
-    ['Inicio del', 'Beginning of the'],
-    ['comienza ', 'begins '],
-    ['termina ', 'ends '],
-    ['sin precedentes', 'unprecedented'],
-    ['histórico', 'historic'],
-    ['histórica', 'historic'],
-    ['legendario', 'legendary'],
-    ['legendaria', 'legendary'],
-    ['definitivo', 'definitive'],
-    ['definitiva', 'definitive'],
-    ['heroica', 'heroic'],
-    ['heroico', 'heroic'],
-    ['masacre', 'massacre'],
-    ['masacra', 'massacres'],
-    ['destruye', 'destroys'],
-    ['destruyen', 'destroy'],
-    ['destruyó', 'destroyed'],
-    ['captura', 'captures'],
-    ['capturado', 'captured'],
-    ['humillado', 'humiliated'],
-    ['humillante', 'humiliating'],
-    ['resistencia', 'resistance'],
-    ['resiste', 'resists'],
-    ['resistió', 'resisted'],
-    ['domina', 'dominates'],
-    ['dominó', 'dominated'],
-    ['conquista', 'conquers'],
-    ['conquistó', 'conquered'],
-    ['libera', 'liberates'],
-    ['liberó', 'liberated'],
-    ['reunifica', 'reunifies'],
-    ['unifica', 'unifies'],
-    ['unificó', 'unified'],
-    ['funda', 'founds'],
-    ['fundó', 'founded'],
-    ['expulsa', 'expels'],
-    ['expulsó', 'expelled'],
-    ['derrota', 'defeats'],
-    ['derrotó', 'defeated'],
-    ['avance', 'advance'],
-    ['retirada', 'retreat'],
-    ['asedio', 'siege'],
-    ['bloqueo', 'blockade'],
-    ['bombardeo', 'bombing'],
-    ['invasión', 'invasion'],
-    ['independencia', 'independence'],
-    ['Imperio', 'Empire'],['imperio', 'empire'],
-    ['ejército', 'army'],['ejércitos', 'armies'],
-    ['caballería', 'cavalry'],
-    ['infantería', 'infantry'],
-    ['artillería', 'artillery'],
-    ['flota', 'fleet'],['flotas', 'fleets'],
-    ['batalla', 'battle'],
-    ['guerra', 'war'],
-    ['Alemania', 'Germany'],['alemania', 'Germany'],
-    ['Francia', 'France'],['Francia', 'France'],
-    ['España', 'Spain'],
-    ['Rusia', 'Russia'],
-    ['Japón', 'Japan'],
-    ['China', 'China'],
-    ['Roma', 'Rome'],['romanos', 'Romans'],
-    ['Cartago', 'Carthage'],['cartagineses', 'Carthaginians'],
-    ['Grecia', 'Greece'],['griegos', 'Greeks'],
-    ['Persia', 'Persia'],['persas', 'Persians'],
-    ['Egipto', 'Egypt'],['egipcios', 'Egyptians'],
-    ['los siglos', 'the centuries'],
-    ['el siglo', 'the century'],
-    ['años de', 'years of'],
-    ['meses de', 'months of'],
-    ['días de', 'days of'],
-    ['horas de', 'hours of'],
-    ['esqueletos con marcas de violencia', 'skeletons with marks of violence'],
-    ['masacre más antigua documentada', 'oldest documented massacre'],
-    ['violencia sistemática', 'systematic violence'],
-    ['evidencias de', 'evidence of'],
-    ['conflicto armado', 'armed conflict'],
-    ['empalizadas defensivas', 'defensive palisades'],
-    ['expansión violenta', 'violent expansion'],
-    ['documentada arqueológicamente', 'archaeologically documented'],
-    ['grandes asentamientos', 'large settlements'],
-    ['primeras evidencias de caballería en combate', 'first evidence of cavalry in combat'],
-    ['unificación violenta del Valle del Nilo', 'violent unification of the Nile Valley'],
-    ['primera campaña militar iconográficamente documentada', 'first iconographically documented military campaign'],
-    ['fundación del Estado egipcio por conquista militar', 'foundation of the Egyptian state by military conquest'],
-    ['conflictos entre las primeras ciudades-estado', 'conflicts between the first city-states'],
-    ['El rey', 'King'],
-    ['primer', 'first'],
-    ['primera', 'first'],
+    ['primer tratado de paz','first peace treaty'],
+    ['primera ciudad amurallada','first walled city'],
+    ['primera aldea permanente','first permanent village'],
+    ['primera vez en la historia','first time in history'],
+    ['por primera vez','for the first time'],
+    ['primera batalla','first battle'],
+    ['punto de inflexión','turning point'],
+    ['el mayor conflicto','the greatest conflict'],
+    ['mayor derrota','greatest defeat'],
+    ['mayor victoria','greatest victory'],
+    ['mayor operación','largest operation'],
+    ['obra maestra del envolvimiento doble','double envelopment masterpiece'],
+    ['obra maestra táctica','tactical masterpiece'],
+    ['obra maestra','masterpiece'],
+    ['muertos de hambre','died of starvation'],
+    ['civiles muertos','civilians killed'],
+    ['soldados muertos','soldiers killed'],
+    ['soldados capturados','soldiers captured'],
+    ['esqueletos con marcas de violencia','skeletons with marks of violence'],
+    ['masacre más antigua documentada','oldest documented massacre'],
+    ['violencia sistemática','systematic violence'],
+    ['evidencias de','evidence of'],
+    ['conflicto armado','armed conflict'],
+    ['empalizadas defensivas','defensive palisades'],
+    ['expansión violenta','violent expansion'],
+    ['documentada arqueológicamente','archaeologically documented'],
+    ['grandes asentamientos','large settlements'],
+    ['primeras evidencias de caballería en combate','first evidence of cavalry in combat'],
+    ['unificación violenta del Valle del Nilo','violent unification of the Nile Valley'],
+    ['primera campaña militar iconográficamente documentada','first iconographically documented military campaign'],
+    ['fundación del Estado egipcio por conquista militar','foundation of the Egyptian state by military conquest'],
+    ['conflictos entre las primeras ciudades-estado','conflicts between the first city-states'],
+    ['primera de la historia','first in history'],
+    ['primera del mundo','first in the world'],
+    ['Rommel el Zorro del Desierto','Rommel the Desert Fox'],
+    ['guerra de movimiento en el desierto','war of movement in the desert'],
+    ['guerra de movimiento','war of movement'],
+    ['Paris cae sin combate','Paris falls without a fight'],
+    ['París cae sin combate','Paris falls without a fight'],
+    ['France firmó el Armisticio','France signs the Armistice'],
+    ['firmó el Armisticio','signs the Armistice'],
+    ['Grecia derrota a Italia','Greece defeats Italy'],
+    ['Mussolini humillado','Mussolini humiliated'],
+    ['primer conquest de isla por paracaidistas','first island conquest by paratroopers'],
+    ['conquest de isla por paracaidistas','island conquest by paratroopers'],
+    ['millones de soldados','million soldiers'],
+    ['3 millones de soldados','3 million soldiers'],
+    ['Balcanes conquistados en 3 semanas','Balkans conquered in 3 weeks'],
+    ['conquistados en 3 semanas','conquered in 3 weeks'],
+    ['en combate','in combat'],
   ];
-  [...replacements].sort((a,b) => b[0].length - a[0].length).forEach(([es, en]) => {
-    t = t.replace(new RegExp(es, 'gi'), en);
+  phrases.forEach(([es, en]) => {
+    t = t.replace(new RegExp(es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), en);
   });
+
+  // ── WORD-LEVEL REPLACEMENTS (with word boundaries to avoid partial matches) ──
+  const words = [
+    // Cities & places
+    ['París','Paris'], ['Berlín','Berlin'], ['Moscú','Moscow'], ['Viena','Vienna'],
+    ['Varsovia','Warsaw'], ['Nínive','Nineveh'], ['Jerusalén','Jerusalem'],
+    ['Constantinopla','Constantinople'], ['Babilonia','Babylon'], ['Cartago','Carthage'],
+    // Countries
+    ['Alemania','Germany'], ['Francia','France'], ['España','Spain'], ['Italia','Italy'],
+    ['Polonia','Poland'], ['Rusia','Russia'], ['Grecia','Greece'], ['Persia','Persia'],
+    ['Egipto','Egypt'], ['Japón','Japan'], ['China','China'], ['India','India'],
+    ['Finlandia','Finland'], ['Noruega','Norway'], ['Bélgica','Belgium'],
+    ['Ucrania','Ukraine'], ['Siria','Syria'], ['Irak','Iraq'], ['Irán','Iran'],
+    // Peoples / armies
+    ['griegos','Greeks'], ['romanos','Romans'], ['persas','Persians'], ['egipcios','Egyptians'],
+    ['cartagineses','Carthaginians'], ['mongoles','Mongols'], ['vikingos','Vikings'],
+    ['otomanos','Ottomans'], ['normandos','Normans'], ['sajones','Saxons'],
+    ['francos','Franks'], ['visigodos','Visigoths'], ['hunos','Huns'],
+    ['paracaidistas','paratroopers'], ['cruzados','Crusaders'],
+    // Military nouns
+    ['ejércitos','armies'], ['ejército','army'], ['caballería','cavalry'],
+    ['infantería','infantry'], ['artillería','artillery'], ['flota','fleet'],
+    ['flotas','fleets'], ['armada','fleet'], ['asedio','siege'], ['bloqueo','blockade'],
+    ['bombardeo','bombing'], ['invasión','invasion'], ['conquista','conquest'],
+    ['retirada','retreat'], ['avance','advance'], ['rendición','surrender'],
+    ['resistencia','resistance'], ['victoria','victory'], ['derrota','defeat'],
+    ['batalla','battle'], ['guerra','war'], ['operación','operation'],
+    ['campaña','campaign'], ['tratado','treaty'], ['independencia','independence'],
+    ['revolución','revolution'], ['revolución','revolution'],
+    ['armisticio','armistice'], ['Armisticio','Armistice'],
+    ['isla','island'], ['islas','islands'], ['desierto','desert'],
+    ['movimiento','movement'], ['bajas','casualties'],
+    ['prisioneros','prisoners'], ['muertos','killed'], ['heridos','wounded'],
+    // Numbers / quantities
+    ['millones','million'], ['miles','thousands'], ['cientos','hundreds'],
+    // Adjectives
+    ['masacre','massacre'], ['histórico','historic'], ['histórica','historic'],
+    ['legendario','legendary'], ['legendaria','legendary'],
+    ['definitivo','definitive'], ['definitiva','definitive'],
+    ['heroico','heroic'], ['heroica','heroic'],
+    ['humillante','humiliating'], ['humillado','humiliated'],
+    ['decisivo','decisive'], ['decisiva','decisive'],
+    ['sangriento','bloody'], ['sangrienta','bloody'],
+    ['sin precedentes','unprecedented'],
+    // Verbs
+    ['destruye','destroys'], ['destruyó','destroyed'], ['destruyen','destroy'],
+    ['captura','captures'], ['capturado','captured'], ['capturó','captured'],
+    ['resiste','resists'], ['resistió','resisted'],
+    ['domina','dominates'], ['dominó','dominated'],
+    ['conquista','conquers'], ['conquistó','conquered'],
+    ['libera','liberates'], ['liberó','liberated'],
+    ['unifica','unifies'], ['unificó','unified'], ['reunifica','reunifies'],
+    ['funda','founds'], ['fundó','founded'],
+    ['expulsa','expels'], ['expulsó','expelled'],
+    ['derrota','defeats'], ['derrotó','defeated'],
+    ['avanza','advances'], ['avanzó','advanced'],
+    ['termina','ends'], ['comienza','begins'],
+    ['cambia','changes'], ['cambió','changed'],
+    ['rinde','surrenders'], ['rindió','surrendered'],
+    ['cae','falls'], ['cayó','fell'],
+    ['nace','is born'], ['nacen','are born'],
+    // Empires / specific names
+    ['Imperio','Empire'], ['imperio','empire'],
+    ['República','Republic'], ['república','republic'],
+    ['Rey','King'], ['rey','king'], ['Reina','Queen'], ['reina','queen'],
+    ['General','General'], ['Almirante','Admiral'], ['Mariscal','Marshal'],
+    ['Faraón','Pharaoh'], ['Emperador','Emperor'], ['emperador','emperor'],
+    // Time
+    ['siglo','century'], ['siglos','centuries'],
+    ['años de','years of'], ['meses de','months of'],
+    ['días de','days of'], ['semanas','weeks'], ['semana','week'],
+    ['horas de','hours of'],
+    // Connectors
+    ['entre dos fuegos','caught between two fires'],
+    ['el fin del','the end of the'],
+    ['fin del','end of the'], ['fin de la','end of the'],
+    ['inicio del','beginning of the'], ['inicio de la','beginning of the'],
+    ['los siglos','the centuries'], ['el siglo','the century'],
+  ];
+
+  words.forEach(([es, en]) => {
+    try {
+      t = t.replace(new RegExp('\\b' + es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), en);
+    } catch(e) {}
+  });
+
   return t;
 }
 function civNameEN(name) {
@@ -5958,6 +5974,120 @@ const DOC_NAME_EN = {
 function docNameEN(name) {
   return LANG === 'en' ? (DOC_NAME_EN[name] || name) : name;
 }
+
+// ═══ CIVILIZATION NAME TRANSLATOR ═══
+const CIV_NAME_EN = {
+  // Prehistoric
+  'Tribus del Paleolítico': 'Paleolithic Tribes',
+  'Tribus Neolíticas': 'Neolithic Tribes',
+  'Cultura de Çatalhöyük': 'Çatalhöyük Culture',
+  'Cultura de Vinca': 'Vinča Culture',
+  'Cultura de Cucuteni': 'Cucuteni Culture',
+  'Pueblos del Cáucaso': 'Caucasus Peoples',
+  'Primeras Ciudades Sumerias': 'Early Sumerian City-States',
+  'Tribus del Nilo': 'Nile Tribes',
+  // Ancient
+  'Imperio Persa Aqueménida': 'Achaemenid Persian Empire',
+  'Macedonia / Liga de Corinto': 'Macedon / League of Corinth',
+  'Egipto del Nuevo Imperio': 'New Kingdom Egypt',
+  'Imperio Asirio': 'Assyrian Empire',
+  'Cartago': 'Carthage',
+  'Zhou y Han China': 'Zhou and Han China',
+  'Imperio Maurya': 'Maurya Empire',
+  'Esparta': 'Sparta',
+  'Imperio Acadio': 'Akkadian Empire',
+  'Imperio Babilónico': 'Babylonian Empire',
+  'Imperio Hitita': 'Hittite Empire',
+  'Egipto Dinástico': 'Dynastic Egypt',
+  'República Romana': 'Roman Republic',
+  'Grecia Clásica': 'Classical Greece',
+  'Liga del Peloponeso': 'Peloponnesian League',
+  'Liga de Delos': 'Delian League',
+  'India Védica': 'Vedic India',
+  // Classical
+  'Imperio Romano': 'Roman Empire',
+  'Imperio Parto': 'Parthian Empire',
+  'Imperio Sasánida': 'Sassanid Empire',
+  'Han China': 'Han China',
+  'Los Tres Reinos de China': 'Three Kingdoms of China',
+  'Imperio Gupta': 'Gupta Empire',
+  'Imperio Kushán': 'Kushan Empire',
+  'Hunos': 'Huns',
+  'Visigodos': 'Visigoths',
+  'Imperio Romano de Oriente': 'Eastern Roman Empire',
+  // Medieval
+  'Califato Islámico / Omeya': 'Islamic / Umayyad Caliphate',
+  'Califato Omeya': 'Umayyad Caliphate',
+  'Califato Árabe': 'Arab Caliphate',
+  'Imperio Carolingio / Sacro Imperio': 'Carolingian / Holy Roman Empire',
+  'Imperio Carolingio': 'Carolingian Empire',
+  'Sacro Imperio Romano': 'Holy Roman Empire',
+  'Imperio Mongol': 'Mongol Empire',
+  'Imperio Bizantino': 'Byzantine Empire',
+  'Reinos Vikingos': 'Viking Kingdoms',
+  'Reinos Cruzados': 'Crusader States',
+  'Sultanato de Delhi': 'Delhi Sultanate',
+  'Japón Feudal (Shogunato)': 'Feudal Japan (Shogunate)',
+  'Imperio Otomano': 'Ottoman Empire',
+  'Reinos de la Reconquista': 'Reconquista Kingdoms',
+  // Early Modern
+  'España Imperial / Corona Española': 'Imperial Spain / Spanish Crown',
+  'España Imperial': 'Imperial Spain',
+  'Francia de los Borbones / Valois': 'Bourbon / Valois France',
+  'Imperio Otomano (apogeo)': 'Ottoman Empire (apogee)',
+  'Imperio Mogol': 'Mughal Empire',
+  'Japón Tokugawa': 'Tokugawa Japan',
+  'Suecia Imperial (Era del Gran Poder)': 'Imperial Sweden (Age of Greatness)',
+  'Rusia de los Zares': 'Tsarist Russia',
+  'Provincias Unidas (Holanda)': 'Dutch Republic',
+  'Gran Bretaña / Inglaterra': 'Great Britain / England',
+  // Napoleonic
+  'Francia Napoleónica': 'Napoleonic France',
+  'Coalición Anti-Napoleónica': 'Anti-Napoleonic Coalition',
+  'Prusia / Alemania emergente': 'Prussia / Emerging Germany',
+  'Gran Bretaña (Era Napoleónica)': 'Great Britain (Napoleonic Era)',
+  'Rusia Imperial (Era Napoleónica)': 'Imperial Russia (Napoleonic Era)',
+  'Imperio Austriaco': 'Austrian Empire',
+  'España Peninsular': 'Peninsular Spain',
+  'Naciones Latinoamericanas emergentes': 'Emerging Latin American Nations',
+  // WWI
+  'Imperio Alemán (Kaiserreich)': 'German Empire (Kaiserreich)',
+  'Imperio Austro-Húngaro': 'Austro-Hungarian Empire',
+  'Imperio Otomano (final)': 'Ottoman Empire (final)',
+  'Gran Bretaña y Commonwealth': 'Great Britain and Commonwealth',
+  'Francia (III República)': 'France (Third Republic)',
+  'Rusia Imperial / URSS emergente': 'Imperial Russia / Emerging USSR',
+  'Estados Unidos (WWI)': 'United States (WWI)',
+  'Imperio Ruso': 'Russian Empire',
+  // WWII
+  'Alemania Nazi (III Reich)': 'Nazi Germany (Third Reich)',
+  'URSS (Stalin)': 'USSR (Stalin)',
+  'Estados Unidos (WWII)': 'United States (WWII)',
+  'Gran Bretaña (Churchill)': 'Great Britain (Churchill)',
+  'Japón Imperial': 'Imperial Japan',
+  'Francia Libre / Resistencia': 'Free France / Resistance',
+  'Italia Fascista': 'Fascist Italy',
+  'China (República / Comunista)': 'China (Republic / Communist)',
+  // Cold War
+  'Estados Unidos (Guerra Fría)': 'United States (Cold War)',
+  'URSS (Guerra Fría)': 'USSR (Cold War)',
+  'China Popular (Mao)': 'People\'s Republic of China (Mao)',
+  'Vietnam del Norte': 'North Vietnam',
+  'Israel': 'Israel',
+  'Corea del Norte / Sur': 'North / South Korea',
+  'Cuba Revolucionaria': 'Revolutionary Cuba',
+  'Guerrillas y Movimientos de Liberación': 'Guerrillas and Liberation Movements',
+  // Contemporary
+  'Estados Unidos (Siglo XXI)': 'United States (21st Century)',
+  'Rusia (Putin)': 'Russia (Putin)',
+  'China (Xi Jinping)': 'China (Xi Jinping)',
+  'Grupos No Estatales (ISIS, Al-Qaeda)': 'Non-State Actors (ISIS, Al-Qaeda)',
+  'Ucrania': 'Ukraine',
+  'OTAN': 'NATO',
+  'Israel (Siglo XXI)': 'Israel (21st Century)',
+  'Fuerzas de la OTAN en Afganistán': 'NATO Forces in Afghanistan',
+};
+
 
 
 const CMD_NAME_EN = {
