@@ -462,7 +462,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 /* ── SECTION VIEWS ── */
 .section-view { display:none; min-height:60vh; padding:2rem; max-width:1400px; margin:0 auto; }
 .section-view.active { display:block; }
-#home-view { display:block; }
+/* home-view uses .active class like every other view — no static override needed */
 
 /* Nav active state */
 .nav-link.active { color:var(--gold) !important; }
@@ -3137,7 +3137,7 @@ function buildTacticsGrid(tactics) {
     el.innerHTML = '<div class="tactic-diagram">' + tac.icon + '</div>' +
       '<div class="tactic-name">' + tac.name + '</div>' +
       '<div class="tactic-origin">' + tac.origin + '</div>';
-    el.onclick = () => openTacticModal(t);
+    el.onclick = () => openTacticModal(tac);
     g.appendChild(el);
   });
 }
@@ -3608,6 +3608,7 @@ function initCivsIndex() {
   if (!civsIndexBuilt) {
     buildAllCivsFlat();
     const chips = document.getElementById('civs-filter-chips');
+    chips.innerHTML = ''; // clear before rebuilding
     // All eras button
     const allBtn = document.createElement('button');
     allBtn.className = 'filter-chip active';
@@ -4839,11 +4840,16 @@ function applyTranslations() {
   stel('footer-tu', 'footer_tu');
   stel('footer-af', 'footer_af');
 
-  // Footer era links
-  const footerEraLinks = document.querySelectorAll('.footer-links a[onclick*="selectEra"]');
-  footerEraLinks.forEach(a => {
-    const m = a.getAttribute('onclick').match(/selectEra\('(\w+)\('/);
-    if (m) { const era = ERAS.find(e => e.id === m[1]); if (era) a.textContent = eraName(era); }
+  // Footer era links — use data-era attribute (reliable, no regex needed)
+  const _footerEraMap = {
+    ancient:     {es:'Antigüedad',      en:'Antiquity'},
+    medieval:    {es:'Edad Media',      en:'Middle Ages'},
+    ww2:         {es:'II Guerra Mundial',en:'World War II'},
+    contemporary:{es:'Contemporáneo',   en:'Contemporary'}
+  };
+  document.querySelectorAll('.footer-era-link').forEach(a => {
+    const id = a.dataset.era;
+    if (id && _footerEraMap[id]) a.textContent = LANG === 'en' ? _footerEraMap[id].en : _footerEraMap[id].es;
   });
 
   // War quote — translate if EN
@@ -5899,7 +5905,7 @@ function autoTranslateDesc(text) {
     ['primer', 'first'],
     ['primera', 'first'],
   ];
-  replacements.forEach(([es, en]) => {
+  [...replacements].sort((a,b) => b[0].length - a[0].length).forEach(([es, en]) => {
     t = t.replace(new RegExp(es, 'gi'), en);
   });
   return t;
