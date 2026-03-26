@@ -1309,9 +1309,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <div>
       <div class="footer-col-title" id="footer-legal-title">Legal</div>
       <ul class="footer-links">
-        <li><a>Privacidad</a></li>
-        <li><a>Términos</a></li>
-        <li><a>Cookies</a></li>
+        <li><a id="footer-privacy-link">Privacidad</a></li>
+        <li><a id="footer-terms-link">Términos</a></li>
+        <li><a id="footer-cookies-link">Cookies</a></li>
         <li><a id="footer-contact-link" onclick="showToast('hola@bellummundi.com','success')">Contacto</a></li>
       </ul>
     </div>
@@ -2955,11 +2955,25 @@ function selectEra(eraId) {
   const stats = document.getElementById('era-stats');
   stats.style.display = 'grid';
   document.getElementById('es-battles').textContent = era.battles;
+  document.querySelector('#era-stats .stat-box:nth-child(1) .stat-label').textContent = t('stat_label_battles');
+  document.querySelector('#era-stats .stat-box:nth-child(2) .stat-label').textContent = t('stat_label_years');
+  document.querySelector('#era-stats .stat-box:nth-child(3) .stat-label').textContent = t('stat_label_civs');
+  document.querySelector('#era-stats .stat-box:nth-child(4) .stat-label').textContent = t('stat_label_cmds');
   document.getElementById('es-years').textContent = era.duration;
   document.getElementById('es-civs').textContent = era.civs_count;
   document.getElementById('es-cmds').textContent = era.cmds;
 
   // Update tab counts
+  // Translate tab labels
+  const tabTrans = {battles:t('tab_battles'),commanders:t('tab_commanders'),weapons:t('tab_weapons'),civs:t('tab_civs'),tactics:t('tab_tactics'),docs:t('tab_docs')};
+  document.querySelectorAll('.era-tab').forEach(tab => {
+    const tabId = tab.dataset.tab;
+    if (tabId && tabTrans[tabId]) {
+      const count = tab.querySelector('.tab-count');
+      tab.textContent = tabTrans[tabId] + ' ';
+      if (count) tab.appendChild(count);
+    }
+  });
   document.getElementById('tab-count-battles').textContent = era.battles_data.length;
   document.getElementById('tab-count-commanders').textContent = era.commanders.length;
   document.getElementById('tab-count-weapons').textContent = era.weapons.length;
@@ -2969,7 +2983,7 @@ function selectEra(eraId) {
 
   // Map — show ALL battles
   updateMap(era.battles_data);
-  document.getElementById('map-counter').innerHTML = '<span>' + era.battles_data.length + '</span> ubicaciones en el mapa';
+  document.getElementById('map-counter').innerHTML = '<span>' + era.battles_data.length + '</span> ' + (LANG==='en' ? 'locations on the map' : 'ubicaciones en el mapa');
 
   // Build all panels
   buildBattlesGrid(era.battles_data);
@@ -2983,8 +2997,8 @@ function selectEra(eraId) {
   // Reset search fields
   const bs = document.getElementById('battle-search');
   const cs = document.getElementById('cmd-search');
-  if (bs) bs.value = '';
-  if (cs) cs.value = '';
+  if (bs) { bs.value = ''; bs.placeholder = t('search_battle_ph'); }
+  if (cs) { cs.value = ''; cs.placeholder = t('search_cmd_ph'); }
 
   // Quote
   document.getElementById('rotating-quote').textContent = '"' + era.quote.text + '"';
@@ -5339,9 +5353,9 @@ window.addEventListener('load', async () => {
   initHeroCanvas();
   initMap();
   buildEraNav();
-  selectEra('ww2');
   updateNavUI();
-  applyTranslations();
+  applyTranslations();   // Apply language FIRST
+  selectEra('ww2');      // Then render content in correct language
   initReveal();
   handleURLRouting();
 
