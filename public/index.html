@@ -602,7 +602,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   position: fixed;
   inset: 0;
   background: var(--ink);
-  z-index: 800;
+  z-index: 10000;
   display: none;
   overflow-y: auto;
   animation: overlayIn 0.2s ease forwards;
@@ -1173,94 +1173,6 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 </div>
 
 
-<!-- ═══ BATALLA DETALLE VIEW ═══ -->
-<div id="battle-detail-view" class="section-view" style="padding:0;max-width:none;">
-  <div style="background:linear-gradient(135deg,rgba(139,26,26,0.3),rgba(10,8,6,0.95));padding:3rem 2rem 2rem;border-bottom:1px solid rgba(201,168,76,0.2);">
-    <div style="max-width:1000px;margin:0 auto;">
-      <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1.5rem;transition:all 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver</button>
-      <div id="bd-era" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:0.5rem;"></div>
-      <h1 id="bd-title" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--white);line-height:1.1;margin-bottom:0.8rem;"></h1>
-      <div id="bd-combatants" style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.2rem;color:var(--parchment-dark);margin-bottom:1rem;"></div>
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-        <span id="bd-year" style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);padding:0.3rem 0.8rem;"></span>
-        <span id="bd-tag" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;color:#E07070;background:rgba(139,26,26,0.2);border:1px solid rgba(139,26,26,0.4);padding:0.3rem 0.8rem;text-transform:uppercase;"></span>
-      </div>
-    </div>
-  </div>
-  <div style="max-width:1000px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 340px;gap:2rem;" id="bd-layout">
-    <!-- Main content -->
-    <div>
-      <div id="bd-ai-content" style="font-family:'Crimson Pro',serif;font-size:1.05rem;color:var(--parchment-dark);line-height:1.8;">
-        <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Cargando análisis histórico...</span></div>
-      </div>
-    </div>
-    <!-- Sidebar -->
-    <div>
-      <!-- Related battles -->
-      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);padding:1.5rem;margin-bottom:1rem;">
-        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(201,168,76,0.1);">⚔ Batallas Relacionadas</div>
-        <div id="bd-related"></div>
-      </div>
-      <!-- Map mini -->
-      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);">
-        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;padding:1rem 1.5rem 0.5rem;">📍 Localización</div>
-        <div id="bd-mini-map" style="height:200px;"></div>
-      </div>
-    </div>
-  </div>
-  <!-- Mobile: stack layout -->
-  <style>
-    @media(max-width:768px) { #bd-layout { grid-template-columns:1fr !important; } }
-  </style>
-</div>
-
-<!-- ═══ COMANDANTE DETALLE VIEW ═══ -->
-<div id="commander-detail-view" class="section-view" style="padding:0;max-width:none;">
-  <div style="background:linear-gradient(135deg,rgba(26,26,139,0.2),rgba(10,8,6,0.95));padding:3rem 2rem 2rem;border-bottom:1px solid rgba(201,168,76,0.2);">
-    <div style="max-width:1000px;margin:0 auto;">
-      <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1.5rem;transition:all 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver</button>
-      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-        <div id="cd-emoji" style="font-size:4rem;"></div>
-        <div>
-          <div id="cd-era" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;"></div>
-          <h1 id="cd-name" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--white);line-height:1.1;margin-bottom:0.3rem;"></h1>
-          <div id="cd-role" style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.1rem;color:var(--parchment-dark);"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div style="max-width:1000px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 300px;gap:2rem;" id="cd-layout">
-    <div>
-      <div id="cd-ai-content" style="font-family:'Crimson Pro',serif;font-size:1.05rem;color:var(--parchment-dark);line-height:1.8;">
-        <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Cargando análisis histórico...</span></div>
-      </div>
-    </div>
-    <div>
-      <div style="background:var(--slate);border:1px solid rgba(201,168,76,0.15);padding:1.5rem;">
-        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(201,168,76,0.1);">👑 Otros Comandantes de la Era</div>
-        <div id="cd-related"></div>
-      </div>
-    </div>
-  </div>
-  <style>@media(max-width:768px){#cd-layout{grid-template-columns:1fr !important;}}</style>
-</div>
-
-<!-- ═══ COMPARE VIEW ═══ -->
-<div id="compare-view" class="section-view" style="padding:2rem;max-width:1100px;margin:0 auto;">
-  <div class="page-title-bar">
-    <button onclick="goBack()" style="background:none;border:1px solid rgba(201,168,76,0.3);color:var(--smoke);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;padding:0.4rem 0.8rem;cursor:pointer;text-transform:uppercase;margin-bottom:1rem;display:block;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--smoke)'">← Volver a Batallas</button>
-    <div class="page-eyebrow">Análisis Comparativo con IA</div>
-    <h1 class="page-title" id="cmp-title">Comparación de Batallas</h1>
-  </div>
-  <div class="cmp-grid" id="cmp-grid">
-    <div class="cmp-bh" id="cmp-left"></div>
-    <div class="cmp-vs-big">VS</div>
-    <div class="cmp-bh" id="cmp-right"></div>
-  </div>
-  <div class="cmp-result" id="cmp-result">
-    <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando...</span></div>
-  </div>
-</div>
 
 </main>
 
@@ -3498,9 +3410,13 @@ let _lastFromSection = 'home';
 
 function openPage(type) {
   const overlay = document.getElementById('page-overlay');
-  document.getElementById('battle-page').style.display    = type === 'battle'    ? 'block' : 'none';
-  document.getElementById('commander-page').style.display = type === 'commander' ? 'block' : 'none';
-  document.getElementById('compare-page').style.display   = type === 'compare'   ? 'block' : 'none';
+  if (!overlay) { console.error('page-overlay not found'); return; }
+  const bp = document.getElementById('battle-page');
+  const cp2 = document.getElementById('commander-page');
+  const cp3 = document.getElementById('compare-page');
+  if (bp)  bp.style.display  = type === 'battle'    ? 'block' : 'none';
+  if (cp2) cp2.style.display = type === 'commander' ? 'block' : 'none';
+  if (cp3) cp3.style.display = type === 'compare'   ? 'block' : 'none';
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   overlay.scrollTop = 0;
@@ -3892,15 +3808,7 @@ async function runCmp() {
   document.getElementById('cmpRight1').textContent = e2.name + ' · ' + b2.year;
   document.getElementById('cmpRight2').textContent = b2.name;
   document.getElementById('cmpAiResult').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando batallas...</span></div>';
-
-  // Show as overlay — no scroll through home
-  document.getElementById('battle-page').style.display = 'none';
-  document.getElementById('commander-page').style.display = 'none';
-  document.getElementById('compare-page').style.display = 'block';
-  const overlay = document.getElementById('page-overlay');
-  overlay.classList.add('open');
-  overlay.scrollTop = 0;
-  document.body.style.overflow = 'hidden';
+  openPage('compare');
 
   if (!canQuery()) {
     document.getElementById('paywall-overlay').classList.add('open');
@@ -4081,6 +3989,34 @@ window.addEventListener('load', async () => {
           <div class="bp-sidebar-title">🗡️ Armamento de su época</div>
           <div class="bp-sidebar-body" id="cpRelWeapons"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- COMPARACIÓN PAGE -->
+  <div id="compare-page" style="display:none;">
+    <div class="bp-hero" style="background:linear-gradient(160deg,rgba(60,20,80,0.35) 0%,rgba(10,8,6,0.98) 55%);">
+      <div class="bp-hero-inner">
+        <button class="bp-back" onclick="closePage()">← Volver</button>
+        <div class="bp-era-tag">Análisis Comparativo con IA</div>
+        <h1 class="bp-title" id="cmpPageTitle" style="font-size:clamp(1.4rem,3.5vw,2.5rem);"></h1>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-top:1.2rem;">
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);padding:0.8rem 1rem;">
+            <div class="bp-era-tag" id="cmpLeft1" style="margin-bottom:0.3rem;"></div>
+            <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--white);" id="cmpLeft2"></div>
+          </div>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:var(--gold);text-align:center;">VS</div>
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);padding:0.8rem 1rem;">
+            <div class="bp-era-tag" id="cmpRight1" style="margin-bottom:0.3rem;"></div>
+            <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--white);" id="cmpRight2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="max-width:1100px;margin:0 auto;padding:2rem;">
+      <div class="bp-ai" id="cmpAiResult">
+        <div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando batallas...</span></div>
       </div>
     </div>
   </div>
