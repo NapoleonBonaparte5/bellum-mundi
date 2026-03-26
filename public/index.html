@@ -2998,8 +2998,8 @@ function selectEra(eraId) {
   if (cs) { cs.value = ''; cs.placeholder = t('search_cmd_ph'); }
 
   // Quote
-  document.getElementById('rotating-quote').textContent = '"' + era.quote.text + '"';
-  document.getElementById('rotating-attr').textContent = '— ' + era.quote.attr;
+  const _q = (LANG==='en'&&QUOTE_EN[era.id])?QUOTE_EN[era.id]:era.quote; document.getElementById('rotating-quote').textContent = '\u201c' + _q.text + '\u201d';
+  document.getElementById('rotating-attr').textContent = '\u2014 ' + _q.attr;
 
   // Switch to battles tab
   switchTab('battles');
@@ -3059,20 +3059,20 @@ function renderBattleCards(battles) {
     const c = document.createElement('div');
     c.className = 'battle-card';
     c.innerHTML = '<div class="battle-year">' + b.year + '</div>' +
-      '<div class="battle-name">' + b.name + '</div>' +
-      '<div class="battle-combatants">' + b.combatants + '</div>' +
-      '<span class="battle-tag">' + b.tag + '</span>' +
+      '<div class="battle-name">' + battleNameEN(b.name) + '</div>' +
+      '<div class="battle-combatants">' + translateCombatants(b.combatants) + '</div>' +
+      '<span class="battle-tag">' + tagName(b.tag) + '</span>' +
       '<div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">' + b.desc + '</div>';
-    c.onclick = () => openBattleModal(b);
+    c.onclick = () => { if(currentEra) openBattleDetail(b, currentEra); else openBattleModal(b); };
     g.appendChild(c);
   });
   if (battles.length > BATTLES_PAGE_SIZE && !allBattlesShown) {
     showMore.style.display = 'block';
-    showMore.textContent = 'Ver las ' + (battles.length - BATTLES_PAGE_SIZE) + ' batallas restantes →';
+    showMore.textContent = LANG==='en'
+      ? 'Show ' + (battles.length - BATTLES_PAGE_SIZE) + ' more battles →'
+      : 'Ver las ' + (battles.length - BATTLES_PAGE_SIZE) + ' batallas restantes →';
     showMore._battles = battles;
-  } else {
-    showMore.style.display = 'none';
-  }
+  } else { showMore.style.display = 'none'; }
 }
 
 function showMoreBattles() {
@@ -3088,14 +3088,15 @@ function buildBattlesGrid(battles) {
 
 function buildCommandersGrid(cmds) {
   const g = document.getElementById('commanders-grid');
+  if (!g) return;
   g.innerHTML = '';
   cmds.forEach(c => {
     const el = document.createElement('div');
     el.className = 'commander-card';
     el.innerHTML = '<div class="commander-avatar">' + c.emoji + '</div>' +
       '<div class="commander-name">' + c.name + '</div>' +
-      '<div class="commander-role">' + c.role + '</div>';
-    el.onclick = () => openCommanderModal(c);
+      '<div class="commander-role">' + roleName(c.role) + '</div>';
+    el.onclick = () => { if(currentEra) openCommanderDetail(c, currentEra); else openCommanderModal(c); };
     g.appendChild(el);
   });
 }
@@ -3220,6 +3221,8 @@ function showSection(sectionId) {
     target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
   }
   currentSection = sectionId;
+  // Re-apply translations to the newly visible section
+  try { applyTranslations(); } catch(e) {}
 
   // Update nav active state
   document.querySelectorAll('.nav-link').forEach(a => {
@@ -3282,6 +3285,7 @@ function initBattlesIndex() {
 function renderBattlesIndex(battles) {
   const grid = document.getElementById('battles-index-grid');
   document.getElementById('battles-count').textContent = battles.length;
+  const _blbl=document.getElementById('battles-count-label'); if(_blbl) _blbl.textContent=LANG==='en'?'battles found':'batallas encontradas';
   const brc = document.getElementById('battles-results-count');
   if (brc) { const sp = brc.querySelector('span'); if (!sp) brc.innerHTML = `<span>${battles.length}</span> ${t('battles_found').replace('{{n}} ','')}`; }
   grid.innerHTML = '';
@@ -3290,10 +3294,10 @@ function renderBattlesIndex(battles) {
     card.className = 'index-card';
     card.innerHTML = `
       <div class="index-card-era">${b.eraName} · ${b.year}</div>
-      <div class="index-card-name">${b.name}</div>
-      <div class="index-card-sub">${b.combatants}</div>
+      <div class="index-card-name">${battleNameEN(b.name)}</div>
+      <div class="index-card-sub">${translateCombatants(b.combatants)}</div>
       <div style="font-size:0.8rem;color:var(--smoke);margin-top:0.4rem;">${b.desc}</div>
-      <span class="index-card-tag">${b.tag}</span>
+      <span class="index-card-tag">${tagName(b.tag)}</span>
     `;
     card.onclick = () => {
       const eraObj = ERAS.find(e => e.id === b.eraId);
@@ -3374,6 +3378,7 @@ function initCommandersIndex() {
 function renderCommandersIndex(cmds) {
   const grid = document.getElementById('commanders-index-grid');
   document.getElementById('commanders-count').textContent = cmds.length;
+  const _clbl=document.getElementById('cmds-count-label'); if(_clbl) _clbl.textContent=LANG==='en'?'commanders found':'comandantes encontrados';
   grid.innerHTML = '';
   cmds.forEach(c => {
     const card = document.createElement('div');
@@ -3487,6 +3492,17 @@ function filterWorldMap(eraFilter, chipBtn) {
   });
 
   document.getElementById('wm-count').textContent = totalCount;
+  // Translate worldmap stat labels
+  const _wmsb = document.getElementById('wm-stat-battles');
+  const _wmse = document.getElementById('wm-stat-eras');
+  const _wmsc = document.getElementById('wm-stat-countries');
+  const _wmss = document.getElementById('wm-stat-span');
+  const _wmsv = document.getElementById('wm-span-val');
+  if(_wmsb && _wmsb.firstChild) _wmsb.firstChild.textContent = LANG==='en' ? 'Battles on map: ' : 'Batallas en el mapa: ';
+  if(_wmse && _wmse.firstChild) _wmse.firstChild.textContent = LANG==='en' ? 'Eras represented: ' : 'Eras representadas: ';
+  if(_wmsc && _wmsc.firstChild) _wmsc.firstChild.textContent = LANG==='en' ? 'Countries involved: ' : 'Países involucrados: ';
+  if(_wmss && _wmss.firstChild) _wmss.firstChild.textContent = LANG==='en' ? 'Time span: ' : 'Span temporal: ';
+  if(_wmsv) _wmsv.textContent = LANG==='en' ? '50,000 years of history' : '50.000 años de historia';
   document.getElementById('wm-eras').textContent = eraFilter === 'all' ? ERAS.length : 1;
 
   setTimeout(() => { if (worldMap) worldMap.invalidateSize(); }, 200);
