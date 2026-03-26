@@ -793,6 +793,22 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <li><a href="#newsletter-section" class="nav-link">Newsletter</a></li>
     </ul>
     <div class="nav-right" id="nav-right"></div>
+    <div class="lang-switcher" id="lang-switcher">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLangMenu()">
+        <span class="lang-flag" id="lang-flag">🇪🇸</span>
+        <span class="lang-code" id="lang-code">ES</span>
+      </button>
+      <div class="lang-menu" id="lang-menu">
+        <button class="lang-option active" data-lang="es" onclick="setLang('es');toggleLangMenu()">
+          <span class="lang-option-flag">🇪🇸</span>
+          <span class="lang-option-name">Español</span>
+        </button>
+        <button class="lang-option" data-lang="en" onclick="setLang('en');toggleLangMenu()">
+          <span class="lang-option-flag">🇬🇧</span>
+          <span class="lang-option-name">English</span>
+        </button>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -800,18 +816,18 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 <section id="hero">
   <canvas id="hero-canvas"></canvas>
   <div class="hero-content">
-    <div class="hero-ornament">Encyclopaedia Militaris Universalis · Est. MMXXV</div>
+    <div class="hero-ornament" id="hero-ornament">Encyclopaedia Militaris Universalis · Est. MMXXV</div>
     <h1 class="hero-title">BELLUM<br><span>MUNDI</span></h1>
-    <p class="hero-subtitle">Historia Militar del Mundo · De los Albores de la Civilización<br>hasta el Siglo XXI</p>
+    <p class="hero-subtitle" id="hero-subtitle-el">Historia Militar del Mundo · De los Albores de la Civilización<br>hasta el Siglo XXI</p>
     <div class="hero-rule"></div>
-    <p class="hero-meta">Todas las batallas · Todos los ejércitos · Todos los comandantes · Todos los tratados</p>
+    <p class="hero-meta" id="hero-meta-el">Todas las batallas · Todos los ejércitos · Todos los comandantes · Todos los tratados</p>
     <div class="hero-ctas">
-      <button class="btn-primary" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">Explorar Gratis</button>
-      <button class="btn-ghost" onclick="openPricing()">Ver Premium ⚔</button>
+      <button class="btn-primary" id="hero-explore-btn" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">Explorar Gratis</button>
+      <button class="btn-ghost" id="hero-premium-btn" onclick="openPricing()">Ver Premium ⚔</button>
     </div>
   </div>
   <div class="scroll-cta" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">
-    <span>Descender</span>
+    <span id="hero-scroll-text">Descender</span>
     <div class="scroll-line"></div>
   </div>
 </section>
@@ -834,7 +850,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 
   <!-- Search Autocomplete -->
   <div id="search-section" class="reveal">
-    <div class="section-eyebrow">Búsqueda Universal con IA</div>
+    <div class="section-eyebrow" id="search-eyebrow">Búsqueda Universal con IA</div>
     <div class="search-wrapper">
       <div class="search-bar">
         <input class="search-input" type="text" id="search-input"
@@ -862,9 +878,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 
   <!-- Timeline -->
   <div class="section-header reveal">
-    <div class="section-eyebrow">Navegación Cronológica</div>
-    <h2 class="section-title">La Historia en el Tiempo</h2>
-    <p class="section-desc">Recorre todas las eras de la historia militar, desde las primeras civilizaciones hasta el mundo contemporáneo</p>
+    <div class="section-eyebrow" id="timeline-eyebrow">Navegación Cronológica</div>
+    <h2 class="section-title" id="timeline-title-el">La Historia en el Tiempo</h2>
+    <p class="section-desc" id="timeline-desc-el">Recorre todas las eras de la historia militar, desde las primeras civilizaciones hasta el mundo contemporáneo</p>
     <div class="gold-rule"></div>
   </div>
 
@@ -1708,7 +1724,7 @@ async function queryAI(eyebrow, title, prompt) {
   document.getElementById('bpCombatants').textContent = '';
   document.getElementById('bpYear').textContent = '';
   document.getElementById('bpTag').textContent = '';
-  document.getElementById('bpAiContent').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+  document.getElementById('bpAiContent').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_ai')}</span></div>`;
   document.getElementById('bpRelBattles').innerHTML = '';
   document.getElementById('bpRelCmds').innerHTML = '';
   document.getElementById('bpRelWeapons').innerHTML = '';
@@ -2678,7 +2694,7 @@ function scrollEraNav(dir) {
 
 // ── TAB SYSTEM ──
 function switchTab(tabId) {
-  document.querySelectorAll('.era-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+  document.querySelectorAll('.era-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === tabId));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
 }
 
@@ -2872,7 +2888,7 @@ function buildCivsGrid(civs) {
 function buildTacticsGrid(tactics) {
   const g = document.getElementById('tactics-grid');
   g.innerHTML = '';
-  tactics.forEach(t => {
+  tactics.forEach(tac => {
     const el = document.createElement('div');
     el.className = 'tactic-card';
     el.innerHTML = '<div class="tactic-diagram">' + t.icon + '</div>' +
@@ -3467,7 +3483,7 @@ function fillSidebarWeapons(containerId, weapons, eraObj) {
   c.innerHTML = '';
   weapons.slice(0, 6).forEach(w => {
     c.appendChild(makeSidebarItem(w.icon || '🗡️', w.name, w.period, null,
-      () => queryAI('Armamento', w.name, `Explica en detalle el arma ${w.name}, período ${w.period}. Era: ${eraObj.name}.`)));
+      () => queryAI(LANG==='en'?'Weapon':'Armamento', w.name, t('ai_explain_weapon',{name:w.name,period:w.period,era:eraObj.name}))));
   });
 }
 
@@ -3475,8 +3491,8 @@ function fillSidebarTactics(containerId, tactics, eraObj) {
   const c = document.getElementById(containerId);
   if (!c) return;
   c.innerHTML = '';
-  tactics.slice(0, 5).forEach(t => {
-    c.appendChild(makeSidebarItem(t.icon || '🎯', t.name, t.origin, null,
+  tactics.slice(0, 5).forEach(tac => {
+    c.appendChild(makeSidebarItem(tac.icon || '🎯', tac.name, tac.origin, null,
       () => queryAI('Táctica', t.name, `Explica la táctica "${t.name}" usada por ${t.origin}. Era: ${eraObj.name}.`)));
   });
 }
@@ -3499,14 +3515,15 @@ async function openBattleDetail(battle, eraObj) {
   document.title = battle.name + ' — Bellum Mundi';
 
   // Fill header
-  document.getElementById('bpEraTag').textContent = eraObj.name + ' · Historia Militar';
+  document.getElementById('bpEraTag').textContent = eraObj.name + ' ' + t('history_military');
+  document.querySelectorAll('.bp-back').forEach(b => b.textContent = t('back_btn'));
   document.getElementById('bpTitle').textContent = battle.name;
   document.getElementById('bpCombatants').textContent = battle.combatants;
   document.getElementById('bpYear').textContent = battle.year;
   document.getElementById('bpTag').textContent = battle.tag;
 
   // Reset AI
-  document.getElementById('bpAiContent').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+  document.getElementById('bpAiContent').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_ai')}</span></div>`;
 
   // Fill sidebar
   buildBpMap(battle.lat, battle.lng);
@@ -3526,7 +3543,8 @@ async function openBattleDetail(battle, eraObj) {
   }
   consumeQuery();
   try {
-    const result = await callAI(`Explica en detalle exhaustivo la batalla de ${battle.name} (${battle.year}), entre ${battle.combatants}. Contexto: ${battle.desc}. Era: ${eraObj.name}.`);
+    const aiPrompt = t('ai_explain_battle', {name:battle.name, year:battle.year, combatants:battle.combatants, desc:battle.desc||'', era:eraObj.name});
+  const result = await callAI(aiPrompt);
     const aiDiv = document.getElementById('bpAiContent');
     aiDiv.innerHTML = result.content;
     // Load images
@@ -3562,7 +3580,7 @@ async function openCommanderDetail(commander, eraObj) {
   document.getElementById('cpName').textContent = commander.name;
   document.getElementById('cpRole').textContent = commander.role;
 
-  document.getElementById('cpAiContent').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
+  document.getElementById('cpAiContent').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_ai')}</span></div>`;
 
   fillSidebarBattles('cpRelBattles', eraObj.battles_data, eraObj, '');
   fillSidebarCmds('cpRelCmds', eraObj.commanders, eraObj, commander.name);
@@ -3577,7 +3595,8 @@ async function openCommanderDetail(commander, eraObj) {
   }
   consumeQuery();
   try {
-    const result = await callAI(`Explica en detalle la vida militar, campañas, tácticas y legado histórico de ${commander.name}, ${commander.role}. Era: ${eraObj.name}.`);
+    const aiPrompt = t('ai_explain_commander', {name:commander.name, role:commander.role, era:eraObj.name});
+  const result = await callAI(aiPrompt);
     const aiDiv = document.getElementById('cpAiContent');
     aiDiv.innerHTML = result.content;
     if (result.imageTerms && result.imageTerms.length > 0) {
@@ -3644,7 +3663,10 @@ function acSelect(i) {
   currentEra = r.era;
   if (r.type==='battle') openBattleDetail(r.item, r.era);
   else if (r.type==='cmd') openCommanderDetail(r.item, r.era);
-  else queryAI(r.type==='doc'?'Documento':r.type==='civ'?'Civilización':'Armamento', r.name, 'Explica en detalle: '+r.name+'. Era: '+r.era.name+'.');
+  else {
+    const typeLabel = LANG==='en' ? (r.type==='doc'?'Document':r.type==='civ'?'Civilization':'Weapon') : (r.type==='doc'?'Documento':r.type==='civ'?'Civilización':'Armamento');
+    queryAI(typeLabel, r.name, 'Explica en detalle: '+r.name+'. Era: '+r.era.name+'. '+(LANG==='en'?'Write entirely in English.':''));
+  }
 }
 
 function acKeydown(e) {
@@ -3803,11 +3825,12 @@ async function runCmp() {
 
   // Fill overlay header
   document.getElementById('cmpPageTitle').textContent = b1.name + ' vs ' + b2.name;
+  document.querySelectorAll('.bp-back').forEach(b => b.textContent = t('back_btn'));
   document.getElementById('cmpLeft1').textContent  = e1.name + ' · ' + b1.year;
   document.getElementById('cmpLeft2').textContent  = b1.name;
   document.getElementById('cmpRight1').textContent = e2.name + ' · ' + b2.year;
   document.getElementById('cmpRight2').textContent = b2.name;
-  document.getElementById('cmpAiResult').innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Analizando y comparando batallas...</span></div>';
+  document.getElementById('cmpAiResult').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_compare')}</span></div>`;
   openPage('compare');
 
   if (!canQuery()) {
@@ -3816,7 +3839,8 @@ async function runCmp() {
   }
   consumeQuery();
 
-  const prompt = `Compara exhaustivamente estas dos batallas históricas:
+  const cmpLangNote = LANG === 'en' ? 'Write the entire analysis in English.' : '';
+  const prompt = `Compara exhaustivamente estas dos batallas históricas (${cmpLangNote}):
 
 BATALLA 1: ${b1.name} (${b1.year}) — ${b1.combatants} — Era: ${e1.name}
 BATALLA 2: ${b2.name} (${b2.year}) — ${b2.combatants} — Era: ${e2.name}
@@ -3874,6 +3898,569 @@ function vtlUpdate(eraId) {
   if (yr) yr.textContent = era.years;
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// INTERNATIONALISATION SYSTEM — ES / EN
+// ═══════════════════════════════════════════════════════════════
+let LANG = localStorage.getItem('bm_lang') || 'es';
+
+const T = {
+  es: {
+    // Nav
+    nav_eras: 'Eras',
+    nav_battles: '⚔ Batallas',
+    nav_commanders: '👑 Comandantes',
+    nav_worldmap: '🗺️ Mapa Global',
+    nav_library: '📜 Biblioteca',
+    nav_civs: '🏛️ Civilizaciones',
+    nav_premium: 'Premium',
+    nav_newsletter: 'Newsletter',
+    lang_label: '🌐 ES',
+    // Announce bar
+    announce: '⚔ Nuevo: <span>La Batalla de Waterloo</span> — Análisis completo con IA · Más de <span>1.200</span> suscriptores del newsletter esta semana',
+    // Hero
+    hero_ornament: 'Encyclopaedia Militaris Universalis · Est. MMXXV',
+    hero_subtitle: 'Historia Militar del Mundo · De los Albores de la Civilización<br>hasta el Siglo XXI',
+    hero_meta: 'Todas las batallas · Todos los ejércitos · Todos los comandantes · Todos los tratados',
+    hero_explore: 'Explorar Gratis',
+    hero_premium: 'Ver Premium ⚔',
+    hero_scroll: 'Descender',
+    // Free banner
+    free_text: 'Acceso gratuito —',
+    free_queries: '{{n}} consultas',
+    free_queries_suffix: 'de IA disponibles hoy',
+    free_cta: 'Consultas ilimitadas con Premium →',
+    // Search
+    search_eyebrow: 'Búsqueda Universal con IA',
+    search_placeholder: 'Busca batalla, comandante, civilización, tratado...',
+    search_btn: 'Buscar',
+    // Stats
+    stat_years: 'Años de Historia',
+    stat_battles: 'Batallas Registradas',
+    stat_civs: 'Civilizaciones',
+    stat_commanders: 'Comandantes',
+    // Timeline section
+    timeline_eyebrow: 'Navegación Cronológica',
+    timeline_title: 'La Historia en el Tiempo',
+    timeline_desc: 'Recorre todas las eras de la historia militar, desde las primeras civilizaciones hasta el mundo contemporáneo',
+    vtl_placeholder: 'Selecciona una era en la línea del tiempo',
+    era_overview_placeholder: 'Selecciona una era para explorar sus guerras, batallas, ejércitos, comandantes, armas y documentos históricos.',
+    // Era stats labels
+    stat_label_battles: 'Batallas',
+    stat_label_years: 'Años de Duración',
+    stat_label_civs: 'Civilizaciones',
+    stat_label_cmds: 'Comandantes',
+    // Map
+    map_title: '⚔ Mapa de Batallas',
+    map_select: 'Selecciona una era',
+    map_locations: '{{n}} ubicaciones en el mapa',
+    // Era tabs
+    tab_battles: '⚔ Batallas',
+    tab_commanders: '👑 Comandantes',
+    tab_weapons: '🗡️ Armamento',
+    tab_civs: '🏛️ Civilizaciones',
+    tab_tactics: '🎯 Tácticas',
+    tab_docs: '📜 Documentos',
+    // Tab search placeholders
+    search_battle_ph: 'Buscar batalla por nombre, fecha o combatiente...',
+    search_cmd_ph: 'Buscar comandante por nombre o rol...',
+    // Show more
+    show_more: 'Ver más batallas →',
+    // Pricing section
+    pricing_eyebrow: 'Acceso al Conocimiento',
+    pricing_title: 'Elige tu Plan',
+    pricing_desc: 'Desde el explorador curioso hasta el estudioso apasionado',
+    plan_free_name: 'Explorador',
+    plan_free_price: 'Gratis',
+    plan_free_desc: 'Para descubrir la historia',
+    plan_premium_name: 'Commander',
+    plan_premium_badge: 'RECOMENDADO',
+    plan_annual_badge: 'AHORRA 40%',
+    plan_annual_label: 'anual',
+    // Footer
+    footer_desc: 'La enciclopedia militar más completa en español. De Qadesh a Ucrania, pasando por todas las batallas, ejércitos y estrategas de la historia humana.',
+    footer_explore: 'Explorar',
+    footer_product: 'Producto',
+    footer_legal: 'Legal',
+    footer_privacy: 'Privacidad',
+    footer_terms: 'Términos',
+    footer_cookies: 'Cookies',
+    footer_contact: 'Contacto',
+    footer_prices: 'Precios',
+    footer_register: 'Crear cuenta',
+    footer_api: 'API',
+    footer_copy: '© 2025 Bellum Mundi · Todos los derechos reservados',
+    // Section pages
+    battles_eyebrow: 'Enciclopedia Militar',
+    battles_title: '⚔ Todas las Batallas',
+    battles_subtitle: 'Índice completo · Haz clic en cualquier batalla para ver el análisis completo · Activa el modo comparación para comparar dos batallas',
+    battles_search_ph: 'Buscar por nombre, año, combatientes, era...',
+    battles_found: '{{n}} batallas encontradas',
+    compare_btn: '⚖ Comparar Batallas',
+    compare_slot1: '+ Primera batalla',
+    compare_slot2: '+ Segunda batalla',
+    compare_go: '⚖ Comparar →',
+    commanders_eyebrow: 'Enciclopedia Militar',
+    commanders_title: '👑 Todos los Comandantes',
+    commanders_subtitle: 'Los estrategas, generales y líderes militares que cambiaron la historia',
+    commanders_search_ph: 'Buscar comandante por nombre, rol, era...',
+    commanders_found: '{{n}} comandantes encontrados',
+    worldmap_eyebrow: 'Cartografía Histórica',
+    worldmap_title: '🗺️ Mapa Global de Batallas',
+    worldmap_all: 'Todas las Eras',
+    wm_battles: 'Batallas en el mapa:',
+    wm_eras: 'Eras representadas:',
+    wm_countries: 'Países involucrados:',
+    wm_span: 'Span temporal:',
+    wm_span_val: '50.000 años de historia',
+    library_eyebrow: 'Archivo Histórico',
+    library_title: '📜 Biblioteca Militar',
+    library_subtitle: 'Tratados, documentos, obras clásicas y fuentes primarias de la historia militar universal',
+    lib_all: 'Todos',
+    lib_treaties: '📜 Tratados de Paz',
+    lib_classics: '📚 Obras Clásicas',
+    lib_docs: '📋 Documentos Históricos',
+    lib_letters: '✉️ Cartas y Declaraciones',
+    lib_found: '{{n}} documentos en el archivo',
+    civs_eyebrow: 'Imperios y Ejércitos',
+    civs_title: '🏛️ Civilizaciones Militares',
+    civs_subtitle: 'Todos los imperios, reinos y naciones que forjaron la historia con sus ejércitos',
+    civs_found: '{{n}} civilizaciones registradas',
+    // Overlay / detail pages
+    back_btn: '← Volver',
+    history_military: '· Historia Militar',
+    sidebar_battles: '⚔ Batallas de la misma era',
+    sidebar_commanders: '👑 Comandantes de la era',
+    sidebar_weapons: '🗡️ Armamento de la era',
+    sidebar_tactics: '🎯 Tácticas empleadas',
+    sidebar_location: '📍 Localización',
+    sidebar_era_battles: '⚔ Batallas de su era',
+    sidebar_contemporaries: '👑 Contemporáneos',
+    sidebar_era_weapons: '🗡️ Armamento de su época',
+    compare_eyebrow: 'Análisis Comparativo con IA',
+    loading_ai: 'Consultando los archivos históricos...',
+    loading_compare: 'Analizando y comparando batallas...',
+    // Picker
+    picker_title1: 'Elige la primera batalla',
+    picker_title2: 'Elige la segunda batalla',
+    picker_search: 'Buscar batalla...',
+    picker_empty: 'No se encontraron batallas',
+    picker_more: 'Mostrando 100 de {{n}} — usa el buscador para filtrar',
+    // Autocomplete groups
+    ac_battles: '⚔ Batallas',
+    ac_commanders: '👑 Comandantes',
+    ac_civs: '🏛️ Civilizaciones',
+    ac_docs: '📜 Documentos',
+    ac_weapons: '🗡️ Armamento',
+    ac_empty: 'Sin resultados para "{{q}}" — pulsa Buscar para consultar la IA',
+    // Auth
+    login_btn: 'Iniciar Sesión',
+    register_title: 'Crear Cuenta',
+    login_title: 'Iniciar Sesión',
+    name_ph: 'Tu nombre',
+    email_ph: 'tu@email.com',
+    password_ph: 'Contraseña',
+    // Queries
+    queries_label: '{{n}} consultas',
+    // War quote section
+    war_quote_eyebrow: 'Sabiduría Militar',
+    // Newsletter
+    newsletter_eyebrow: 'Inteligencia Histórica',
+    newsletter_title: 'La Batalla de la Semana',
+    newsletter_desc: 'Cada semana: una batalla analizada en profundidad, el perfil de un comandante, y los datos que los libros de historia omiten.',
+    // AI prompts language
+    ai_lang: 'es',
+    ai_explain_battle: 'Explica en detalle exhaustivo la batalla de {{name}} ({{year}}), entre {{combatants}}. Contexto: {{desc}}. Era: {{era}}.',
+    ai_explain_commander: 'Explica en detalle la vida militar, campañas, tácticas y legado histórico de {{name}}, {{role}}. Era: {{era}}.',
+    ai_explain_civ: 'Explica el poder militar de {{name}}, período {{period}}. Era: {{era}}.',
+    ai_explain_doc: 'Explica en detalle el documento "{{name}}" ({{year}}). Era: {{era}}.',
+    ai_explain_weapon: 'Explica en detalle el arma "{{name}}", período {{period}}. Era: {{era}}.',
+    ai_explain_tactic: 'Explica la táctica "{{name}}" usada por {{origin}}. Era: {{era}}.',
+  },
+  en: {
+    // Nav
+    nav_eras: 'Eras',
+    nav_battles: '⚔ Battles',
+    nav_commanders: '👑 Commanders',
+    nav_worldmap: '🗺️ World Map',
+    nav_library: '📜 Library',
+    nav_civs: '🏛️ Civilizations',
+    nav_premium: 'Premium',
+    nav_newsletter: 'Newsletter',
+    lang_label: '🌐 EN',
+    // Announce bar
+    announce: '⚔ New: <span>The Battle of Waterloo</span> — Full AI Analysis · Over <span>1,200</span> newsletter subscribers this week',
+    // Hero
+    hero_ornament: 'Encyclopaedia Militaris Universalis · Est. MMXXV',
+    hero_subtitle: 'Military History of the World · From the Dawn of Civilization<br>to the 21st Century',
+    hero_meta: 'All battles · All armies · All commanders · All treaties',
+    hero_explore: 'Explore Free',
+    hero_premium: 'See Premium ⚔',
+    hero_scroll: 'Scroll Down',
+    // Free banner
+    free_text: 'Free access —',
+    free_queries: '{{n}} queries',
+    free_queries_suffix: 'AI queries available today',
+    free_cta: 'Unlimited queries with Premium →',
+    // Search
+    search_eyebrow: 'Universal AI Search',
+    search_placeholder: 'Search battle, commander, civilization, treaty...',
+    search_btn: 'Search',
+    // Stats
+    stat_years: 'Years of History',
+    stat_battles: 'Battles Recorded',
+    stat_civs: 'Civilizations',
+    stat_commanders: 'Commanders',
+    // Timeline section
+    timeline_eyebrow: 'Chronological Navigation',
+    timeline_title: 'History Through Time',
+    timeline_desc: 'Explore all eras of military history, from the first civilizations to the contemporary world',
+    vtl_placeholder: 'Select an era on the timeline',
+    era_overview_placeholder: 'Select an era to explore its wars, battles, armies, commanders, weapons and historical documents.',
+    // Era stats labels
+    stat_label_battles: 'Battles',
+    stat_label_years: 'Years Duration',
+    stat_label_civs: 'Civilizations',
+    stat_label_cmds: 'Commanders',
+    // Map
+    map_title: '⚔ Battle Map',
+    map_select: 'Select an era',
+    map_locations: '{{n}} locations on the map',
+    // Era tabs
+    tab_battles: '⚔ Battles',
+    tab_commanders: '👑 Commanders',
+    tab_weapons: '🗡️ Weapons',
+    tab_civs: '🏛️ Civilizations',
+    tab_tactics: '🎯 Tactics',
+    tab_docs: '📜 Documents',
+    // Tab search placeholders
+    search_battle_ph: 'Search battle by name, date or combatants...',
+    search_cmd_ph: 'Search commander by name or role...',
+    // Show more
+    show_more: 'Show more battles →',
+    // Pricing section
+    pricing_eyebrow: 'Access to Knowledge',
+    pricing_title: 'Choose Your Plan',
+    pricing_desc: 'From the curious explorer to the passionate scholar',
+    plan_free_name: 'Explorer',
+    plan_free_price: 'Free',
+    plan_free_desc: 'To discover history',
+    plan_premium_name: 'Commander',
+    plan_premium_badge: 'RECOMMENDED',
+    plan_annual_badge: 'SAVE 40%',
+    plan_annual_label: 'annual',
+    // Footer
+    footer_desc: 'The most complete military encyclopedia in English. From Qadesh to Ukraine, covering all battles, armies and strategists in human history.',
+    footer_explore: 'Explore',
+    footer_product: 'Product',
+    footer_legal: 'Legal',
+    footer_privacy: 'Privacy',
+    footer_terms: 'Terms',
+    footer_cookies: 'Cookies',
+    footer_contact: 'Contact',
+    footer_prices: 'Pricing',
+    footer_register: 'Create account',
+    footer_api: 'API',
+    footer_copy: '© 2025 Bellum Mundi · All rights reserved',
+    // Section pages
+    battles_eyebrow: 'Military Encyclopedia',
+    battles_title: '⚔ All Battles',
+    battles_subtitle: 'Complete index · Click any battle to view the full analysis · Enable comparison mode to compare two battles',
+    battles_search_ph: 'Search by name, year, combatants, era...',
+    battles_found: '{{n}} battles found',
+    compare_btn: '⚖ Compare Battles',
+    compare_slot1: '+ First battle',
+    compare_slot2: '+ Second battle',
+    compare_go: '⚖ Compare Now →',
+    commanders_eyebrow: 'Military Encyclopedia',
+    commanders_title: '👑 All Commanders',
+    commanders_subtitle: 'The strategists, generals and military leaders who changed history',
+    commanders_search_ph: 'Search commander by name, role, era...',
+    commanders_found: '{{n}} commanders found',
+    worldmap_eyebrow: 'Historical Cartography',
+    worldmap_title: '🗺️ Global Battle Map',
+    worldmap_all: 'All Eras',
+    wm_battles: 'Battles on map:',
+    wm_eras: 'Eras represented:',
+    wm_countries: 'Countries involved:',
+    wm_span: 'Time span:',
+    wm_span_val: '50,000 years of history',
+    library_eyebrow: 'Historical Archive',
+    library_title: '📜 Military Library',
+    library_subtitle: 'Treaties, documents, classic works and primary sources from universal military history',
+    lib_all: 'All',
+    lib_treaties: '📜 Peace Treaties',
+    lib_classics: '📚 Classic Works',
+    lib_docs: '📋 Historical Documents',
+    lib_letters: '✉️ Letters & Declarations',
+    lib_found: '{{n}} documents in archive',
+    civs_eyebrow: 'Empires & Armies',
+    civs_title: '🏛️ Military Civilizations',
+    civs_subtitle: 'All empires, kingdoms and nations that forged history with their armies',
+    civs_found: '{{n}} civilizations recorded',
+    // Overlay / detail pages
+    back_btn: '← Back',
+    history_military: '· Military History',
+    sidebar_battles: '⚔ Battles of the same era',
+    sidebar_commanders: '👑 Commanders of the era',
+    sidebar_weapons: '🗡️ Weapons of the era',
+    sidebar_tactics: '🎯 Tactics employed',
+    sidebar_location: '📍 Location',
+    sidebar_era_battles: '⚔ Battles of his era',
+    sidebar_contemporaries: '👑 Contemporaries',
+    sidebar_era_weapons: '🗡️ Weapons of his era',
+    compare_eyebrow: 'AI Comparative Analysis',
+    loading_ai: 'Consulting the historical archives...',
+    loading_compare: 'Analysing and comparing battles...',
+    // Picker
+    picker_title1: 'Choose the first battle',
+    picker_title2: 'Choose the second battle',
+    picker_search: 'Search battle...',
+    picker_empty: 'No battles found',
+    picker_more: 'Showing 100 of {{n}} — use search to filter',
+    // Autocomplete groups
+    ac_battles: '⚔ Battles',
+    ac_commanders: '👑 Commanders',
+    ac_civs: '🏛️ Civilizations',
+    ac_docs: '📜 Documents',
+    ac_weapons: '🗡️ Weapons',
+    ac_empty: 'No results for "{{q}}" — press Search to query AI',
+    // Auth
+    login_btn: 'Sign In',
+    register_title: 'Create Account',
+    login_title: 'Sign In',
+    name_ph: 'Your name',
+    email_ph: 'your@email.com',
+    password_ph: 'Password',
+    // Queries
+    queries_label: '{{n}} queries',
+    // War quote section
+    war_quote_eyebrow: 'Military Wisdom',
+    // Newsletter
+    newsletter_eyebrow: 'Historical Intelligence',
+    newsletter_title: 'Battle of the Week',
+    newsletter_desc: 'Every week: a battle analysed in depth, a commander profile, and the data history books leave out.',
+    // AI prompts language
+    ai_lang: 'en',
+    ai_explain_battle: 'Explain in exhaustive detail the battle of {{name}} ({{year}}), between {{combatants}}. Context: {{desc}}. Era: {{era}}. Write entirely in English.',
+    ai_explain_commander: 'Explain in detail the military life, campaigns, tactics and historical legacy of {{name}}, {{role}}. Era: {{era}}. Write entirely in English.',
+    ai_explain_civ: 'Explain the military power of {{name}}, period {{period}}. Era: {{era}}. Write entirely in English.',
+    ai_explain_doc: 'Explain in detail the document "{{name}}" ({{year}}). Era: {{era}}. Write entirely in English.',
+    ai_explain_weapon: 'Explain in detail the weapon "{{name}}", period {{period}}. Era: {{era}}. Write entirely in English.',
+    ai_explain_tactic: 'Explain the tactic "{{name}}" used by {{origin}}. Era: {{era}}. Write entirely in English.',
+  }
+};
+
+function t(key, vars) {
+  let str = (T[LANG] && T[LANG][key]) || (T['es'] && T['es'][key]) || key;
+  if (vars) {
+    Object.keys(vars).forEach(k => { str = str.replace(new RegExp('\\{\\{' + k + '\\}\\}', 'g'), vars[k]); });
+  }
+  return str;
+}
+
+function setLang(lang) {
+  LANG = lang;
+  localStorage.setItem('bm_lang', lang);
+  // Update flag + code in button
+  const flagEl = document.getElementById('lang-flag');
+  const codeEl = document.getElementById('lang-code');
+  if (flagEl) flagEl.textContent = lang === 'en' ? '🇬🇧' : '🇪🇸';
+  if (codeEl) codeEl.textContent = lang === 'en' ? 'EN' : 'ES';
+  applyTranslations();
+  if (typeof buildEraNav === 'function') buildEraNav();
+  if (typeof updateNavUI === 'function') updateNavUI();
+  if (currentEra && typeof selectEra === 'function') selectEra(currentEra.id);
+}
+
+function applyTranslations() {
+  // Announce bar
+  const ab = document.getElementById('announce-bar');
+  if (ab) { const close = ab.querySelector('.announce-close'); ab.innerHTML = t('announce'); if (close) ab.appendChild(close); }
+
+  // Hero
+  setText('hero-ornament', t('hero_ornament'));
+  setHTML('hero-subtitle-el', t('hero_subtitle'));
+  setText('hero-meta-el', t('hero_meta'));
+  setText('hero-explore-btn', t('hero_explore'));
+  setText('hero-premium-btn', t('hero_premium'));
+  setText('hero-scroll-text', t('hero_scroll'));
+
+  // Nav links
+  setNavLink('home', t('nav_eras'));
+  setNavLink('battles', t('nav_battles'));
+  setNavLink('commanders', t('nav_commanders'));
+  setNavLink('worldmap', t('nav_worldmap'));
+  setNavLink('library', t('nav_library'));
+  setNavLink('civilizations', t('nav_civs'));
+  // lang button updated via flag+code elements in setLang()
+
+  // Free banner
+  const fbt = document.getElementById('free-banner-text');
+  if (fbt) {
+    const n = document.getElementById('queries-left-banner');
+    const qText = n ? n.textContent : '3';
+    fbt.innerHTML = t('free_text') + ' <strong id="queries-left-banner">' + qText + ' ' + t('free_queries_suffix').split(' ').slice(1).join(' ') + '</strong>';
+  }
+  const freeCta = document.querySelector('.free-banner-cta');
+  if (freeCta) freeCta.textContent = t('free_cta');
+
+  // Search
+  setText('search-eyebrow', t('search_eyebrow'), true);
+  const si = document.getElementById('search-input');
+  if (si) si.placeholder = t('search_placeholder');
+  const sb = document.querySelector('.search-btn');
+  if (sb) sb.textContent = t('search_btn');
+
+  // Stats
+  setStatLabels();
+
+  // Timeline section
+  setText('timeline-eyebrow', t('timeline_eyebrow'), true);
+  setText('timeline-title-el', t('timeline_title'));
+  setText('timeline-desc-el', t('timeline_desc'));
+  const vtlName = document.getElementById('vtl-era-name');
+  if (vtlName && vtlName.textContent === T['es'].vtl_placeholder || vtlName && vtlName.textContent === T['en'].vtl_placeholder) {
+    vtlName.textContent = t('vtl_placeholder');
+  }
+  const eraOv = document.getElementById('era-overview');
+  if (eraOv && (eraOv.textContent === T['es'].era_overview_placeholder || eraOv.textContent === T['en'].era_overview_placeholder)) {
+    eraOv.textContent = t('era_overview_placeholder');
+  }
+
+  // Map
+  const mapTitle = document.querySelector('.map-title');
+  if (mapTitle) mapTitle.textContent = t('map_title');
+  const mapCounter = document.getElementById('map-counter');
+  if (mapCounter && (mapCounter.textContent === T['es'].map_select || mapCounter.textContent === T['en'].map_select)) {
+    mapCounter.textContent = t('map_select');
+  }
+
+  // Era tabs
+  const tabLabels = {battles: t('tab_battles'), commanders: t('tab_commanders'), weapons: t('tab_weapons'), civs: t('tab_civs'), tactics: t('tab_tactics'), docs: t('tab_docs')};
+  document.querySelectorAll('.era-tab').forEach(tab => {
+    const tabId = tab.dataset.tab;
+    if (tabId && tabLabels[tabId]) {
+      const count = tab.querySelector('.tab-count');
+      tab.textContent = tabLabels[tabId] + ' ';
+      if (count) tab.appendChild(count);
+    }
+  });
+
+  // Era stat labels
+  const esl = [{id:'es-battles',k:'stat_label_battles'},{id:'es-years',k:'stat_label_years'},{id:'es-civs',k:'stat_label_civs'},{id:'es-cmds',k:'stat_label_cmds'}];
+  esl.forEach(({id, k}) => {
+    const el = document.getElementById(id);
+    if (el) { const parent = el.parentElement; const label = parent.querySelector('.stat-label'); if (label) label.textContent = t(k); }
+  });
+
+  // Era search placeholders
+  const bs = document.getElementById('battle-search');
+  if (bs) bs.placeholder = t('search_battle_ph');
+  const cs = document.getElementById('cmd-search');
+  if (cs) cs.placeholder = t('search_cmd_ph');
+
+  // Section pages
+  translateSectionPage('battles', 'battles_eyebrow', 'battles_title', 'battles_subtitle');
+  translateSectionPage('commanders', 'commanders_eyebrow', 'commanders_title', 'commanders_subtitle');
+
+  const bsph = document.getElementById('battles-search');
+  if (bsph) bsph.placeholder = t('battles_search_ph');
+  const csph = document.getElementById('commanders-search');
+  if (csph) csph.placeholder = t('commanders_search_ph');
+
+  const cmpBtn = document.getElementById('cmp-btn');
+  if (cmpBtn) cmpBtn.textContent = t('compare_btn');
+
+  // Worldmap
+  const wmHeader = document.querySelector('.worldmap-title');
+  if (wmHeader) wmHeader.textContent = t('worldmap_title');
+  const wmEyebrow = document.querySelector('#worldmap-view .page-eyebrow');
+  if (wmEyebrow) wmEyebrow.textContent = t('worldmap_eyebrow');
+  const wmAll = document.querySelector('.worldmap-chip.all');
+  if (wmAll) wmAll.textContent = t('worldmap_all');
+
+  // Library
+  const libTitle = document.querySelector('#library-view .page-title');
+  if (libTitle) libTitle.textContent = t('library_title');
+
+  // Sidebar titles (in overlay)
+  translateOverlaySidebars();
+
+  // Back button texts
+  document.querySelectorAll('.bp-back').forEach(b => { b.textContent = t('back_btn'); });
+
+  // Footer
+  const fdesc = document.querySelector('.footer-brand p');
+  if (fdesc) fdesc.textContent = t('footer_desc');
+  const fcopy = document.querySelector('.footer-copy');
+  if (fcopy) fcopy.textContent = t('footer_copy');
+
+  // Picker
+  const psi = document.getElementById('bpm-search-input');
+  if (psi) psi.placeholder = t('picker_search');
+
+  // Lang switcher active state
+  document.querySelectorAll('.lang-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === LANG);
+  });
+}
+
+function setText(id, text, isEyebrow) {
+  const el = document.getElementById(id) || (isEyebrow && document.querySelector(`[data-t="${id}"]`));
+  if (el) el.textContent = text;
+}
+function setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+function setNavLink(section, text) {
+  const el = document.querySelector(`.nav-link[data-section="${section}"]`);
+  if (el) el.textContent = text;
+}
+function setStatLabels() {
+  const labels = document.querySelectorAll('.stat-label');
+  const keys = [t('stat_years'), t('stat_battles'), t('stat_civs'), t('stat_commanders')];
+  labels.forEach((el, i) => { if (keys[i] && el.closest('.reveal')) el.textContent = keys[i]; });
+}
+function translateSectionPage(section, eyebrowKey, titleKey, subtitleKey) {
+  const view = document.getElementById(section + '-view');
+  if (!view) return;
+  const ey = view.querySelector('.page-eyebrow');
+  const ti = view.querySelector('.page-title');
+  const su = view.querySelector('.page-subtitle');
+  if (ey) ey.textContent = t(eyebrowKey);
+  if (ti) ti.textContent = t(titleKey);
+  if (su) su.textContent = t(subtitleKey);
+}
+function translateOverlaySidebars() {
+  const map = {
+    'bpRelBattles': 'sidebar_battles', 'bpRelCmds': 'sidebar_commanders',
+    'bpRelWeapons': 'sidebar_weapons', 'bpRelTactics': 'sidebar_tactics',
+    'cpRelBattles': 'sidebar_era_battles', 'cpRelCmds': 'sidebar_contemporaries',
+    'cpRelWeapons': 'sidebar_era_weapons'
+  };
+  Object.entries(map).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) { const title = el.closest('.bp-sidebar-card')?.querySelector('.bp-sidebar-title'); if (title) title.innerHTML = t(key); }
+  });
+  const mapTitle = document.getElementById('bpMap');
+  if (mapTitle) { const card = mapTitle.closest('.bp-sidebar-card'); if (card) { const st = card.querySelector('.bp-sidebar-title'); if (st) st.textContent = t('sidebar_location'); } }
+}
+
+function toggleLangMenu() {
+  const menu = document.getElementById('lang-menu');
+  const btn  = document.getElementById('lang-btn');
+  if (menu) menu.classList.toggle('open');
+  if (btn)  btn.classList.toggle('open', menu && menu.classList.contains('open'));
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lang-switcher')) {
+    const menu = document.getElementById('lang-menu');
+    if (menu) menu.classList.remove('open');
+  }
+});
+
 window.addEventListener('load', async () => {
   initHeroCanvas();
   initMap();
@@ -3897,6 +4484,7 @@ window.addEventListener('load', async () => {
   updateNavUI();
   initReveal();
   handleURLRouting();
+  applyTranslations();
 });
 </script>
 
