@@ -1267,9 +1267,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <h1 class="page-title" id="civs-title-el">🏛️ Civilizaciones Militares</h1>
     <p class="page-subtitle" id="civs-subtitle-el">Todos los imperios, reinos y naciones que forjaron la historia con sus ejércitos</p>
   </div>
-  <div class="filter-chips" id="civs-filter-chips">
-    <button class="filter-chip active" onclick="filterCivsIndex('all',this)">Todas las Eras</button>
-  </div>
+  <div class="filter-chips" id="civs-filter-chips"></div>
   <div class="results-count" id="civs-results-count"><span id="civs-count">0</span> <span id="civs-count-label">civilizaciones registradas</span></div>
   <div class="civ-index-grid" id="civs-index-grid"></div>
 </div>
@@ -3062,7 +3060,7 @@ function renderBattleCards(battles) {
       '<div class="battle-name">' + battleNameEN(b.name) + '</div>' +
       '<div class="battle-combatants">' + translateCombatants(b.combatants) + '</div>' +
       '<span class="battle-tag">' + tagName(b.tag) + '</span>' +
-      '<div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">' + b.desc + '</div>';
+      '<div style="font-size:0.85rem;color:var(--smoke);margin-top:0.5rem;">' + autoTranslateDesc(b.desc) + '</div>';
     c.onclick = () => { if(currentEra) openBattleDetail(b, currentEra); else openBattleModal(b); };
     g.appendChild(c);
   });
@@ -3122,7 +3120,7 @@ function buildCivsGrid(civs) {
     const el = document.createElement('div');
     el.className = 'civ-card';
     el.innerHTML = '<div class="civ-flag">' + c.flag + '</div>' +
-      '<div class="civ-name">' + c.name + '</div>' +
+      '<div class="civ-name">' + civNameEN(c.name) + '</div>' +
       '<div class="civ-period">' + c.period + '</div>' +
       '<div class="civ-power"><div class="civ-power-fill" style="width:' + (c.power*100) + '%"></div></div>';
     el.onclick = () => openCivModal(c);
@@ -3296,7 +3294,7 @@ function renderBattlesIndex(battles) {
       <div class="index-card-era">${LANG==="en"?(ERA_NAMES_EN[b.eraId]||b.eraName):b.eraName} · ${b.year}</div>
       <div class="index-card-name">${battleNameEN(b.name)}</div>
       <div class="index-card-sub">${translateCombatants(b.combatants)}</div>
-      <div style="font-size:0.8rem;color:var(--smoke);margin-top:0.4rem;">${b.desc}</div>
+      <div style="font-size:0.8rem;color:var(--smoke);margin-top:0.4rem;">${autoTranslateDesc(b.desc)}</div>
       <span class="index-card-tag">${tagName(b.tag)}</span>
     `;
     card.onclick = () => {
@@ -3542,6 +3540,20 @@ function initLibrary() {
     libraryBuilt = true;
   }
   renderLibrary(allDocsFlat);
+  translateLibraryUI();
+}
+
+function translateLibraryUI() {
+  const slib = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+  slib('lib-eyebrow', LANG==='en'?'Historical Archive':'Archivo Histórico');
+  slib('lib-title', LANG==='en'?'📜 Military Library':'📜 Biblioteca Militar');
+  slib('lib-subtitle', LANG==='en'?'Treaties, documents, classic works and primary sources from universal military history':'Tratados, documentos, obras clásicas y fuentes primarias de la historia militar universal');
+  slib('lib-filter-all', LANG==='en'?'All':'Todos');
+  slib('lib-filter-treaty', LANG==='en'?'📜 Peace Treaties':'📜 Tratados de Paz');
+  slib('lib-filter-obra', LANG==='en'?'📚 Classic Works':'📚 Obras Clásicas');
+  slib('lib-filter-doc', LANG==='en'?'📋 Historical Documents':'📋 Documentos Históricos');
+  slib('lib-filter-carta', LANG==='en'?'✉️ Letters & Declarations':'✉️ Cartas y Declaraciones');
+  slib('lib-count-label', LANG==='en'?'documents in archive':'documentos en el archivo');
 }
 
 function renderLibrary(docs) {
@@ -3555,7 +3567,7 @@ function renderLibrary(docs) {
     card.innerHTML = `
       <div class="lib-doc-icon">${d.icon}</div>
       <div>
-        <div class="lib-doc-name">${d.name}</div>
+        <div class="lib-doc-name">${docNameEN(d.name)}</div>
         <div class="lib-doc-year">${d.year}</div>
         <div class="lib-doc-era">${LANG==='en'?(ERA_NAMES_EN[d.eraId]||d.eraName):d.eraName}</div>
       </div>
@@ -3624,7 +3636,7 @@ function renderCivsIndex(civs) {
     card.className = 'civ-index-card';
     card.innerHTML = `
       <div class="civ-index-flag">${c.flag}</div>
-      <div class="civ-index-name">${c.name}</div>
+      <div class="civ-index-name">${civNameEN(c.name)}</div>
       <div class="civ-index-period">${c.period}</div>
       <div class="civ-index-era">${LANG==='en'?(ERA_NAMES_EN[c.eraId]||c.eraName):c.eraName}</div>
       <div class="civ-power-bar"><div class="civ-power-fill" style="width:${c.power*100}%"></div></div>
@@ -5737,6 +5749,153 @@ const BATTLE_NAME_EN = {
 function battleNameEN(name) {
   if (LANG !== 'en') return name;
   return BATTLE_NAME_EN[name] || name;
+}
+
+
+function autoTranslateDesc(text) {
+  if (!text || LANG !== 'en') return text;
+  // Common phrases
+  const phrases = [
+    ['La Blitzkrieg en acción', 'Blitzkrieg in action'],
+    ['Finlandia resiste heroicamente', 'Finland heroically resists'],
+    ['Primera operación aerotransportada de la historia', 'First airborne operation in history'],
+    ['Francia cae en 6 semanas', 'France falls in 6 weeks'],
+    ['el milagro de Dunkerque', 'the miracle of Dunkirk'],
+    ['Nunca tantos debieron tanto a tan pocos', 'Never was so much owed by so many to so few'],
+    ['57 noches consecutivas de bombardeo sobre Londres', '57 consecutive nights of bombing over London'],
+    ['civiles muertos', 'civilians killed'],
+    ['la mayor', 'the greatest'],
+    ['Primera vez', 'First time'],
+    ['primera vez', 'first time'],
+    ['La primera', 'The first'],
+    ['El primer', 'The first'],
+    ['muertos', 'dead'],
+    ['bajas', 'casualties'],
+    ['prisioneros', 'prisoners'],
+    ['soldados', 'soldiers'],
+    ['ejército', 'army'],
+    ['victoria', 'victory'],
+    ['derrota', 'defeat'],
+    ['batalla', 'battle'],
+    ['guerra', 'war'],
+    ['invasión', 'invasion'],
+    ['rendición', 'surrender'],
+    ['asedio', 'siege'],
+    ['conquista', 'conquest'],
+    ['destrucción', 'destruction'],
+    ['Roma', 'Rome'],['Alemania', 'Germany'],['Francia', 'France'],
+    ['España', 'Spain'],['Rusia', 'Russia'],['Japón', 'Japan'],
+    ['nace', 'marks the birth of'],['nacen', 'marks the birth of'],
+    ['punto de inflexión', 'turning point'],
+    ['cambia la historia', 'changes history'],
+    ['histórico', 'historic'],['histórica', 'historic'],
+    ['definitiva', 'definitive'],['definitivo', 'definitive'],
+    ['por primera vez', 'for the first time'],
+  ];
+  let t = text;
+  phrases.forEach(([es, en]) => { t = t.replace(new RegExp(es, 'gi'), en); });
+  return t;
+}
+
+
+const CIV_NAME_EN = {
+  'Sumer Arcaico': 'Archaic Sumer',
+  'Egipto Pre-dinástico': 'Pre-Dynastic Egypt',
+  'Cultura de Cucuteni-Tripolye': 'Cucuteni-Trypillia Culture',
+  'Cultura del Vaso Campaniforme': 'Bell Beaker Culture',
+  'Cultura Yamna (Estepas Pónticas)': 'Yamnaya Culture (Pontic Steppes)',
+  'Imperio Persa Aqueménida': 'Achaemenid Persian Empire',
+  'Macedonia / Liga de Corinto': 'Macedonia / League of Corinth',
+  'Egipto del Nuevo Imperio': 'New Kingdom Egypt',
+  'Imperio Asirio': 'Assyrian Empire',
+  'Cartago': 'Carthage',
+  'República Romana': 'Roman Republic',
+  'Imperio Romano': 'Roman Empire',
+  'Imperio Romano de Occidente': 'Western Roman Empire',
+  'Imperio Romano de Oriente': 'Eastern Roman Empire',
+  'Imperio Chino — Han': 'Han Chinese Empire',
+  'Imperio Chino — Tang': 'Tang Chinese Empire',
+  'Imperio Chino — Song': 'Song Chinese Empire',
+  'Imperio Chino — Ming': 'Ming Chinese Empire',
+  'Imperio Chino — Qing': 'Qing Chinese Empire',
+  'Imperio Parto': 'Parthian Empire',
+  'Imperio Sasánida': 'Sassanid Empire',
+  'Imperio Gupta': 'Gupta Empire',
+  'Imperio Maurya': 'Maurya Empire',
+  'Califato Árabe / Islámico': 'Arab/Islamic Caliphate',
+  'Imperio Carolingio': 'Carolingian Empire',
+  'Imperio Bizantino': 'Byzantine Empire',
+  'Imperio Mongol': 'Mongol Empire',
+  'Sultanato de Delhi': 'Delhi Sultanate',
+  'Imperio Otomano': 'Ottoman Empire',
+  'Imperio Azteca': 'Aztec Empire',
+  'Imperio Inca': 'Inca Empire',
+  'Imperio Español': 'Spanish Empire',
+  'Imperio Británico': 'British Empire',
+  'Imperio Napoleónico': 'Napoleonic Empire',
+  'Imperio Austro-Húngaro': 'Austro-Hungarian Empire',
+  'Imperio Alemán (II Reich)': 'German Empire (2nd Reich)',
+  'Alemania Nazi (III Reich)': 'Nazi Germany (3rd Reich)',
+  'Gran Bretaña y su Imperio': 'Great Britain and its Empire',
+  'Imperio Japonés': 'Japanese Empire',
+  'Francia Libre / Vichy': 'Free France / Vichy',
+  'China (Nacionalista y Comunista)': 'China (Nationalist and Communist)',
+  'EE.UU. (Hiperpotencia)': 'USA (Hyperpower)',
+  'China (Ascenso Estratégico)': 'China (Strategic Rise)',
+  'Rusia (Revisionismo)': 'Russia (Revisionism)',
+  'OTAN (Alianza Ampliada)': 'NATO (Expanded Alliance)',
+  'Israel (Tecnología Militar Líder)': 'Israel (Military Technology Leader)',
+  'Irán (Potencia Regional)': 'Iran (Regional Power)',
+  'Cultura del Vaso Campaniforme': 'Bell Beaker Culture',
+};
+
+function civNameEN(name) {
+  return LANG === 'en' ? (CIV_NAME_EN[name] || name) : name;
+}
+
+
+const DOC_NAME_EN = {
+  'Crónicas de las Cruzadas — Guillermo de Tiro': 'Chronicles of the Crusades — William of Tyre',
+  'Tratado de Qadesh — Primer tratado de paz': 'Treaty of Kadesh — First Peace Treaty',
+  'Anales de Tutmosis III': 'Annals of Thutmose III',
+  'Instrucción Militar — Mauricio de Nassau': 'Military Instruction — Maurice of Nassau',
+  'Paz de Westfalia': 'Peace of Westphalia',
+  'Tratado de Utrecht': 'Treaty of Utrecht',
+  'Actas del Congreso de Viena': 'Acts of the Congress of Vienna',
+  'Memorias de Santa Elena — Napoleón': 'Memoirs of Saint Helena — Napoleon',
+  'Tratado de París (1856)': 'Treaty of Paris (1856)',
+  'Tratado de Versalles': 'Treaty of Versailles',
+  'Carta del Atlántico': 'Atlantic Charter',
+  'Acuerdos de Yalta': 'Yalta Agreements',
+  'Rendición Incondicional Alemana': 'German Unconditional Surrender',
+  'Acta de Capitulación Japonesa (USS Missouri)': 'Japanese Instrument of Surrender (USS Missouri)',
+  'Juicios de Núremberg — Estatuto': 'Nuremberg Trials — Charter',
+  'Carta de las Naciones Unidas': 'United Nations Charter',
+  'Directiva Barbarroja': 'Operation Barbarossa Directive',
+  'Discurso de Churchill — Sangre, esfuerzo, lágrimas': 'Churchill Speech — Blood, Toil, Tears',
+  'Tratado de Tordesillas': 'Treaty of Tordesillas',
+  'Código de Caballería — Ramon Llull': 'Book of the Order of Chivalry — Ramon Llull',
+  'Historia Secreta de los Mongoles': 'Secret History of the Mongols',
+  'De Re Militari — Honorio Bonet': 'Tree of Battles — Honoré Bovet',
+  'El Arte de la Guerra — Maquiavelo': 'The Art of War — Machiavelli',
+  'De Jure Belli ac Pacis — Grocio': 'On the Law of War and Peace — Grotius',
+  'Tratado de Westfalia': 'Peace of Westphalia',
+  'Acuerdos de Minsk I y II': 'Minsk Agreements I and II',
+  'Artículo 5 del Tratado OTAN': 'NATO Treaty Article 5',
+  'Convención sobre Armas Químicas': 'Chemical Weapons Convention',
+  'Memorando de Budapest': 'Budapest Memorandum',
+  'Acuerdos de Abraham (Israel-Emiratos)': 'Abraham Accords (Israel-UAE)',
+  'Tratado sobre el Comercio de Armas': 'Arms Trade Treaty',
+  'Pinturas rupestres de Cañaverales': 'Cave Paintings of Cañaverales',
+  'Tablillas Sumerias de Conflicto': 'Sumerian Conflict Tablets',
+  'Paleta de Narmer': 'Narmer Palette',
+  'Epitoma rei militaris — Vegecio': 'Epitoma rei militaris — Vegetius',
+  'Estrategiká — Sexto Julio Frontino': 'Strategemata — Sextus Julius Frontinus',
+  'Paz de Westfalia': 'Peace of Westphalia',
+};
+
+function docNameEN(name) {
+  return LANG === 'en' ? (DOC_NAME_EN[name] || name) : name;
 }
 
 window.addEventListener('load', async () => {
