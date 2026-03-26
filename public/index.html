@@ -3092,7 +3092,7 @@ function buildCommandersGrid(cmds) {
     const el = document.createElement('div');
     el.className = 'commander-card';
     el.innerHTML = '<div class="commander-avatar">' + c.emoji + '</div>' +
-      '<div class="commander-name">' + c.name + '</div>' +
+      '<div class="commander-name">' + cmdNameEN(c.name) + '</div>' +
       '<div class="commander-role">' + roleName(c.role) + '</div>';
     el.onclick = () => { if(currentEra) openCommanderDetail(c, currentEra); else openCommanderModal(c); };
     g.appendChild(el);
@@ -3383,7 +3383,7 @@ function renderCommandersIndex(cmds) {
     card.className = 'cmd-index-card';
     card.innerHTML = `
       <div class="cmd-index-avatar">${c.emoji}</div>
-      <div class="cmd-index-name">${c.name}</div>
+      <div class="cmd-index-name">${cmdNameEN(c.name)}</div>
       <div class="cmd-index-role">${roleName(c.role)}</div>
       <div class="cmd-index-era">${LANG==="en"?(ERA_NAMES_EN[c.eraId]||c.eraName):c.eraName}</div>
     `;
@@ -3879,7 +3879,7 @@ async function openCommanderDetail(commander, eraObj) {
 
   document.getElementById('cpEmoji').textContent = commander.emoji;
   document.getElementById('cpEraTag').textContent = eraName(eraObj) + ' ' + t('history_military');
-  document.getElementById('cpName').textContent = commander.name;
+  document.getElementById('cpName').textContent = cmdNameEN(commander.name);
   document.getElementById('cpRole').textContent = roleName(commander.role);
 
   document.getElementById('cpAiContent').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_ai')}</span></div>`;
@@ -4649,6 +4649,9 @@ function setLang(lang) {
   applyTranslations();
   // Rebuild all dynamic content
   acBuilt = false; acData = []; // Reset autocomplete for new lang
+  // Update footer era links immediately
+  const _fem = {ancient:{es:'Antigüedad',en:'Antiquity'},medieval:{es:'Edad Media',en:'Middle Ages'},ww2:{es:'II Guerra Mundial',en:'World War II'},contemporary:{es:'Contemporáneo',en:'Contemporary'}};
+  document.querySelectorAll('.footer-era-link').forEach(a => { const id = a.dataset.era; if(id&&_fem[id]) a.textContent=lang==='en'?_fem[id].en:_fem[id].es; });
   // Reset section indexes for retranslation
   battlesIndexBuilt = false;
   commandersIndexBuilt = false;
@@ -5754,101 +5757,153 @@ function battleNameEN(name) {
 
 function autoTranslateDesc(text) {
   if (!text || LANG !== 'en') return text;
-  // Common phrases
-  const phrases = [
-    ['La Blitzkrieg en acción', 'Blitzkrieg in action'],
-    ['Finlandia resiste heroicamente', 'Finland heroically resists'],
-    ['Primera operación aerotransportada de la historia', 'First airborne operation in history'],
-    ['Francia cae en 6 semanas', 'France falls in 6 weeks'],
-    ['el milagro de Dunkerque', 'the miracle of Dunkirk'],
-    ['Nunca tantos debieron tanto a tan pocos', 'Never was so much owed by so many to so few'],
-    ['57 noches consecutivas de bombardeo sobre Londres', '57 consecutive nights of bombing over London'],
-    ['civiles muertos', 'civilians killed'],
-    ['la mayor', 'the greatest'],
+  let t = text;
+  const replacements = [
+    // Full phrase translations first
+    ['La Blitzkrieg en acción — Polonia entre dos fuegos','Blitzkrieg in action — Poland caught between two fires'],
+    ['Finlandia resiste heroicamente 3 meses contra la URSS','Finland heroically resists the USSR for 3 months'],
+    ['Primera operación aerotransportada de la historia','First airborne operation in history'],
+    ['Francia cae en 6 semanas — el milagro de Dunkerque','France falls in 6 weeks — the miracle of Dunkirk'],
+    ['Nunca tantos debieron tanto a tan pocos','Never was so much owed by so many to so few'],
+    ['57 noches consecutivas de bombardeo sobre Londres','57 consecutive nights of bombing over London'],
+    ['43.000 civiles muertos','43,000 civilians killed'],
+    ['La primera batalla naval donde los barcos no se ven — solo aviones','First naval battle where ships never see each other — aircraft only'],
+    ['Primer uso masivo del gas cloro — 6.000 bajas en 10 minutos','First mass use of chlorine gas — 6,000 casualties in 10 minutes'],
+    ['Los australianos y neozelandeses desembarcan bajo fuego — nacimiento de una identidad nacional','Australians and New Zealanders land under fire — birth of a national identity'],
+    ['476 tanques atacan en masa — primera vez en la historia','476 tanks attack en masse — first time in history'],
+    ['Hungría se rinde en 13 días — India captura 93.000 prisioneros','Hungary surrenders in 13 days — India captures 93,000 prisoners'],
+    ['Fin de la presencia americana','End of the American presence'],
+    // Partial phrase translations
+    ['primer tratado de paz', 'first peace treaty'],
+    ['primera ciudad amurallada', 'first walled city'],
+    ['primera aldea permanente', 'first permanent village'],
+    ['primera vez en la historia', 'first time in history'],
+    ['por primera vez', 'for the first time'],
     ['Primera vez', 'First time'],
-    ['primera vez', 'first time'],
-    ['La primera', 'The first'],
-    ['El primer', 'The first'],
-    ['muertos', 'dead'],
+    ['primera batalla', 'first battle'],
+    ['punto de inflexión', 'turning point'],
+    ['el mayor conflicto', 'the greatest conflict'],
+    ['mayor derrota', 'greatest defeat'],
+    ['mayor victoria', 'greatest victory'],
+    ['la mayor', 'the greatest'],
+    ['el mayor', 'the greatest'],
+    ['obra maestra', 'masterpiece'],
+    ['muertos de hambre', 'died of starvation'],
+    ['civiles muertos', 'civilians killed'],
     ['bajas', 'casualties'],
+    ['muertos', 'killed'],
+    ['soldados muertos', 'soldiers killed'],
+    ['soldados capturados', 'soldiers captured'],
     ['prisioneros', 'prisoners'],
-    ['soldados', 'soldiers'],
-    ['ejército', 'army'],
-    ['victoria', 'victory'],
-    ['derrota', 'defeat'],
+    ['rendición', 'surrender'],
+    ['conquista', 'conquest'],
+    ['victoria decisiva', 'decisive victory'],
+    ['victoria pírrica', 'Pyrrhic victory'],
+    ['derrota decisiva', 'decisive defeat'],
+    ['derrota humillante', 'humiliating defeat'],
+    ['cambia la historia', 'changes history'],
+    ['cambió la historia', 'changed history'],
+    ['nace el concepto de', 'marks the birth of the concept of'],
+    ['nace ', 'is born '],
+    ['nacen ', 'are born '],
+    ['fin del', 'end of the'],
+    ['fin de la', 'end of the'],
+    ['inicio del', 'beginning of the'],
+    ['inicio de la', 'beginning of the'],
+    ['Inicio del', 'Beginning of the'],
+    ['comienza ', 'begins '],
+    ['termina ', 'ends '],
+    ['sin precedentes', 'unprecedented'],
+    ['histórico', 'historic'],
+    ['histórica', 'historic'],
+    ['legendario', 'legendary'],
+    ['legendaria', 'legendary'],
+    ['definitivo', 'definitive'],
+    ['definitiva', 'definitive'],
+    ['heroica', 'heroic'],
+    ['heroico', 'heroic'],
+    ['masacre', 'massacre'],
+    ['masacra', 'massacres'],
+    ['destruye', 'destroys'],
+    ['destruyen', 'destroy'],
+    ['destruyó', 'destroyed'],
+    ['captura', 'captures'],
+    ['capturado', 'captured'],
+    ['humillado', 'humiliated'],
+    ['humillante', 'humiliating'],
+    ['resistencia', 'resistance'],
+    ['resiste', 'resists'],
+    ['resistió', 'resisted'],
+    ['domina', 'dominates'],
+    ['dominó', 'dominated'],
+    ['conquista', 'conquers'],
+    ['conquistó', 'conquered'],
+    ['libera', 'liberates'],
+    ['liberó', 'liberated'],
+    ['reunifica', 'reunifies'],
+    ['unifica', 'unifies'],
+    ['unificó', 'unified'],
+    ['funda', 'founds'],
+    ['fundó', 'founded'],
+    ['expulsa', 'expels'],
+    ['expulsó', 'expelled'],
+    ['derrota', 'defeats'],
+    ['derrotó', 'defeated'],
+    ['avance', 'advance'],
+    ['retirada', 'retreat'],
+    ['asedio', 'siege'],
+    ['bloqueo', 'blockade'],
+    ['bombardeo', 'bombing'],
+    ['invasión', 'invasion'],
+    ['independencia', 'independence'],
+    ['Imperio', 'Empire'],['imperio', 'empire'],
+    ['ejército', 'army'],['ejércitos', 'armies'],
+    ['caballería', 'cavalry'],
+    ['infantería', 'infantry'],
+    ['artillería', 'artillery'],
+    ['flota', 'fleet'],['flotas', 'fleets'],
     ['batalla', 'battle'],
     ['guerra', 'war'],
-    ['invasión', 'invasion'],
-    ['rendición', 'surrender'],
-    ['asedio', 'siege'],
-    ['conquista', 'conquest'],
-    ['destrucción', 'destruction'],
-    ['Roma', 'Rome'],['Alemania', 'Germany'],['Francia', 'France'],
-    ['España', 'Spain'],['Rusia', 'Russia'],['Japón', 'Japan'],
-    ['nace', 'marks the birth of'],['nacen', 'marks the birth of'],
-    ['punto de inflexión', 'turning point'],
-    ['cambia la historia', 'changes history'],
-    ['histórico', 'historic'],['histórica', 'historic'],
-    ['definitiva', 'definitive'],['definitivo', 'definitive'],
-    ['por primera vez', 'for the first time'],
+    ['Alemania', 'Germany'],['alemania', 'Germany'],
+    ['Francia', 'France'],['Francia', 'France'],
+    ['España', 'Spain'],
+    ['Rusia', 'Russia'],
+    ['Japón', 'Japan'],
+    ['China', 'China'],
+    ['Roma', 'Rome'],['romanos', 'Romans'],
+    ['Cartago', 'Carthage'],['cartagineses', 'Carthaginians'],
+    ['Grecia', 'Greece'],['griegos', 'Greeks'],
+    ['Persia', 'Persia'],['persas', 'Persians'],
+    ['Egipto', 'Egypt'],['egipcios', 'Egyptians'],
+    ['los siglos', 'the centuries'],
+    ['el siglo', 'the century'],
+    ['años de', 'years of'],
+    ['meses de', 'months of'],
+    ['días de', 'days of'],
+    ['horas de', 'hours of'],
+    ['esqueletos con marcas de violencia', 'skeletons with marks of violence'],
+    ['masacre más antigua documentada', 'oldest documented massacre'],
+    ['violencia sistemática', 'systematic violence'],
+    ['evidencias de', 'evidence of'],
+    ['conflicto armado', 'armed conflict'],
+    ['empalizadas defensivas', 'defensive palisades'],
+    ['expansión violenta', 'violent expansion'],
+    ['documentada arqueológicamente', 'archaeologically documented'],
+    ['grandes asentamientos', 'large settlements'],
+    ['primeras evidencias de caballería en combate', 'first evidence of cavalry in combat'],
+    ['unificación violenta del Valle del Nilo', 'violent unification of the Nile Valley'],
+    ['primera campaña militar iconográficamente documentada', 'first iconographically documented military campaign'],
+    ['fundación del Estado egipcio por conquista militar', 'foundation of the Egyptian state by military conquest'],
+    ['conflictos entre las primeras ciudades-estado', 'conflicts between the first city-states'],
+    ['El rey', 'King'],
+    ['primer', 'first'],
+    ['primera', 'first'],
   ];
-  let t = text;
-  phrases.forEach(([es, en]) => { t = t.replace(new RegExp(es, 'gi'), en); });
+  replacements.forEach(([es, en]) => {
+    t = t.replace(new RegExp(es, 'gi'), en);
+  });
   return t;
 }
-
-
-const CIV_NAME_EN = {
-  'Sumer Arcaico': 'Archaic Sumer',
-  'Egipto Pre-dinástico': 'Pre-Dynastic Egypt',
-  'Cultura de Cucuteni-Tripolye': 'Cucuteni-Trypillia Culture',
-  'Cultura del Vaso Campaniforme': 'Bell Beaker Culture',
-  'Cultura Yamna (Estepas Pónticas)': 'Yamnaya Culture (Pontic Steppes)',
-  'Imperio Persa Aqueménida': 'Achaemenid Persian Empire',
-  'Macedonia / Liga de Corinto': 'Macedonia / League of Corinth',
-  'Egipto del Nuevo Imperio': 'New Kingdom Egypt',
-  'Imperio Asirio': 'Assyrian Empire',
-  'Cartago': 'Carthage',
-  'República Romana': 'Roman Republic',
-  'Imperio Romano': 'Roman Empire',
-  'Imperio Romano de Occidente': 'Western Roman Empire',
-  'Imperio Romano de Oriente': 'Eastern Roman Empire',
-  'Imperio Chino — Han': 'Han Chinese Empire',
-  'Imperio Chino — Tang': 'Tang Chinese Empire',
-  'Imperio Chino — Song': 'Song Chinese Empire',
-  'Imperio Chino — Ming': 'Ming Chinese Empire',
-  'Imperio Chino — Qing': 'Qing Chinese Empire',
-  'Imperio Parto': 'Parthian Empire',
-  'Imperio Sasánida': 'Sassanid Empire',
-  'Imperio Gupta': 'Gupta Empire',
-  'Imperio Maurya': 'Maurya Empire',
-  'Califato Árabe / Islámico': 'Arab/Islamic Caliphate',
-  'Imperio Carolingio': 'Carolingian Empire',
-  'Imperio Bizantino': 'Byzantine Empire',
-  'Imperio Mongol': 'Mongol Empire',
-  'Sultanato de Delhi': 'Delhi Sultanate',
-  'Imperio Otomano': 'Ottoman Empire',
-  'Imperio Azteca': 'Aztec Empire',
-  'Imperio Inca': 'Inca Empire',
-  'Imperio Español': 'Spanish Empire',
-  'Imperio Británico': 'British Empire',
-  'Imperio Napoleónico': 'Napoleonic Empire',
-  'Imperio Austro-Húngaro': 'Austro-Hungarian Empire',
-  'Imperio Alemán (II Reich)': 'German Empire (2nd Reich)',
-  'Alemania Nazi (III Reich)': 'Nazi Germany (3rd Reich)',
-  'Gran Bretaña y su Imperio': 'Great Britain and its Empire',
-  'Imperio Japonés': 'Japanese Empire',
-  'Francia Libre / Vichy': 'Free France / Vichy',
-  'China (Nacionalista y Comunista)': 'China (Nationalist and Communist)',
-  'EE.UU. (Hiperpotencia)': 'USA (Hyperpower)',
-  'China (Ascenso Estratégico)': 'China (Strategic Rise)',
-  'Rusia (Revisionismo)': 'Russia (Revisionism)',
-  'OTAN (Alianza Ampliada)': 'NATO (Expanded Alliance)',
-  'Israel (Tecnología Militar Líder)': 'Israel (Military Technology Leader)',
-  'Irán (Potencia Regional)': 'Iran (Regional Power)',
-  'Cultura del Vaso Campaniforme': 'Bell Beaker Culture',
-};
-
 function civNameEN(name) {
   return LANG === 'en' ? (CIV_NAME_EN[name] || name) : name;
 }
@@ -5896,6 +5951,75 @@ const DOC_NAME_EN = {
 
 function docNameEN(name) {
   return LANG === 'en' ? (DOC_NAME_EN[name] || name) : name;
+}
+
+
+const CMD_NAME_EN = {
+  'Alejandro Magno': 'Alexander the Great',
+  'Alejandro Nevski': 'Alexander Nevsky',
+  'Aníbal Barca': 'Hannibal Barca',
+  'Arminio': 'Arminius',
+  'Atila el Huno': 'Attila the Hun',
+  'Carlos Martel': 'Charles Martel',
+  'Carlos XII de Suecia': 'Charles XII of Sweden',
+  'Ciro el Grande': 'Cyrus the Great',
+  'Darío I': 'Darius I',
+  'Don Juan de Austria': 'Don John of Austria',
+  'Enheduanna': 'Enheduanna',
+  'Enrique V de Inglaterra': 'Henry V of England',
+  'Escipión Africano': 'Scipio Africanus',
+  'Espartaco': 'Spartacus',
+  'Federico II de Prusia': 'Frederick the Great',
+  'Filipo II de Macedonia': 'Philip II of Macedon',
+  'Francisco Pizarro': 'Francisco Pizarro',
+  'Gebhard von Blücher': 'Gebhard von Blücher',
+  'Gengis Kan': 'Genghis Khan',
+  'Gonzalo Fernández de Córdoba': 'Gonzalo de Córdoba',
+  'Gustavo Adolfo de Suecia': 'Gustavus Adolphus of Sweden',
+  'Hernán Cortés': 'Hernán Cortés',
+  'Hulagu Kan': 'Hulagu Khan',
+  'Jan III Sobieski': 'John III Sobieski',
+  'Juana de Arco': 'Joan of Arc',
+  'Julio César': 'Julius Caesar',
+  'Lawrence de Arabia': 'Lawrence of Arabia',
+  'Leónidas I': 'Leonidas I',
+  'Marco Antonio': 'Mark Antony',
+  'Marco Aurelio': 'Marcus Aurelius',
+  'Mehmed II el Conquistador': 'Mehmed II the Conqueror',
+  'Milcíades': 'Miltiades',
+  'Mikhail Kutúzov': 'Mikhail Kutuzov',
+  'Mustafá Kemal': 'Mustafa Kemal Atatürk',
+  'Napoleón Bonaparte': 'Napoleon Bonaparte',
+  'Pirro de Epiro': 'Pyrrhus of Epirus',
+  'Pompeyo el Grande': 'Pompey the Great',
+  'Ramsés II': 'Ramesses II',
+  'Ricardo I Corazón de León': 'Richard I the Lionheart',
+  'Robert Bruce': 'Robert the Bruce',
+  'Saladino': 'Saladin',
+  'Sargón de Acad': 'Sargon of Akkad',
+  'Solimán el Magnífico': 'Suleiman the Magnificent',
+  'Tamerlán': 'Tamerlane',
+  'Temístocles': 'Themistocles',
+  'Tiglat-Pileser III': 'Tiglath-Pileser III',
+  'Trajano': 'Trajan',
+  'Turena': 'Turenne',
+  'Tutmosis III': 'Thutmose III',
+  'Vercingetórix': 'Vercingetorix',
+  'Aecio': 'Aetius',
+  'Baybars': 'Baybars',
+  'Boudica': 'Boudica',
+  'Epaminondas': 'Epaminondas',
+  'Gilgamesh': 'Gilgamesh',
+  'Lugalbanda': 'Lugalbanda',
+  'Marlborough': 'Duke of Marlborough',
+  'Menes': 'Menes',
+  'Narmer': 'Narmer',
+  'Wallenstein': 'Wallenstein',
+  'Ernesto \"Che\" Guevara': 'Ernesto "Che" Guevara',
+};
+
+function cmdNameEN(name) {
+  return LANG === 'en' ? (CMD_NAME_EN[name] || name) : name;
 }
 
 window.addEventListener('load', async () => {
