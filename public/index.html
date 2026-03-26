@@ -767,6 +767,92 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 .cmp-result td{padding:0.55rem 0.9rem;border:1px solid rgba(201,168,76,0.08);}
 .cmp-result tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
 @media(max-width:700px){#compare-view .cmp-grid{grid-template-columns:1fr;}#bd-layout,#cd-layout{grid-template-columns:1fr !important;}}
+
+/* ══════════════════════════════════
+   LANGUAGE SWITCHER — refined
+══════════════════════════════════ */
+.lang-switcher {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+.lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3rem 0.5rem;
+  color: var(--smoke);
+  transition: color 0.2s;
+  font-family: 'Cinzel', serif;
+}
+.lang-btn:hover { color: var(--gold); }
+.lang-btn.open .lang-chevron { transform: rotate(180deg); }
+.lang-flag { font-size: 1rem; line-height: 1; }
+.lang-code {
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+  color: inherit;
+}
+.lang-chevron {
+  width: 8px;
+  height: 8px;
+  transition: transform 0.2s;
+  opacity: 0.6;
+}
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: rgba(10,8,6,0.98);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-top: 2px solid var(--gold);
+  min-width: 148px;
+  display: none;
+  z-index: 10100;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.75);
+}
+.lang-menu.open { display: block; animation: langIn 0.15s ease; }
+@keyframes langIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+  color: var(--smoke);
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  position: relative;
+}
+.lang-option:last-child { border-bottom: none; }
+.lang-option:hover { background: rgba(201,168,76,0.07); color: var(--gold); }
+.lang-option.active { color: var(--gold); }
+.lang-option.active::after {
+  content: '✦';
+  position: absolute;
+  right: 0.8rem;
+  font-size: 0.45rem;
+  color: var(--gold);
+  opacity: 0.8;
+}
+.lang-option-flag { font-size: 1rem; }
+.lang-option-name { flex: 1; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -797,6 +883,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <button class="lang-btn" id="lang-btn" onclick="toggleLangMenu()">
         <span class="lang-flag" id="lang-flag">🇪🇸</span>
         <span class="lang-code" id="lang-code">ES</span>
+        <svg class="lang-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
       </button>
       <div class="lang-menu" id="lang-menu">
         <button class="lang-option active" data-lang="es" onclick="setLang('es');toggleLangMenu()">
@@ -1931,6 +2020,22 @@ const ERAS=[
       {year:'197 a.C.',name:'Batalla de Cinoscéfalos',combatants:'Roma vs Macedonia',tag:'Macedonia',lat:39.5,lng:22.3,desc:'La legión romana supera a la falange macedónica'},
       {year:'168 a.C.',name:'Batalla de Pidna',combatants:'Roma (Paulo Emilio) vs Macedonia (Perseo)',tag:'Macedonia',lat:40.4,lng:22.5,desc:'Fin del Reino de Macedonia'},
       {year:'146 a.C.',name:'Destrucción de Cartago',combatants:'Roma vs Cartago',tag:'Roma',lat:36.9,lng:10.3,desc:'Cartago arrasada y sembrada de sal — Delenda est Carthago'},
+      {year:'2250 a.C.',name:'Rebelión contra Naram-Sin',combatants:'Imperio Acadio vs Coalición Rebelde',tag:'Mesopotamia',lat:32.5,lng:45.0,desc:'Primer levantamiento documentado contra un Imperio universal — nueve reyes en un año'},
+      {year:'1800 a.C.',name:'Campañas de Hammurabi',combatants:'Babilonia vs Larsa y Mari',tag:'Babilonia',lat:32.5,lng:44.4,desc:'Hammurabi unifica Mesopotamia por conquista — base del primer código de leyes'},
+      {year:'1700 a.C.',name:'Invasión Hicsa de Egipto',combatants:'Hicsos vs Egipto Medio',tag:'Egipto',lat:30.5,lng:31.3,desc:'Los Hicsos introducen el carro de guerra de dos caballos en Egipto'},
+      {year:'1560 a.C.',name:'Expulsión de los Hicsos',combatants:'Tebas (Ahmose I) vs Hicsos',tag:'Nuevo Imperio',lat:25.7,lng:32.6,desc:'Ahmose I expulsa a los Hicsos y funda el Nuevo Imperio Egipcio'},
+      {year:'1350 a.C.',name:'Guerras Hititas en Siria',combatants:'Hititas vs Mitanni',tag:'Hititas',lat:37.0,lng:37.0,desc:'El dominio hitita sobre Anatolia y Siria del norte'},
+      {year:'1200 a.C.',name:'Colapso del Bronce — Pueblos del Mar',combatants:'Pueblos del Mar vs Mediterráneo Oriental',tag:'Colapso',lat:35.0,lng:33.0,desc:'Los Pueblos del Mar destruyen la civilización del Bronce — Troya, Micenas, Ugarit caen'},
+      {year:'853 a.C.',name:'Batalla de Qarqar',combatants:'Asiria (Salmanasar III) vs Coalición',tag:'Asiria',lat:35.2,lng:36.7,desc:'Primera batalla con fuentes históricas de múltiples naciones — 50.000 soldados'},
+      {year:'545 a.C.',name:'Conquista Persa de Lidia',combatants:'Persia (Ciro) vs Creso de Lidia',tag:'Persia',lat:38.4,lng:28.1,desc:'Ciro derrota al legendariamente rico Creso — Persia domina Anatolia'},
+      {year:'525 a.C.',name:'Batalla de Pelusion',combatants:'Persia (Cambises) vs Egipto',tag:'Persia',lat:31.0,lng:32.5,desc:'Persia conquista Egipto usando gatos sagrados como escudos psicológicos'},
+      {year:'362 a.C.',name:'Batalla de Mantinea II',combatants:'Tebas (Epaminondas) vs Esparta/Atenas',tag:'Guerras Griegas',lat:37.6,lng:22.4,desc:'Muerte de Epaminondas en la victoria — fin de la hegemonía tebana'},
+      {year:'338 a.C.',name:'Batalla de Queronea',combatants:'Macedonia (Filipo II) vs Grecia',tag:'Macedonia',lat:38.5,lng:22.9,desc:'Filipo II conquista Grecia — el joven Alejandro manda la caballería y derrota a la Banda Sagrada'},
+      {year:'333 a.C.',name:'Batalla de Iso',combatants:'Macedonia (Alejandro) vs Persia (Darío III)',tag:'Alejandro',lat:36.8,lng:36.6,desc:'Alejandro derrota personalmente a Darío III — el rey persa huye'},
+      {year:'323 a.C.',name:'Guerras de los Diádocos',combatants:'Sucesores de Alejandro entre sí',tag:'Helenístico',lat:37.0,lng:26.0,desc:'40 años de guerras fraticidas por el Imperio de Alejandro'},
+      {year:'260 a.C.',name:'Batalla de Changping',combatants:'Qin vs Zhao (China)',tag:'China',lat:35.9,lng:112.8,desc:'400.000 soldados Zhao ejecutados — la más sangrienta de la historia china'},
+      {year:'241 a.C.',name:'Batalla de las Islas Egates',combatants:'Roma vs Cartago',tag:'Primera Púnica',lat:37.9,lng:12.0,desc:'Roma destruye la flota cartaginesa — fin de la Primera Guerra Púnica'},
+
     ],
     commanders:[
       {name:'Alejandro Magno',role:'Rey de Macedonia',emoji:'👑'},
@@ -2034,6 +2139,22 @@ const ERAS=[
       {year:'161–166 d.C.',name:'Guerra Pártica de Marco Aurelio',combatants:'Roma vs Partia',tag:'Oriente',lat:37.0,lng:40.0,desc:'Victoria romana pero llegan la plaga y las invasiones bárbaras'},
       {year:'378 d.C.',name:'Batalla de Adrianópolis',combatants:'Visigodos vs Roma (Valente)',tag:'Decadencia',lat:41.7,lng:26.6,desc:'Muerte del Emperador Valente — inicio de la decadencia'},
       {year:'451 d.C.',name:'Batalla de los Campos Cataláunicos',combatants:'Roma/Visigodos (Aecio) vs Atila',tag:'Hunos',lat:48.5,lng:4.3,desc:'La última gran victoria romana detiene a Atila'},
+      {year:'280 a.C.',name:'Batalla de Heraclea',combatants:'Pirro de Epiro vs Roma',tag:'Roma',lat:40.2,lng:16.4,desc:'Primera victoria pírrica — Pirro vence pero pierde el 40% de su ejército'},
+      {year:'218 a.C.',name:'Cruce de los Alpes de Aníbal',combatants:'Cartago vs Roma',tag:'Segunda Púnica',lat:44.6,lng:7.1,desc:'Aníbal cruza los Alpes con 37 elefantes — proeza logística legendaria'},
+      {year:'218 a.C.',name:'Batalla de la Trebia',combatants:'Aníbal vs Roma (Sempronio)',tag:'Segunda Púnica',lat:45.0,lng:9.7,desc:'Aníbal destruye un ejército romano en pleno invierno con emboscada y frío'},
+      {year:'207 a.C.',name:'Batalla del Metauro',combatants:'Roma vs Asdrúbal Barca',tag:'Segunda Púnica',lat:43.7,lng:12.9,desc:'Roma corta el refuerzo de Aníbal — punto de inflexión decisivo'},
+      {year:'190 a.C.',name:'Batalla de Magnesia',combatants:'Roma vs Antíoco III',tag:'Helenístico',lat:38.4,lng:28.0,desc:'Roma derrota al mayor estado helenístico — dominio sobre el Mediterráneo oriental'},
+      {year:'146 a.C.',name:'Destrucción de Cartago',combatants:'Roma (Escipión Emiliano) vs Cartago',tag:'Roma',lat:36.9,lng:10.3,desc:'Cartago arrasada y sembrada de sal — fin de la rival de Roma'},
+      {year:'105 a.C.',name:'Batalla de Arausio',combatants:'Roma vs Cimbrios y Teutones',tag:'Migración',lat:44.0,lng:4.9,desc:'Peor derrota romana: 80.000 soldados muertos — Mario reforma el ejército'},
+      {year:'52 a.C.',name:'Batalla de Alesia',combatants:'César vs Vercingetórix',tag:'César',lat:47.5,lng:4.5,desc:'César construye doble línea de circunvalación — obra maestra de ingeniería militar'},
+      {year:'49 a.C.',name:'Cruce del Rubicón',combatants:'César vs Senado Romano',tag:'Guerra Civil',lat:44.2,lng:12.3,desc:'Alea iacta est — comienza la guerra civil que destruye la República'},
+      {year:'47 a.C.',name:'Batalla de Zela',combatants:'César vs Farnaces II',tag:'César',lat:40.3,lng:36.6,desc:'Veni, vidi, vici — victoria en 4 horas contra el hijo de Mitrídates'},
+      {year:'42 a.C.',name:'Batalla de Filipos',combatants:'Octavio/Marco Antonio vs Bruto/Casio',tag:'Guerra Civil',lat:41.0,lng:24.3,desc:'Muerte de los asesinos de César — el destino de Roma se decide'},
+      {year:'60 d.C.',name:'Rebelión de Boudica',combatants:'Iceni (Boudica) vs Roma',tag:'Britania',lat:52.6,lng:1.0,desc:'Reina celta quema Londinium, Camulodunum y Verulamium — 70.000 romanos muertos'},
+      {year:'113 d.C.',name:'Guerra Pártica de Trajano',combatants:'Roma vs Imperio Parto',tag:'Oriente',lat:33.3,lng:44.4,desc:'Máxima expansión del Imperio Romano — Trajano llega al Golfo Pérsico'},
+      {year:'260 d.C.',name:'Batalla de Edesa',combatants:'Persia (Sapor I) vs Roma (Valeriano)',tag:'Crisis',lat:37.2,lng:38.8,desc:'El Emperador romano Valeriano capturado — primera vez en la historia'},
+      {year:'312 d.C.',name:'Batalla del Puente Milvio',combatants:'Constantino vs Majencio',tag:'Roma',lat:41.9,lng:12.5,desc:'In hoc signo vinces — Constantino adopta el cristianismo y unifica el Imperio'},
+
     ],
     commanders:[
       {name:'Julio César',role:'Dictador y General Romano',emoji:'🦅'},
@@ -2133,6 +2254,22 @@ const ERAS=[
       {year:'1389',name:'Batalla de Kosovo',combatants:'Imperio Otomano vs Serbia',tag:'Otomanos',lat:42.7,lng:21.0,desc:'Caída de Serbia — mito fundacional serbio'},
       {year:'1396',name:'Cruzada de Nicópolis',combatants:'Cruzados Europeos vs Otomanos (Bayaceto)',tag:'Otomanos',lat:43.7,lng:24.9,desc:'Última cruzada masiva — destruida por los otomanos'},
       {year:'1415',name:'Batalla de Agincourt',combatants:'Inglaterra (Enrique V) vs Francia',tag:'Guerra 100 Años',lat:50.5,lng:2.1,desc:'6.000 ingleses vs 36.000 franceses — longbow triunfa'},
+      {year:'507',name:'Batalla de Vouillé',combatants:'Francos (Clodoveo) vs Visigodos',tag:'Francos',lat:46.6,lng:0.2,desc:'Los Francos expulsan a los Visigodos de la Galia — nace la Francia cristiana'},
+      {year:'636',name:'Batalla del Yarmuk',combatants:'Califato Árabe vs Bizancio',tag:'Conquista Islámica',lat:32.8,lng:35.6,desc:'Bizancio pierde Siria y Palestina definitivamente en 6 días de batalla'},
+      {year:'641',name:'Batalla de Nihavand',combatants:'Califato Árabe vs Sasánidas',tag:'Conquista Islámica',lat:34.8,lng:48.4,desc:'Fin del Imperio Sasánida — Persia se islamiza'},
+      {year:'717',name:'Segundo Asedio de Constantinopla',combatants:'Omeyas vs Bizancio (León III)',tag:'Omeyas',lat:41.0,lng:28.9,desc:'La flota árabe destruida por Fuego Griego — Bizancio sobrevive'},
+      {year:'793',name:'Saqueo de Lindisfarne',combatants:'Vikingos Noruegos vs Monasterio',tag:'Vikingos',lat:55.7,lng:-1.8,desc:'Inicio de la Era Vikinga de terror en Europa — el mundo tiembla'},
+      {year:'878',name:'Batalla de Edington',combatants:'Alfredo el Grande vs Vikingos Daneses',tag:'Vikingos',lat:51.3,lng:-2.1,desc:'Alfredo salva Inglaterra del dominio danés — nace el concepto de Inglaterra'},
+      {year:'1097',name:'Batalla de Dorilea',combatants:'Cruzados vs Selyúcidas',tag:'Primera Cruzada',lat:39.9,lng:30.5,desc:'Primera gran victoria cruzada en Asia Menor — camino a Jerusalén'},
+      {year:'1099',name:'Asalto a Jerusalén',combatants:'Cruzados vs Fatimíes',tag:'Primera Cruzada',lat:31.8,lng:35.2,desc:'Los Cruzados conquistan Jerusalén tras 5 semanas — masacre de la población'},
+      {year:'1119',name:'Batalla del Campo de Sangre',combatants:'Cruzados vs Artuqíes',tag:'Cruzadas',lat:36.5,lng:37.0,desc:'Destrucción del ejército del Principado de Antioquía'},
+      {year:'1191',name:'Batalla de Arsuf',combatants:'Ricardo Corazón de León vs Saladino',tag:'Tercera Cruzada',lat:32.2,lng:34.9,desc:'Ricardo mantiene la formación bajo lluvia de flechas y lanza carga devastadora'},
+      {year:'1208',name:'Cruzada Albigense — Béziers',combatants:'Simón de Montfort vs Cátaros',tag:'Cruzada Interna',lat:43.3,lng:3.2,desc:'Matalos a todos — Dios reconocerá a los suyos: 20.000 muertos'},
+      {year:'1241',name:'Batalla de Mohi',combatants:'Mongoles (Batu/Sübutai) vs Hungría',tag:'Mongoles',lat:47.9,lng:20.7,desc:'Hungría devastada — 500.000 muertos, Europa al borde del colapso'},
+      {year:'1242',name:'Batalla del Lago Peipus',combatants:'Rusia (Alejandro Nevski) vs Teutones',tag:'Orden Teutónica',lat:58.5,lng:27.5,desc:'La Batalla del Hielo — caballeros teutones hunden en el lago helado'},
+      {year:'1302',name:'Batalla de las Espuelas de Oro',combatants:'Flandes vs Francia (Roberto de Artois)',tag:'Flandes',lat:50.8,lng:3.3,desc:'Piqueros flamencos destruyen a la caballería francesa — 700 espuelas de oro recogidas'},
+      {year:'1396',name:'Cruzada de Nicópolis',combatants:'Cruzados Europeos vs Otomanos (Bayaceto)',tag:'Otomanos',lat:43.7,lng:24.9,desc:'Última cruzada masiva destruida por los otomanos — 10.000 prisioneros ejecutados'},
+
     ],
     commanders:[
       {name:'Carlos Martel',role:'Mayor de Palacio Franco',emoji:'⚔️'},
@@ -2230,6 +2367,22 @@ const ERAS=[
       {year:'1704',name:'Batalla de Blenheim',combatants:'Gran Alianza (Marlborough) vs Francia',tag:'Sucesión Española',lat:48.6,lng:10.6,desc:'Marlborough destruye el mito del ejército francés'},
       {year:'1709',name:'Batalla de Poltava',combatants:'Rusia (Pedro el Grande) vs Suecia (Carlos XII)',tag:'G. Norte',lat:49.6,lng:34.5,desc:'Fin de Suecia como gran potencia — ascenso de Rusia'},
       {year:'1720',name:'Asedio de Gibraltar (España)',combatants:'España vs Gran Bretaña',tag:'Gibraltar',lat:36.1,lng:-5.4,desc:'España intenta recuperar Gibraltar sin éxito'},
+      {year:'1429',name:'Levantamiento del Asedio de Orléans',combatants:'Francia (Juana de Arco) vs Inglaterra',tag:'Guerra 100 Años',lat:47.9,lng:1.9,desc:'Juana de Arco salva Orléans en 9 días — punto de inflexión de la guerra'},
+      {year:'1453',name:'Batalla de Castillon',combatants:'Francia vs Inglaterra (Talbot)',tag:'Guerra 100 Años',lat:44.9,lng:-0.1,desc:'Los cañones franceses deciden la última batalla — fin de la Guerra de 100 Años'},
+      {year:'1503',name:'Batalla de Ceriñola',combatants:'España (Gran Capitán) vs Francia',tag:'Guerras Italianas',lat:41.4,lng:15.9,desc:'Primera batalla de la historia ganada por armas de fuego — nace la táctica moderna'},
+      {year:'1509',name:'Batalla de Agnadello',combatants:'Francia (Luis XII) vs Venecia',tag:'Guerras Italianas',lat:45.5,lng:9.7,desc:'Venecia casi destruida — la República Serenísima pierde su ejército en un día'},
+      {year:'1515',name:'Batalla de Marignano',combatants:'Francia (Francisco I) vs Suizos',tag:'Guerras Italianas',lat:45.4,lng:9.3,desc:'Francisco I derrota a los invictos piqueros suizos — primer uso decisivo de artillería'},
+      {year:'1522',name:'Asedio de Rodas',combatants:'Otomanos (Solimán) vs Hospitalarios',tag:'Mediterráneo',lat:36.4,lng:28.2,desc:'Los Caballeros de Rodas expulsados tras 145 días — se retiran a Malta'},
+      {year:'1526',name:'Batalla de Panipat I',combatants:'Babur vs Ibrahim Lodi (India)',tag:'India',lat:29.4,lng:76.9,desc:'Babur funda el Imperio Mogol con artillería — primera vez en India'},
+      {year:'1527',name:'Saqueo de Roma',combatants:'Ejército Imperial vs Roma',tag:'Guerras Italianas',lat:41.9,lng:12.5,desc:'Lansquenetes y españoles saquean Roma — el Papa Clemente VII huye'},
+      {year:'1556',name:'Batalla de Panipat II',combatants:'Akbar/Bairam Kan vs Hemu',tag:'India Mogol',lat:29.4,lng:76.9,desc:'Akbar consolida el Imperio Mogol — Hemu muerto con una flecha en el ojo'},
+      {year:'1565',name:'Gran Asedio de Malta',combatants:'Hospitalarios vs Otomanos (Dragut)',tag:'Mediterráneo',lat:35.9,lng:14.5,desc:'700 caballeros y 8.000 malteses resisten a 48.000 otomanos durante 4 meses'},
+      {year:'1576',name:'Furia Española — Amberes',combatants:'Tercios vs Amberes',tag:'Flandes',lat:51.2,lng:4.4,desc:'Los Tercios saquean Amberes — 8.000 muertos en 3 días'},
+      {year:'1578',name:'Batalla de Alcazarquivir',combatants:'Marruecos vs Portugal (Sebastián I)',tag:'Portugal',lat:34.9,lng:-5.5,desc:'Tres reyes mueren — Portugal pierde su independencia 60 años'},
+      {year:'1600',name:'Batalla de Sekigahara',combatants:'Tokugawa vs Toyotomi (Japón)',tag:'Japón',lat:35.4,lng:136.5,desc:'165.000 hombres en combate — Tokugawa unifica Japón y funda el Shogunato'},
+      {year:'1631',name:'Saqueo de Magdeburgo',combatants:'Imperiales (Tilly) vs Ciudad',tag:'30 Años',lat:52.1,lng:11.6,desc:'25.000 muertos en un día — la mayor atrocidad de la Guerra de los Treinta Años'},
+      {year:'1700',name:'Batalla de Narva',combatants:'Suecia (Carlos XII) vs Rusia',tag:'Guerra Norte',lat:59.4,lng:28.2,desc:'8.000 suecos derrotan a 40.000 rusos en la nieve — Carlos XII el invencible'},
+
     ],
     commanders:[
       {name:'Gonzalo Fernández de Córdoba',role:'El Gran Capitán',emoji:'⚔️'},
@@ -2314,6 +2467,22 @@ const ERAS=[
       {year:'1814',name:'Campaña de Francia',combatants:'Napoleón vs Gran Coalición',tag:'Decadencia',lat:48.9,lng:3.0,desc:'Napoleón lucha desesperadamente para salvar París'},
       {year:'1815',name:'Batalla de Ligny',combatants:'Napoleón vs Blücher (Prusianos)',tag:'Los Cien Días',lat:50.5,lng:4.5,desc:'Última victoria de Napoleón — 2 días antes de Waterloo'},
       {year:'1815',name:'Batalla de Waterloo',combatants:'Napoleón vs Wellington / Blücher',tag:'Final',lat:50.7,lng:4.4,desc:'El error de Ney, la Guardia Imperial y el ejército prusiano — fin de Napoleón'},
+      {year:'1745',name:'Batalla de Fontenoy',combatants:'Francia (Sajonia) vs Gran Alianza',tag:'Pre-Napoleónico',lat:50.6,lng:3.5,desc:'El Mariscal de Sajonia — primera gran victoria de columnas de infantería'},
+      {year:'1759',name:'Batalla de las Llanuras de Abraham',combatants:'GB (Wolfe) vs Francia (Montcalm)',tag:'G. 7 Años',lat:46.8,lng:-71.2,desc:'Canadá pasa a manos británicas — ambos generales mueren en la batalla'},
+      {year:'1775',name:'Batalla de Bunker Hill',combatants:'Colonias vs Gran Bretaña',tag:'Independencia',lat:42.4,lng:-71.1,desc:'Las colonias americanas resisten heroicamente antes de retirarse'},
+      {year:'1777',name:'Batalla de Saratoga',combatants:'EE.UU. (Gates) vs GB (Burgoyne)',tag:'Independencia',lat:42.9,lng:-73.6,desc:'Punto de inflexión — Francia entra en guerra junto a EE.UU.'},
+      {year:'1781',name:'Batalla de Yorktown',combatants:'EE.UU./Francia vs GB (Cornwallis)',tag:'Independencia',lat:37.2,lng:-76.5,desc:'Rendición de Cornwallis — fin de la guerra de independencia americana'},
+      {year:'1793',name:'Asedio de Toulon',combatants:'Francia Revolucionaria vs Coalición',tag:'Guerras Rev.',lat:43.1,lng:5.9,desc:'Napoleón Bonaparte emerge — captura el puerto y expulsa a los ingleses'},
+      {year:'1800',name:'Batalla de Marengo',combatants:'Francia (Napoleón) vs Austria',tag:'Napoleón',lat:44.9,lng:8.6,desc:'Napoleón resucita una derrota con la llegada de Desaix — Desaix muere'},
+      {year:'1805',name:'Batalla de Ulm',combatants:'Francia vs Austria (Mack)',tag:'Napoleón',lat:48.4,lng:10.0,desc:'Napoleón rodea a 60.000 austriacos sin librar batalla — capitulan'},
+      {year:'1807',name:'Batalla de Friedland',combatants:'Francia vs Rusia (Bennigsen)',tag:'Napoleón',lat:54.4,lng:21.0,desc:'Napoleón arrincona a los rusos contra un río — Rusia pide la paz'},
+      {year:'1808',name:'Asedio de Zaragoza',combatants:'Francia vs Zaragoza (Palafox)',tag:'Guerrillas',lat:41.7,lng:-0.9,desc:'Zaragoza resiste heroicamente — nacen las guerrillas españolas'},
+      {year:'1809',name:'Batalla de Aspern-Essling',combatants:'Austria vs Francia',tag:'Austria',lat:48.2,lng:16.5,desc:'Primera derrota de Napoleón en campo abierto — Lannes muere'},
+      {year:'1812',name:'Batalla de Salamanca',combatants:'Wellington vs Marmont (España)',tag:'Peninsular',lat:40.9,lng:-5.7,desc:'Wellington descubre una brecha en la línea francesa y ataca en 40 minutos'},
+      {year:'1813',name:'Batalla de Vitoria',combatants:'Wellington vs José Bonaparte',tag:'Peninsular',lat:42.8,lng:-2.7,desc:'Wellington expulsa definitivamente a los franceses de España — el tesoro real capturado'},
+      {year:'1814',name:'Campaña de Francia',combatants:'Napoleón vs Gran Coalición',tag:'Decadencia',lat:48.9,lng:3.0,desc:'Napoleón gana 6 batallas en 6 días con 30.000 hombres contra 300.000 — pero pierde la guerra'},
+      {year:'1815',name:'Batalla de Ligny',combatants:'Napoleón vs Blücher',tag:'Cien Días',lat:50.5,lng:4.5,desc:'Última victoria de Napoleón — 2 días antes de Waterloo'},
+
     ],
     commanders:[
       {name:'Napoleón Bonaparte',role:'Emperador de Francia',emoji:'👑'},
@@ -2388,6 +2557,22 @@ const ERAS=[
       {year:'Mar–Jul 1918',name:'Ofensiva de Primavera Alemana (Kaiserschlacht)',combatants:'Alemania vs Aliados',tag:'Último Intento',lat:50.5,lng:3.0,desc:'Última gran apuesta alemana con Stoßtruppen'},
       {year:'Ago–Nov 1918',name:'Los Cien Días (Ofensiva Aliada)',combatants:'Aliados vs Alemania',tag:'Victoria',lat:50.1,lng:2.9,desc:'100 días de contraofensiva que terminó la guerra'},
       {year:'Sep–Oct 1918',name:'Ofensiva Vardar (Macedonia)',combatants:'Aliados vs Bulgaria',tag:'Balcanes',lat:41.9,lng:21.4,desc:'Bulgaria se derrumba — primer Imperio Central en rendirse'},
+      {year:'Ago 1914',name:'Batalla de Lieja',combatants:'Bélgica vs Alemania',tag:'Bélgica',lat:50.6,lng:5.6,desc:'Los belgas resisten 12 días — el mundo se sorprende de la resistencia'},
+      {year:'Ago 1914',name:'Batalla de Tannenberg',combatants:'Alemania (Hindenburg) vs Rusia (Samsonov)',tag:'Frente Oriental',lat:53.5,lng:20.1,desc:'90.000 rusos prisioneros — Samsonov se suicida — catástrofe rusa'},
+      {year:'Oct 1914',name:'Primera Batalla de Ypres',combatants:'Alemania vs GB/Bélgica',tag:'Flandes',lat:50.8,lng:2.9,desc:'Los voluntarios alemanes masacrados — Kindermord bei Ypern'},
+      {year:'Feb 1915',name:'Batalla de los Lagos Masurios',combatants:'Alemania vs Rusia',tag:'Frente Oriental',lat:53.8,lng:21.8,desc:'100.000 rusos capturados en invierno — el Frente Oriental se estabiliza'},
+      {year:'Abr 1915',name:'Segunda Batalla de Ypres — Gas',combatants:'Alemania vs Aliados',tag:'Gas',lat:50.9,lng:2.9,desc:'Primer uso masivo del gas cloro — 6.000 bajas en 10 minutos'},
+      {year:'Abr 1915',name:'Desembarco en Anzac Cove',combatants:'ANZAC vs Imperio Otomano',tag:'Gallipoli',lat:40.2,lng:26.3,desc:'Los australianos y neozelandeses desembarcan bajo fuego — nacimiento de una identidad nacional'},
+      {year:'Mar 1916',name:'Batalla del Lago Narocz',combatants:'Rusia vs Alemania',tag:'Frente Oriental',lat:54.8,lng:26.7,desc:'Ofensiva rusa para aliviar Verdún — 140.000 bajas sin resultado'},
+      {year:'Jul 1916',name:'Primera aparición del Tanque',combatants:'GB vs Alemania (Somme)',tag:'Innovación',lat:50.0,lng:2.8,desc:'Los tanques Mark I entran en combate por primera vez — 49 máquinas'},
+      {year:'Abr 1917',name:'Batalla de Arras — Cresta de Vimy',combatants:'Canadá vs Alemania',tag:'Frente Occidental',lat:50.3,lng:2.8,desc:'Los canadienses toman Vimy Ridge — símbolo del nacimiento de Canadá como nación'},
+      {year:'Jul 1917',name:'Batalla de Passchendaele (3ª Ypres)',combatants:'GB vs Alemania',tag:'Flandes',lat:50.9,lng:3.0,desc:'250.000 bajas británicas en el barro — horror sin igual de la guerra'},
+      {year:'Oct 1917',name:'Batalla de Caporetto',combatants:'Austria-Alemania vs Italia',tag:'Frente Italiano',lat:46.2,lng:13.6,desc:'300.000 prisioneros italianos — Hemingway lo vivió y escribió Adiós a las Armas'},
+      {year:'Nov 1917',name:'Batalla de Cambrai',combatants:'GB vs Alemania',tag:'Tanques',lat:50.2,lng:3.2,desc:'476 tanques atacan en masa — primera vez en la historia'},
+      {year:'Mar 1918',name:'Ofensiva de Primavera — Operación Michael',combatants:'Alemania vs GB',tag:'Kaiserschlacht',lat:50.5,lng:3.0,desc:'La gran apuesta final alemana con Stoßtruppen — avance de 60km en un día'},
+      {year:'Sep 1918',name:'Ofensiva de los Cien Días',combatants:'Aliados vs Alemania',tag:'Victoria',lat:50.1,lng:2.9,desc:'La contraofensiva final que termina la guerra — Alemania se derrumba'},
+      {year:'Sep 1918',name:'Ofensiva Vardar',combatants:'Aliados vs Bulgaria',tag:'Balcanes',lat:41.9,lng:21.4,desc:'Bulgaria se rinde — primer Imperio Central en derrumbarse'},
+
     ],
     commanders:[
       {name:'Ferdinand Foch',role:'Comandante Supremo Aliado',emoji:'🇫🇷'},
@@ -2480,6 +2665,22 @@ const ERAS=[
       {year:'Abr–Jun 1945',name:'Batalla de Okinawa',combatants:'EE.UU. vs Japón',tag:'Pacífico',lat:26.5,lng:128.0,desc:'La más sangrienta del Pacífico — decide el uso de la bomba'},
       {year:'Abr–May 1945',name:'Batalla de Berlín',combatants:'URSS (Zhukov/Konev) vs Alemania',tag:'Final Europa',lat:52.5,lng:13.4,desc:'3M soviéticos vs 1M alemanes — Hitler se suicida'},
       {year:'Ago 1945',name:'Hiroshima y Nagasaki',combatants:'EE.UU. vs Japón',tag:'Nuclear',lat:34.4,lng:132.5,desc:'Las dos únicas bombas atómicas usadas en guerra'},
+      {year:'Sep 1939',name:'Invasión de Polonia',combatants:'Alemania/URSS vs Polonia',tag:'Inicio',lat:52.2,lng:19.1,desc:'La Blitzkrieg en acción — Polonia entre dos fuegos en 35 días'},
+      {year:'Nov 1939',name:'Guerra de Invierno',combatants:'Finlandia vs URSS',tag:'Norte',lat:60.2,lng:24.9,desc:'Finlandia resiste heroicamente 3 meses — 125.000 soviéticos muertos'},
+      {year:'May 1940',name:'Batalla del Paso de las Ardenas',combatants:'Alemania (Manstein) vs Francia',tag:'Blitzkrieg',lat:50.0,lng:5.5,desc:'Guderian rompe por el bosque "imposible" — Francia queda cortada en 24 horas'},
+      {year:'Sep 1940',name:'El Blitz — Bombardeo de Londres',combatants:'Luftwaffe vs Civiles Británicos',tag:'Bombardeo',lat:51.5,lng:-0.1,desc:'57 noches consecutivas de bombardeo sobre Londres — 43.000 civiles muertos'},
+      {year:'Feb 1941',name:'Campaña del Norte de África (Rommel)',combatants:'Afrika Korps vs GB',tag:'N. África',lat:32.0,lng:20.0,desc:'Rommel el Zorro del Desierto — guerra de movimiento a 30km/hora en el desierto'},
+      {year:'May 1941',name:'Batalla de Creta',combatants:'Alemania (Student) vs Aliados',tag:'Aerotransportado',lat:35.3,lng:25.1,desc:'Primera conquista de una isla por paracaidistas — 6.000 alemanes muertos'},
+      {year:'Sep 1941',name:'Asedio de Leningrado',combatants:'Alemania vs URSS (Leningrado)',tag:'Frente Oriental',lat:59.9,lng:30.3,desc:'872 días de asedio — 1 millón de civiles muertos de hambre'},
+      {year:'Oct 1941',name:'Batalla de Moscú',combatants:'Alemania (Bock) vs URSS (Zhukov)',tag:'Frente Oriental',lat:55.7,lng:37.6,desc:'Alemania a 15km de Moscú — el general Invierno detiene la Blitzkrieg'},
+      {year:'Jun 1942',name:'Batalla del Mar de Coral',combatants:'EE.UU. vs Japón',tag:'Pacífico',lat:-15.0,lng:155.0,desc:'Primera batalla naval donde los barcos no se ven — solo aviones'},
+      {year:'Ago 1942',name:'Guadalcanal',combatants:'EE.UU. (Marines) vs Japón',tag:'Pacífico',lat:-9.6,lng:160.2,desc:'Primera ofensiva americana terrestre — 6 meses de combate en la jungla'},
+      {year:'Jan 1944',name:'Batalla de Montecasino',combatants:'Aliados vs Alemania (Kesselring)',tag:'Italia',lat:41.5,lng:13.8,desc:'4 batallas en 5 meses para superar la Línea Gustav — el monasterio destruido'},
+      {year:'Jun 1944',name:'Operación Bagration',combatants:'URSS vs Alemania (Centro)',tag:'Frente Oriental',lat:53.9,lng:27.6,desc:'La mayor derrota alemana — 400.000 bajas en 6 semanas'},
+      {year:'Sep 1944',name:'Operación Market Garden',combatants:'Aliados vs Alemania',tag:'Países Bajos',lat:51.8,lng:5.8,desc:'Un puente demasiado lejos — fracaso aliado en Arnhem'},
+      {year:'Feb 1945',name:'Batalla de Iwo Jima',combatants:'EE.UU. (Marines) vs Japón',tag:'Pacífico',lat:24.8,lng:141.3,desc:'La bandera sobre Monte Suribachi — 7.000 marines muertos en 36 días'},
+      {year:'Mar 1945',name:'Cruce del Rin — Operación Plunder',combatants:'Aliados (Montgomery) vs Alemania',tag:'Final Europa',lat:51.6,lng:6.5,desc:'2 millones de soldados cruzan el último obstáculo natural hacia Alemania'},
+
     ],
     commanders:[
       {name:'Dwight D. Eisenhower',role:'Comandante Supremo Aliado en Europa',emoji:'⭐'},
@@ -2560,6 +2761,22 @@ const ERAS=[
       {year:'1982',name:'Invasión Israelí del Líbano',combatants:'Israel vs OLP/Siria',tag:'Líbano',lat:33.9,lng:35.5,desc:'Israel en Beirut — comienza Hezbolá'},
       {year:'1989',name:'Retirada Soviética de Afganistán',combatants:'URSS vs Muyahidines',tag:'Afganistán',lat:34.5,lng:69.2,desc:'10 años, 15.000 soviéticos muertos — URSS vencida'},
       {year:'1990–1991',name:'Tormenta del Desierto',combatants:'Coalición 34 países vs Irak (Saddam)',tag:'Golfo',lat:29.4,lng:47.5,desc:'100 horas de combate terrestre — revolución tecnológica'},
+      {year:'1945–1949',name:'Guerra Civil China',combatants:'Mao Zedong (PCCh) vs Chiang Kai-shek',tag:'China',lat:32.0,lng:118.8,desc:'La mayor guerra civil del siglo XX — Mao crea la República Popular China'},
+      {year:'1948',name:'Primera Guerra Árabe-Israelí',combatants:'Israel vs Coalición Árabe',tag:'Oriente Medio',lat:31.8,lng:35.2,desc:'Israel nace luchando contra 5 ejércitos — la Guerra de Independencia'},
+      {year:'1950',name:'Batalla del Puente de Chosin',combatants:'Marines EE.UU. vs China',tag:'Corea',lat:40.6,lng:127.1,desc:'15.000 marines se abren paso rodeados por 120.000 chinos en -40ºC'},
+      {year:'1954',name:'Batalla de Dien Bien Phu',combatants:'Viet Minh (Giap) vs Francia',tag:'Indochina',lat:21.4,lng:103.0,desc:'Francia humillada — fin del colonialismo francés en Asia'},
+      {year:'1956',name:'Revolución Húngara',combatants:'Hungría vs URSS',tag:'Europa del Este',lat:47.5,lng:19.1,desc:'Los tanques soviéticos aplastan Budapest — 2.500 húngaros muertos'},
+      {year:'1965',name:'Batalla de Ia Drang',combatants:'EE.UU. (7ª Caballería) vs Vietnam Norte',tag:'Vietnam',lat:13.7,lng:107.8,desc:'Primera gran batalla entre EE.UU. y el NVA — los helicópteros revolucionan la táctica'},
+      {year:'1968',name:'Batalla de Hue — Ofensiva Tet',combatants:'EE.UU./Vietnam Sur vs Vietcong',tag:'Vietnam',lat:16.4,lng:107.6,desc:'Combate urbano casa a casa durante 26 días — punto de inflexión de la opinión pública'},
+      {year:'1969',name:'Guerra de Desgaste — Canal de Suez',combatants:'Israel vs Egipto',tag:'Oriente Medio',lat:30.8,lng:32.3,desc:'1.500 israelíes muertos en guerra no declarada — precedente de la guerra de Yom Kippur'},
+      {year:'1971',name:'Guerra de Liberación de Bangladesh',combatants:'India/Bangladesh vs Pakistán',tag:'Asia',lat:23.7,lng:90.4,desc:'Pakistán se rinde en 13 días — India captura 93.000 prisioneros'},
+      {year:'1975',name:'Caída de Saigón',combatants:'Vietnam Norte vs Vietnam Sur/EE.UU.',tag:'Vietnam',lat:10.8,lng:106.7,desc:'El helicóptero desde la azotea de la embajada — fin de la presencia americana'},
+      {year:'1978',name:'Invasión Vietnamita de Camboya',combatants:'Vietnam vs Jemeres Rojos (Pol Pot)',tag:'Asia',lat:11.5,lng:104.9,desc:'Vietnam derroca a Pol Pot en 2 semanas — fin del genocidio camboyana'},
+      {year:'1980',name:'Operación Águila Garras (Rescate en Irán)',combatants:'EE.UU. vs Irán (fracaso)',tag:'Operaciones Especiales',lat:33.5,lng:48.6,desc:'Misión de rescate fallida — 8 soldados americanos muertos en el desierto'},
+      {year:'1982',name:'Invasión Israelí del Líbano',combatants:'Israel vs OLP/Siria',tag:'Líbano',lat:33.9,lng:35.5,desc:'Israel en Beirut — Ariel Sharon y los campos de Sabra y Chatila'},
+      {year:'1988',name:'Batalla de Cuito Cuanavale',combatants:'Angola/Cuba vs Sudáfrica/UNITA',tag:'África',lat:-15.2,lng:19.2,desc:'La mayor batalla terrestre en África desde El Alamein — fin del apartheid en perspectiva'},
+      {year:'1989',name:'Retirada Soviética de Afganistán',combatants:'URSS vs Muyahidines',tag:'Afganistán',lat:34.5,lng:69.2,desc:'10 años, 15.000 soviéticos muertos — el derrumbe del Imperio comienza'},
+
     ],
     commanders:[
       {name:'Douglas MacArthur',role:'General Supremo en Corea',emoji:'⭐'},
@@ -2628,6 +2845,22 @@ const ERAS=[
       {year:'2022–presente',name:'Invasión Rusa de Ucrania',combatants:'Rusia vs Ucrania/Occidente',tag:'Europa',lat:48.4,lng:31.2,desc:'Mayor guerra en Europa desde 1945 — drones FPV, HIMARS, IA'},
       {year:'2023–presente',name:'Guerra Israel-Hamas (Gaza)',combatants:'Israel vs Hamas/Hezbolá',tag:'Oriente Medio',lat:31.5,lng:34.5,desc:'Guerra urbana de alta intensidad — 40.000+ bajas civiles'},
       {year:'2023',name:'Guerra Civil en Sudán',combatants:'SAF vs RSF (Hemedti)',tag:'África',lat:15.6,lng:32.5,desc:'9 millones de desplazados — la mayor crisis humanitaria del mundo'},
+      {year:'1994–1996',name:'Primera Guerra de Chechenia',combatants:'Rusia vs Chechenia',tag:'Chechenia',lat:43.3,lng:45.7,desc:'Grozny — el ejército ruso humillado en ciudad — 5.500 soldados muertos'},
+      {year:'1998–1999',name:'Guerra de Kosovo',combatants:'Serbia vs UCK/OTAN',tag:'Balcanes',lat:42.7,lng:21.2,desc:'78 días de bombardeos de la OTAN sin bajas aliadas — nueva doctrina aérea'},
+      {year:'2001',name:'Batalla de Tora Bora',combatants:'EE.UU./Alianza Norte vs Al-Qaeda',tag:'Afganistán',lat:34.0,lng:70.2,desc:'Bin Laden escapa por las montañas — el mayor fracaso de inteligencia americano'},
+      {year:'2003',name:'Batalla de Bagdad',combatants:'EE.UU. vs Guardia Republicana de Irak',tag:'Irak',lat:33.3,lng:44.4,desc:'Thunderrun: columnas blindadas americanas atraviesan Bagdad en 24 horas'},
+      {year:'2004',name:'Primera Batalla de Falluyah',combatants:'EE.UU. vs Insurgentes',tag:'Irak',lat:33.4,lng:43.8,desc:'EE.UU. se retira bajo presión política — segunda batalla necesaria'},
+      {year:'2004',name:'Segunda Batalla de Falluyah',combatants:'EE.UU./Irak vs Insurgentes',tag:'Irak',lat:33.4,lng:43.8,desc:'El combate urbano más intenso desde Hue — 95 americanos muertos'},
+      {year:'2006',name:'Segunda Guerra del Líbano',combatants:'Israel vs Hezbolá',tag:'Líbano',lat:33.5,lng:35.8,desc:'Fracaso israelí ante la guerra asimétrica — Hezbolá resiste 34 días'},
+      {year:'2014–2019',name:'Conflicto del ISIS en Siria e Irak',combatants:'ISIS vs Coalición/Kurdos/Siria',tag:'ISIS',lat:35.9,lng:39.0,desc:'El Estado Islámico conquista un territorio del tamaño de Italia — luego destruido'},
+      {year:'2016–2017',name:'Batalla de Mosul',combatants:'Irak/EE.UU./Kurdos vs ISIS',tag:'Irak',lat:36.3,lng:43.1,desc:'9 meses de combate urbano — ISIS destruido en su capital iraquí'},
+      {year:'2020',name:'Asesinato de Soleimani',combatants:'EE.UU. vs Irán',tag:'Oriente Medio',lat:33.3,lng:44.4,desc:'Dron americano elimina al general más poderoso de Irán en Bagdad'},
+      {year:'2022',name:'Batalla de Kyiv',combatants:'Rusia vs Ucrania',tag:'Ucrania',lat:50.4,lng:30.5,desc:'Rusia intenta decapitar el gobierno ucraniano en 72 horas — fracasa'},
+      {year:'2022',name:'Batalla de Mariupol',combatants:'Rusia vs Ucrania (Azov)',tag:'Ucrania',lat:47.1,lng:37.6,desc:'82 días de resistencia del Regimiento Azov en la planta Azovstal'},
+      {year:'2023',name:'Contraofensiva Ucraniana',combatants:'Ucrania vs Rusia',tag:'Ucrania',lat:47.5,lng:34.8,desc:'Ucrania intenta romper las líneas rusas — guerra de posiciones con drones'},
+      {year:'2023',name:'Ataque de Hamas — 7 de Octubre',combatants:'Hamas vs Israel',tag:'Gaza',lat:31.5,lng:34.5,desc:'1.200 israelíes muertos en el mayor ataque terrorista contra Israel'},
+      {year:'2023–2024',name:'Operación Escudo de Hierro (Gaza)',combatants:'Israel vs Hamas/Gaza',tag:'Gaza',lat:31.4,lng:34.3,desc:'Guerra urbana de alta intensidad — 40.000 muertos, la situación humanitaria catastrófica'},
+
     ],
     commanders:[
       {name:'Norman Schwarzkopf',role:'CINCCENT — Tormenta del Desierto',emoji:'🇺🇸'},
@@ -3457,11 +3690,18 @@ function makeSidebarItem(icon, name, sub, badge, onClick) {
   return el;
 }
 
-function fillSidebarBattles(containerId, battles, eraObj, currentName) {
+function fillSidebarBattles(containerId, battles, eraObj, currentName, currentYear) {
   const c = document.getElementById(containerId);
   if (!c) return;
   c.innerHTML = '';
-  battles.filter(b => b.name !== currentName).slice(0, 6).forEach(b => {
+  let filtered = battles.filter(b => b.name !== currentName);
+  // Sort by proximity to currentYear if provided
+  if (currentYear) {
+    const parseYear = y => { const m = String(y).match(/(-?[0-9]+)/); return m ? parseInt(m[1]) : 0; };
+    const cy = parseYear(currentYear);
+    filtered.sort((a, b) => Math.abs(parseYear(a.year) - cy) - Math.abs(parseYear(b.year) - cy));
+  }
+  filtered.slice(0, 6).forEach(b => {
     c.appendChild(makeSidebarItem('⚔', b.name, b.year, b.tag,
       () => openBattleDetail(b, eraObj)));
   });
@@ -3527,7 +3767,7 @@ async function openBattleDetail(battle, eraObj) {
 
   // Fill sidebar
   buildBpMap(battle.lat, battle.lng);
-  fillSidebarBattles('bpRelBattles', eraObj.battles_data, eraObj, battle.name);
+  fillSidebarBattles('bpRelBattles', eraObj.battles_data, eraObj, battle.name, battle.year);
   fillSidebarCmds('bpRelCmds', eraObj.commanders, eraObj, '');
   fillSidebarWeapons('bpRelWeapons', eraObj.weapons, eraObj);
   fillSidebarTactics('bpRelTactics', eraObj.tactics, eraObj);
