@@ -1182,17 +1182,14 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 <div id="battles-view" class="section-view" style="padding:2rem;max-width:1400px;margin:0 auto;">
   <div class="page-title-bar">
     <div class="page-eyebrow">Enciclopedia Militar</div>
-    <h1 class="page-title">⚔ Todas las Batallas</h1>
+    <h1 class="page-title" id="battles-page-title">⚔ Todas las Batallas</h1>
     <p class="page-subtitle">Índice completo de batallas históricas de todas las eras y civilizaciones</p>
   </div>
-  <div class="section-search-bar">
-    <input class="section-search-input" id="battles-search" placeholder="Buscar por nombre, año, combatientes, era..." oninput="filterBattlesIndex(this.value)">
-    <button class="section-search-btn" onclick="filterBattlesIndex(document.getElementById('battles-search').value)">🔍 Buscar</button>
-  </div>
+
   <div style="display:flex;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
     <div class="section-search-bar" style="flex:1;min-width:240px;margin-bottom:0;">
       <input class="section-search-input" id="battles-search" placeholder="Buscar..." oninput="filterBattlesIndex(this.value)">
-      <button class="section-search-btn">🔍</button>
+      <button class="section-search-btn" id="battles-search-btn">🔍</button>
     </div>
     <button class="cmp-toggle" id="cmp-btn" onclick="toggleCmp()">⚖ Comparar Batallas</button>
   </div>
@@ -1205,7 +1202,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <button class="cmp-go" id="cmp-go" disabled onclick="runCmp()">⚖ Comparar →</button>
   </div>
   <div class="filter-chips" id="battles-era-chips"></div>
-  <div class="results-count" id="battles-results-count"><span id="battles-count">0</span> batallas encontradas</div>
+  <div class="results-count" id="battles-results-count"><span id="battles-count">0</span> <span id="battles-count-label">batallas encontradas</span></div>
   <div class="index-grid" id="battles-index-grid"></div>
 </div>
 
@@ -1213,7 +1210,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
 <div id="commanders-view" class="section-view" style="padding:2rem;max-width:1400px;margin:0 auto;">
   <div class="page-title-bar">
     <div class="page-eyebrow">Enciclopedia Militar</div>
-    <h1 class="page-title">👑 Todos los Comandantes</h1>
+    <h1 class="page-title" id="cmds-page-title">👑 Todos los Comandantes</h1>
     <p class="page-subtitle">Los estrategas, generales y líderes militares que cambiaron la historia</p>
   </div>
   <div class="section-search-bar">
@@ -1221,7 +1218,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
     <button class="section-search-btn" onclick="filterCommandersIndex(document.getElementById('commanders-search').value)">🔍 Buscar</button>
   </div>
   <div class="filter-chips" id="commanders-era-chips"></div>
-  <div class="results-count" id="commanders-results-count"><span id="commanders-count">0</span> comandantes encontrados</div>
+  <div class="results-count" id="commanders-results-count"><span id="commanders-count">0</span> <span id="cmds-count-label">comandantes encontrados</span></div>
   <div class="cmd-index-grid" id="commanders-index-grid"></div>
 </div>
 
@@ -1238,28 +1235,28 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   </div>
   <div id="world-map"></div>
   <div class="worldmap-stats">
-    <div class="wm-stat">Batallas en el mapa: <span id="wm-count">0</span></div>
-    <div class="wm-stat">Eras representadas: <span id="wm-eras">0</span></div>
-    <div class="wm-stat">Países involucrados: <span id="wm-countries">50+</span></div>
-    <div class="wm-stat">Span temporal: <span>50.000 años de historia</span></div>
+    <div class="wm-stat" id="wm-stat-battles">Batallas en el mapa: <span id="wm-count">0</span></div>
+    <div class="wm-stat" id="wm-stat-eras">Eras representadas: <span id="wm-eras">0</span></div>
+    <div class="wm-stat" id="wm-stat-countries">Países involucrados: <span id="wm-countries">50+</span></div>
+    <div class="wm-stat" id="wm-stat-span">Span temporal: <span id="wm-span-val">50.000 años de historia</span></div>
   </div>
 </div>
 
 <!-- ═══ BIBLIOTECA VIEW ═══ -->
 <div id="library-view" class="section-view" style="padding:2rem;max-width:1400px;margin:0 auto;">
   <div class="page-title-bar">
-    <div class="page-eyebrow">Archivo Histórico</div>
-    <h1 class="page-title">📜 Biblioteca Militar</h1>
-    <p class="page-subtitle">Tratados, documentos, obras clásicas y fuentes primarias de la historia militar universal</p>
+    <div class="page-eyebrow" id="lib-eyebrow">Archivo Histórico</div>
+    <h1 class="page-title" id="lib-title">📜 Biblioteca Militar</h1>
+    <p class="page-subtitle" id="lib-subtitle">Tratados, documentos, obras clásicas y fuentes primarias de la historia militar universal</p>
   </div>
   <div class="filter-chips" id="library-filters">
-    <button class="filter-chip active" onclick="filterLibrary('all',this)">Todos</button>
-    <button class="filter-chip" onclick="filterLibrary('tratado',this)">📜 Tratados de Paz</button>
-    <button class="filter-chip" onclick="filterLibrary('obra',this)">📚 Obras Clásicas</button>
-    <button class="filter-chip" onclick="filterLibrary('documento',this)">📋 Documentos Históricos</button>
-    <button class="filter-chip" onclick="filterLibrary('carta',this)">✉️ Cartas y Declaraciones</button>
+    <button class="filter-chip active" id="lib-filter-all" onclick="filterLibrary('all',this)">Todos</button>
+    <button class="filter-chip" id="lib-filter-treaty" onclick="filterLibrary('tratado',this)">📜 Tratados de Paz</button>
+    <button class="filter-chip" id="lib-filter-obra" onclick="filterLibrary('obra',this)">📚 Obras Clásicas</button>
+    <button class="filter-chip" id="lib-filter-doc" onclick="filterLibrary('documento',this)">📋 Documentos Históricos</button>
+    <button class="filter-chip" id="lib-filter-carta" onclick="filterLibrary('carta',this)">✉️ Cartas y Declaraciones</button>
   </div>
-  <div class="results-count" id="library-results-count"><span id="library-count">0</span> documentos en el archivo</div>
+  <div class="results-count" id="library-results-count"><span id="library-count">0</span> <span id="lib-count-label">documentos en el archivo</span></div>
   <div class="lib-doc-grid" id="library-grid"></div>
 </div>
 
@@ -1273,7 +1270,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   <div class="filter-chips" id="civs-filter-chips">
     <button class="filter-chip active" onclick="filterCivsIndex('all',this)">Todas las Eras</button>
   </div>
-  <div class="results-count" id="civs-results-count"><span id="civs-count">0</span> civilizaciones registradas</div>
+  <div class="results-count" id="civs-results-count"><span id="civs-count">0</span> <span id="civs-count-label">civilizaciones registradas</span></div>
   <div class="civ-index-grid" id="civs-index-grid"></div>
 </div>
 
@@ -3269,11 +3266,11 @@ function initBattlesIndex() {
     buildAllBattlesFlat();
     // Era chips
     const chips = document.getElementById('battles-era-chips');
-    chips.innerHTML = `<button class="filter-chip active" onclick="filterBattlesIndex('',null,'all',this)">Todas</button>`;
+    chips.innerHTML = `<button class="filter-chip active" onclick="filterBattlesIndex('',null,'all',this)">${LANG==='en'?'All':'Todas'}</button>`;
     ERAS.forEach(era => {
       const btn = document.createElement('button');
       btn.className = 'filter-chip';
-      btn.textContent = era.name;
+      btn.textContent = eraName(era);
       btn.onclick = function() { filterBattlesIndex('', null, era.id, this); };
       chips.appendChild(btn);
     });
@@ -3360,11 +3357,11 @@ function initCommandersIndex() {
   if (!commandersIndexBuilt) {
     buildAllCommandersFlat();
     const chips = document.getElementById('commanders-era-chips');
-    chips.innerHTML = `<button class="filter-chip active" onclick="filterCommandersIndex('','all',this)">Todos</button>`;
+    chips.innerHTML = `<button class="filter-chip active" onclick="filterCommandersIndex('','all',this)">${LANG==='en'?'All':'Todos'}</button>`;
     ERAS.forEach(era => {
       const btn = document.createElement('button');
       btn.className = 'filter-chip';
-      btn.textContent = era.name;
+      btn.textContent = eraName(era);
       btn.dataset.era = era.id;
       btn.onclick = function() { filterCommandersIndex('', era.id, this); };
       chips.appendChild(btn);
@@ -3438,7 +3435,7 @@ function initWorldMap() {
   ERAS.forEach(era => {
     const btn = document.createElement('button');
     btn.className = 'worldmap-chip';
-    btn.textContent = era.name;
+    btn.textContent = eraName(era);
     btn.onclick = () => filterWorldMap(era.id, btn);
     chips.appendChild(btn);
   });
@@ -3543,7 +3540,7 @@ function renderLibrary(docs) {
       <div>
         <div class="lib-doc-name">${d.name}</div>
         <div class="lib-doc-year">${d.year}</div>
-        <div class="lib-doc-era">${d.eraName}</div>
+        <div class="lib-doc-era">${LANG==='en'?(ERA_NAMES_EN[d.eraId]||d.eraName):d.eraName}</div>
       </div>
     `;
     card.onclick = () => {
@@ -3582,10 +3579,16 @@ function initCivsIndex() {
   if (!civsIndexBuilt) {
     buildAllCivsFlat();
     const chips = document.getElementById('civs-filter-chips');
+    // All eras button
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-chip active';
+    allBtn.textContent = LANG==='en'?'All Eras':'Todas las Eras';
+    allBtn.onclick = function() { filterCivsIndex('all', this); };
+    chips.appendChild(allBtn);
     ERAS.forEach(era => {
       const btn = document.createElement('button');
       btn.className = 'filter-chip';
-      btn.textContent = era.name;
+      btn.textContent = eraName(era);
       btn.onclick = function() { filterCivsIndex(era.id, this); };
       chips.appendChild(btn);
     });
@@ -3605,7 +3608,7 @@ function renderCivsIndex(civs) {
       <div class="civ-index-flag">${c.flag}</div>
       <div class="civ-index-name">${c.name}</div>
       <div class="civ-index-period">${c.period}</div>
-      <div class="civ-index-era">${c.eraName}</div>
+      <div class="civ-index-era">${LANG==='en'?(ERA_NAMES_EN[c.eraId]||c.eraName):c.eraName}</div>
       <div class="civ-power-bar"><div class="civ-power-fill" style="width:${c.power*100}%"></div></div>
     `;
     card.onclick = () => {
@@ -4616,6 +4619,12 @@ function setLang(lang) {
   applyTranslations();
   // Rebuild all dynamic content
   acBuilt = false; acData = []; // Reset autocomplete for new lang
+  // Reset section indexes for retranslation
+  battlesIndexBuilt = false;
+  commandersIndexBuilt = false;
+  civsIndexBuilt = false;
+  libraryBuilt = false;
+  worldMapBuilt = false; if(worldMap){worldMap.remove();worldMap=null;}
   buildEraNav();
   updateNavUI();
   if (currentEra) selectEra(currentEra.id);
