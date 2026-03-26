@@ -3447,137 +3447,9 @@ function goBack() {
   closePage();
 }
 
-async function openBattleDetail(battle, eraObj) {
-  navigationStack.push(currentSection);
-  currentEra = eraObj;
+// openBattleDetail defined below via overlay system
 
-  // Fill header
-  document.getElementById('bd-era').textContent = eraObj.name + ' · Historia Militar';
-  document.getElementById('bd-title').textContent = battle.name;
-  document.getElementById('bd-combatants').textContent = battle.combatants;
-  document.getElementById('bd-year').textContent = battle.year;
-  document.getElementById('bd-tag').textContent = battle.tag;
-
-  // Related battles (same era)
-  const related = document.getElementById('bd-related');
-  related.innerHTML = '';
-  const others = eraObj.battles_data.filter(b => b.name !== battle.name).slice(0, 5);
-  others.forEach(b => {
-    const div = document.createElement('div');
-    div.style.cssText = 'padding:0.6rem 0;border-bottom:1px solid rgba(201,168,76,0.08);cursor:pointer;';
-    div.innerHTML = `<div style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.15em;color:var(--gold);">${b.year}</div><div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--white);">${b.name}</div>`;
-    div.onclick = () => openBattleDetail(b, eraObj);
-    related.appendChild(div);
-  });
-
-  // Mini map
-  setTimeout(() => {
-    if (bdMiniMap) { bdMiniMap.remove(); bdMiniMap = null; }
-    if (battle.lat && battle.lng) {
-      bdMiniMap = L.map('bd-mini-map', { center: [battle.lat, battle.lng], zoom: 5, zoomControl: false, attributionControl: false });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bdMiniMap);
-      L.circleMarker([battle.lat, battle.lng], { radius: 8, fillColor: '#C9A84C', color: '#8B1A1A', weight: 2, fillOpacity: 0.9 }).addTo(bdMiniMap);
-    } else {
-      document.getElementById('bd-mini-map').innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--smoke);font-family:Cinzel,serif;font-size:0.6rem;">Sin coordenadas</div>';
-    }
-  }, 300);
-
-  showSection('battle-detail');
-
-  // Load AI content
-  const aiDiv = document.getElementById('bd-ai-content');
-  aiDiv.innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
-
-  if (!canQuery()) {
-    document.getElementById('paywall-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    return;
-  }
-  consumeQuery();
-  try {
-    const result = await callAI(`Explica en detalle exhaustivo la batalla de ${battle.name} (${battle.year}), entre ${battle.combatants}. Contexto: ${battle.desc}. Era: ${eraObj.name}.`);
-    aiDiv.innerHTML = result.content;
-    if (result.imageTerms && result.imageTerms.length > 0) {
-      try {
-        const imgRes = await fetch('/api/get-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ terms: result.imageTerms }) });
-        const imgData = await imgRes.json();
-        if (imgData.images && imgData.images.length > 0) {
-          const gallery = document.createElement('div');
-          gallery.className = 'modal-gallery';
-          gallery.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:1.5rem;';
-          imgData.images.forEach(img => {
-            const el = document.createElement('img');
-            el.src = img.url; el.alt = img.title;
-            el.style.cssText = 'width:100%;height:160px;object-fit:cover;filter:sepia(0.15);border:1px solid rgba(201,168,76,0.15);';
-            el.onerror = function() { this.style.display = 'none'; };
-            gallery.appendChild(el);
-          });
-          aiDiv.insertBefore(gallery, aiDiv.firstChild);
-        }
-      } catch(e) {}
-    }
-  } catch(e) {
-    aiDiv.innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido.</p>';
-  }
-}
-
-async function openCommanderDetail(commander, eraObj) {
-  navigationStack.push(currentSection);
-  currentEra = eraObj;
-
-  document.getElementById('cd-emoji').textContent = commander.emoji;
-  document.getElementById('cd-era').textContent = eraObj.name + ' · Historia Militar';
-  document.getElementById('cd-name').textContent = commander.name;
-  document.getElementById('cd-role').textContent = commander.role;
-
-  // Related commanders
-  const related = document.getElementById('cd-related');
-  related.innerHTML = '';
-  eraObj.commanders.filter(c => c.name !== commander.name).slice(0, 5).forEach(c => {
-    const div = document.createElement('div');
-    div.style.cssText = 'padding:0.6rem 0;border-bottom:1px solid rgba(201,168,76,0.08);cursor:pointer;display:flex;align-items:center;gap:0.6rem;';
-    div.innerHTML = `<span style="font-size:1.3rem;">${c.emoji}</span><div><div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--white);">${c.name}</div><div style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.1em;color:var(--smoke);">${c.role}</div></div>`;
-    div.onclick = () => openCommanderDetail(c, eraObj);
-    related.appendChild(div);
-  });
-
-  showSection('commander-detail');
-
-  const aiDiv = document.getElementById('cd-ai-content');
-  aiDiv.innerHTML = '<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>Consultando los archivos históricos...</span></div>';
-
-  if (!canQuery()) {
-    document.getElementById('paywall-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    return;
-  }
-  consumeQuery();
-  try {
-    const result = await callAI(`Explica en detalle la vida militar, campañas, tácticas y legado histórico de ${commander.name}, ${commander.role}. Era: ${eraObj.name}.`);
-    aiDiv.innerHTML = result.content;
-    if (result.imageTerms && result.imageTerms.length > 0) {
-      try {
-        const imgRes = await fetch('/api/get-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ terms: result.imageTerms }) });
-        const imgData = await imgRes.json();
-        if (imgData.images && imgData.images.length > 0) {
-          const gallery = document.createElement('div');
-          gallery.className = 'modal-gallery';
-          gallery.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:1.5rem;';
-          imgData.images.forEach(img => {
-            const el = document.createElement('img');
-            el.src = img.url; el.alt = img.title;
-            el.style.cssText = 'width:100%;height:160px;object-fit:cover;filter:sepia(0.15);border:1px solid rgba(201,168,76,0.15);';
-            el.onerror = function() { this.style.display = 'none'; };
-            gallery.appendChild(el);
-          });
-          aiDiv.insertBefore(gallery, aiDiv.firstChild);
-        }
-      } catch(e) {}
-    }
-  } catch(e) {
-    aiDiv.innerHTML = '<p style="color:var(--crimson-light);">Error al cargar el contenido.</p>';
-  }
-}
+// openCommanderDetail defined below via overlay system
 
 
 // ════════════════════════════════════════
@@ -3706,7 +3578,7 @@ function buildBpMap(lat, lng) {
 }
 
 // ── BATTLE DETAIL ─────────────────────────────────────
-openBattleDetail = async function(battle, eraObj) {
+async function openBattleDetail(battle, eraObj) {
   history.pushState({}, battle.name, '/batalla/' + slugify(battle.name));
   document.title = battle.name + ' — Bellum Mundi';
 
@@ -3765,7 +3637,7 @@ openBattleDetail = async function(battle, eraObj) {
 };
 
 // ── COMMANDER DETAIL ──────────────────────────────────
-openCommanderDetail = async function(commander, eraObj) {
+async function openCommanderDetail(commander, eraObj) {
   history.pushState({}, commander.name, '/comandante/' + slugify(commander.name));
   document.title = commander.name + ' — Bellum Mundi';
 
