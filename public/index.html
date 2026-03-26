@@ -1577,7 +1577,7 @@ function updateNavUI() {
 
   if (!isPremium) {
     const display = limit===Infinity ? '∞' : left;
-    html += `<div class="nav-queries"><span class="q-count">${display}</span> consultas</div>`;
+    html += `<div class="nav-queries"><span class="q-count">${display}</span> ${LANG==="en"?"queries":"consultas"}</div>`;
     html += `<button class="nav-upgrade" onclick="openPricing()">⚡ Premium</button>`;
   }
 
@@ -2951,7 +2951,7 @@ function selectEra(eraId) {
   });
 
   // Overview + stats
-  document.getElementById('era-overview').textContent = era.overview;
+  document.getElementById('era-overview').textContent = eraOverview(era);
   const stats = document.getElementById('era-stats');
   stats.style.display = 'grid';
   document.getElementById('es-battles').textContent = era.battles;
@@ -3002,7 +3002,7 @@ function buildBattleFilters(battles) {
   tags.forEach(tag => {
     const btn = document.createElement('button');
     btn.className = 'filter-tag';
-    btn.textContent = tag;
+    btn.textContent = tagName(tag);
     btn.onclick = function() { filterByTag(this, tag); };
     row.appendChild(btn);
   });
@@ -3171,8 +3171,15 @@ function initHeroCanvas() {
 // SCROLL REVEAL
 // ═══════════════════════════════════════════
 function initReveal() {
-  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.1});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  // Make all .reveal elements visible immediately if browser doesn't support IntersectionObserver
+  const revealAll = () => document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  if (!('IntersectionObserver' in window)) { revealAll(); return; }
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  // Fallback: after 2s, reveal anything still hidden
+  setTimeout(revealAll, 2000);
 }
 
 // ═══════════════════════════════════════════
@@ -3260,6 +3267,8 @@ function initBattlesIndex() {
 function renderBattlesIndex(battles) {
   const grid = document.getElementById('battles-index-grid');
   document.getElementById('battles-count').textContent = battles.length;
+  const brc = document.getElementById('battles-results-count');
+  if (brc) { const sp = brc.querySelector('span'); if (!sp) brc.innerHTML = `<span>${battles.length}</span> ${t('battles_found').replace('{{n}} ','')}`; }
   grid.innerHTML = '';
   battles.slice(0, 200).forEach(b => {
     const card = document.createElement('div');
@@ -3357,8 +3366,8 @@ function renderCommandersIndex(cmds) {
     card.innerHTML = `
       <div class="cmd-index-avatar">${c.emoji}</div>
       <div class="cmd-index-name">${c.name}</div>
-      <div class="cmd-index-role">${c.role}</div>
-      <div class="cmd-index-era">${c.eraName}</div>
+      <div class="cmd-index-role">${roleName(c.role)}</div>
+      <div class="cmd-index-era">${LANG==='en'?(ERA_NAMES_EN[c.eraId]||c.eraName):c.eraName}</div>
     `;
     card.onclick = () => {
       const eraObj = ERAS.find(e => e.id === c.eraId);
@@ -3450,7 +3459,7 @@ function filterWorldMap(eraFilter, chipBtn) {
       m.bindPopup(`
         <div style="font-family:'Cinzel',serif;font-size:10px;color:#0A0806;min-width:180px;">
           <strong style="font-family:'Playfair Display',serif;font-size:13px;display:block;margin-bottom:3px;">${b.name}</strong>
-          <span style="color:${color};font-weight:700;">${era.name}</span> · ${b.year}<br>
+          <span style="color:${color};font-weight:700;">${eraName(era)}</span> · ${b.year}<br>
           <em style="font-size:11px;">${b.combatants}</em><br>
           <span style="font-size:11px;">${b.desc}</span>
         </div>
@@ -3702,7 +3711,7 @@ function fillSidebarBattles(containerId, battles, eraObj, currentName, currentYe
     filtered.sort((a, b) => Math.abs(parseYear(a.year) - cy) - Math.abs(parseYear(b.year) - cy));
   }
   filtered.slice(0, 6).forEach(b => {
-    c.appendChild(makeSidebarItem('⚔', b.name, b.year, b.tag,
+    c.appendChild(makeSidebarItem('⚔', b.name, b.year, tagName(b.tag),
       () => openBattleDetail(b, eraObj)));
   });
 }
@@ -3755,8 +3764,10 @@ async function openBattleDetail(battle, eraObj) {
   document.title = battle.name + ' — Bellum Mundi';
 
   // Fill header
-  document.getElementById('bpEraTag').textContent = eraObj.name + ' ' + t('history_military');
+  document.getElementById('bpEraTag').textContent = eraName(eraObj) + ' ' + t('history_military');
   document.querySelectorAll('.bp-back').forEach(b => b.textContent = t('back_btn'));
+  document.getElementById('bpYear').textContent = battle.year;
+  document.getElementById('bpTag').textContent = tagName(battle.tag);
   document.getElementById('bpTitle').textContent = battle.name;
   document.getElementById('bpCombatants').textContent = battle.combatants;
   document.getElementById('bpYear').textContent = battle.year;
@@ -3816,9 +3827,9 @@ async function openCommanderDetail(commander, eraObj) {
   document.title = commander.name + ' — Bellum Mundi';
 
   document.getElementById('cpEmoji').textContent = commander.emoji;
-  document.getElementById('cpEraTag').textContent = eraObj.name + ' · Historia Militar';
+  document.getElementById('cpEraTag').textContent = eraName(eraObj) + ' ' + t('history_military');
   document.getElementById('cpName').textContent = commander.name;
-  document.getElementById('cpRole').textContent = commander.role;
+  document.getElementById('cpRole').textContent = roleName(commander.role);
 
   document.getElementById('cpAiContent').innerHTML = `<div class="ai-loading"><div class="loading-dots"><span></span><span></span><span></span></div><span>${t('loading_ai')}</span></div>`;
 
@@ -4119,7 +4130,7 @@ function buildVisualTimeline() {
     nd.className = 'vtl-node';
     nd.style.left = pct + '%';
     nd.dataset.eraId = era.id;
-    nd.innerHTML = '<div class="vtl-dot">'+(ERA_EMOJIS[era.id]||'⚔️')+'</div><div class="vtl-yr">'+era.years.split('–')[0]+'</div><div class="vtl-lbl">'+era.name+'</div>';
+    nd.innerHTML = '<div class="vtl-dot">'+(ERA_EMOJIS[era.id]||'⚔️')+'</div><div class="vtl-yr">'+era.years.split('–')[0]+'</div><div class="vtl-lbl">'+eraName(era)+'</div>';
     nd.onclick = () => selectEra(era.id);
     nodes.appendChild(nd);
   });
@@ -4134,7 +4145,7 @@ function vtlUpdate(eraId) {
   document.querySelectorAll('.vtl-node').forEach((n,i) => n.classList.toggle('active', i === idx));
   const era = ERAS[idx];
   const nm = document.getElementById('vtl-era-name'), yr = document.getElementById('vtl-era-yr');
-  if (nm) nm.textContent = era.name;
+  if (nm) nm.textContent = eraName(era);
   if (yr) yr.textContent = era.years;
 }
 
@@ -4502,18 +4513,24 @@ function t(key, vars) {
 function setLang(lang) {
   LANG = lang;
   localStorage.setItem('bm_lang', lang);
-  // Update flag + code in button
   const flagEl = document.getElementById('lang-flag');
   const codeEl = document.getElementById('lang-code');
   if (flagEl) flagEl.textContent = lang === 'en' ? '🇬🇧' : '🇪🇸';
   if (codeEl) codeEl.textContent = lang === 'en' ? 'EN' : 'ES';
   applyTranslations();
-  if (typeof buildEraNav === 'function') buildEraNav();
-  if (typeof updateNavUI === 'function') updateNavUI();
-  if (currentEra && typeof selectEra === 'function') selectEra(currentEra.id);
+  // Rebuild all dynamic content
+  buildEraNav();
+  updateNavUI();
+  if (currentEra) selectEra(currentEra.id);
+  // Rebuild index pages if built
+  if (battlesIndexBuilt) { battlesIndexBuilt=false; initBattlesIndex(); }
+  if (commandersIndexBuilt) { commandersIndexBuilt=false; initCommandersIndex(); }
+  if (civsIndexBuilt) { civsIndexBuilt=false; initCivsIndex(); }
+  if (libraryBuilt) { libraryBuilt=false; initLibrary(); }
 }
 
 function applyTranslations() {
+  try {
   // Announce bar
   const ab = document.getElementById('announce-bar');
   if (ab) { const close = ab.querySelector('.announce-close'); ab.innerHTML = t('announce'); if (close) ab.appendChild(close); }
@@ -4644,8 +4661,8 @@ function applyTranslations() {
   document.querySelectorAll('.lang-option').forEach(el => {
     el.classList.toggle('active', el.dataset.lang === LANG);
   });
+  } catch(err) { console.warn('Translation error:', err.message); }
 }
-
 function setText(id, text, isEyebrow) {
   const el = document.getElementById(id) || (isEyebrow && document.querySelector(`[data-t="${id}"]`));
   if (el) el.textContent = text;
@@ -4701,13 +4718,220 @@ document.addEventListener('click', function(e) {
   }
 });
 
+
+// ═══════════════════════════════════════════════════
+// DATA TRANSLATIONS — Tags, Era names, Roles
+// ═══════════════════════════════════════════════════
+const TAG_EN = {
+  'Neolítico':'Neolithic','Calcolítico':'Chalcolithic','Pre-dinástico':'Pre-Dynastic',
+  'Sumer':'Sumer','Mesopotamia':'Mesopotamia','Babilonia':'Babylon','Egipto':'Egypt',
+  'Asiria':'Assyria','Persia':'Persia','Guerras Médicas':'Persian Wars',
+  'Guerras Griegas':'Greek Wars','Macedonia':'Macedonia','Alejandro':'Alexander',
+  'Helenístico':'Hellenistic','India':'India','China':'China','Guerras Púnicas':'Punic Wars',
+  'Primera Púnica':'First Punic','Segunda Púnica':'Second Punic','Roma':'Rome',
+  'Guerra Civil':'Civil War','César':'Caesar','Rebelión':'Rebellion','Britania':'Britannia',
+  'Oriente':'Orient','Conquista':'Conquest','Decadencia':'Decline','Hunos':'Huns',
+  'Migración':'Migration','Crisis':'Crisis','Francos':'Franks','Conquista Islámica':'Islamic Conquest',
+  'Omeyas':'Umayyads','Europa':'Europe','Al-Ándalus':'Al-Andalus','Vikingos':'Vikings',
+  'Reconquista':'Reconquista','Carolingios':'Carolingians','Otomanos':'Ottomans',
+  '1ª Cruzada':'1st Crusade','Primera Cruzada':'First Crusade','Cruzadas':'Crusades',
+  '3ª Cruzada':'3rd Crusade','Tercera Cruzada':'Third Crusade','Cruzada Interna':'Internal Crusade',
+  'Cruzadas Internas':'Internal Crusades','Mongoles':'Mongols','Escocia':'Scotland',
+  'Bizancio':'Byzantium','Habsburgos':'Habsburgs','Guerra 100 Años':'100 Years War',
+  'Flandes':'Flanders','Orden Teutónica':'Teutonic Order','Diplomacia':'Diplomacy',
+  'Guerras Italianas':'Italian Wars','G. 7 Años':'7 Years War','30 Años':'30 Years War',
+  'Independencia EE.UU.':'American Independence','Independencia':'Independence',
+  'Guerras Rev.':'Revolutionary Wars','Napoleón':'Napoleon','Pre-Napoleónico':'Pre-Napoleonic',
+  'Pre-napoleónico':'Pre-Napoleonic','Los Cien Días':'The Hundred Days','Cien Días':'Hundred Days',
+  'Peninsular':'Peninsular','Austria':'Austria','Mediterráneo':'Mediterranean',
+  'Naval':'Naval','Norte':'North','Inicio':'Opening','Final':'Final','Rusia':'Russia',
+  'Frente Oriental':'Eastern Front','Frente Occidental':'Western Front',
+  'Frente Italiano':'Italian Front','Bélgica':'Belgium','Gas':'Gas Attack',
+  'Tanques':'Tanks','Aéreo':'Air','Bombardeo':'Bombing','N. África':'N. Africa',
+  'Balcanes':'Balkans','Pacífico':'Pacific','Pacífico Naval':'Pacific Naval',
+  'Aerotransportado':'Airborne','Italia':'Italy','Normandía':'Normandy','Francia':'France',
+  'Países Bajos':'Netherlands','Ardenas':'Ardennes','Final Europa':'End of Europe',
+  'Nuclear':'Nuclear','Blitzkrieg':'Blitzkrieg','Kaiserschlacht':'Spring Offensive',
+  'Gallipoli':'Gallipoli','Plan Schlieffen':'Schlieffen Plan','Victoria':'Victory',
+  'Innovación':'Innovation','Último Intento':'Last Stand','Sucesión Española':'Spanish Succession',
+  'Guerrillas':'Guerrilla','G. Norte':'Northern War','Guerra Norte':'Northern War',
+  'Norte de Europa':'Northern Europe','Religión':'Religion','Portugal':'Portugal',
+  'Japón':'Japan','India Mogol':'Mughal India','Hititas':'Hittites','Bronce':'Bronze Age',
+  'Colapso':'Collapse','Nuevo Imperio':'New Kingdom','Terror':'War on Terror',
+  'Afganistán':'Afghanistan','Irak':'Iraq','Oriente Medio':'Middle East','Gaza':'Gaza',
+  'Ucrania':'Ukraine','Siria':'Syria','ISIS':'ISIS','Libya':'Libya',
+  'Cáucaso':'Caucasus','Chechenia':'Chechenia','Vietnam':'Vietnam',
+  'Corea':'Korea','Falklands':'Falklands','África':'Africa','América':'America',
+  'América Latina':'Latin America','Asia':'Asia','Europa del Este':'Eastern Europe',
+  'Golfo':'Gulf','Golfo Pérsico':'Persian Gulf','Israel':'Israel','Líbano':'Lebanon',
+  'Indochina':'Indochina','China':'China','Inglaterra':'England','Germania':'Germania',
+  'Sumer':'Sumer','Carolingios':'Carolingians','Helenístico':'Hellenistic',
+  'Operaciones Especiales':'Special Operations'
+};
+
+const ERA_NAMES_EN = {
+  'prehistoric':'Prehistoric','ancient':'Antiquity','classical':'Classical Era',
+  'medieval':'Middle Ages','early_modern':'Early Modern','napoleon':'Napoleonic Era',
+  'ww1':'World War I','ww2':'World War II','cold_war':'Cold War','contemporary':'Contemporary'
+};
+
+const ERA_OVERVIEWS_EN = {
+  'prehistoric': 'The first human conflicts arise before writing. Paleolithic tribes fight for resources and survival. The development of the first weapons forever transforms the nature of combat. Neolithic city-states establish the foundations of organized warfare.',
+  'ancient': 'The invention of writing allows wars to be recorded for the first time. The great empires of Mesopotamia, Egypt, Assyria, Persia, Greece and China create professional armies. The Macedonian sarissa, Egyptian war chariots, Assyrian archers and Sun Tzu\u2019s Chinese strategy define ancient warfare.',
+  'classical': 'Rome builds the most efficient army in Western history. Its legions conquer the known world with discipline, engineering and unprecedented logistics. The Parthian Empire holds in the East. China lives the Three Kingdoms era. The Huns emerge as the terror of the steppes.',
+  'medieval': 'The armored knight dominates Europe while Islamic armies expand the caliphate from Arabia to Spain. The Crusades clash civilizations. The Vikings terrorize the known world. The Mongol Empire sweeps Asia. Chinese gunpowder arrives in the West and changes everything.',
+  'early_modern': 'Gunpowder irreversibly transforms warfare. The Spanish Tercios dominate Europe for 150 years. The Ottoman Empire reaches its zenith. The conquest of the New World redefines the world. The Thirty Years War sows the seeds of the modern nation-state.',
+  'napoleon': 'Napoleon Bonaparte creates the modern army based on merit, mobility and tactical initiative. His battles are studied today in military academies worldwide. The corps system and mobile artillery revolutionize strategy. Waterloo marks the end of an era.',
+  'ww1': 'The Great War redefines industrial horror. The trenches of the Western Front turn Europe into a cemetery. Ten million soldiers dead. Gas, tanks and aircraft debut. Four empires fall: German, Austro-Hungarian, Russian and Ottoman.',
+  'ww2': 'The greatest conflict in human history: 70-85 million dead. Blitzkrieg conquers Western Europe in weeks. The USSR resists with unimaginable losses. The Pacific sees the greatest naval combat in history. Atomic bombs inaugurate the nuclear era.',
+  'cold_war': 'Two nuclear superpowers in permanent tension redefine global geopolitics. Proxy wars in Korea, Vietnam, Angola and Afghanistan. Nuclear deterrence maintains peace between great powers but fuels dozens of peripheral conflicts. The Berlin Wall falls.',
+  'contemporary': 'High-technology warfare: drones, precision missiles, cyberweapons and artificial intelligence. 21st century conflicts mix conventional wars, insurgencies and hybrid warfare. Ukraine and Gaza define the combat of the future.'
+};
+
+const ROLE_EN = {
+  'Primer Faraón-Guerrero': 'First Warrior-Pharaoh',
+  'Unificador del Nilo': 'Unifier of the Nile',
+  'Rey Sumerio Legendario': 'Legendary Sumerian King',
+  'Rey de Uruk — Héroe Épico': 'King of Uruk — Epic Hero',
+  'Primera Autora Conocida / Sacerdotisa Militar': 'First Known Author / Military Priestess',
+  'Rey de Macedonia': 'King of Macedonia',
+  'General Cartaginés': 'Carthaginian General',
+  'Rey Aqueménida de Persia': 'Achaemenid King of Persia',
+  'Estratega de Atenas': 'Strategos of Athens',
+  'Faraón Guerrero de Egipto': 'Warrior Pharaoh of Egypt',
+  'General y Filósofo Chino': 'Chinese General and Philosopher',
+  'El Napoleón de Egipto': 'The Napoleon of Egypt',
+  'General de Tebas': 'General of Thebes',
+  'Primer Emperador de la Historia': 'First Emperor in History',
+  'Reformador del Ejército Asirio': 'Reformer of the Assyrian Army',
+  'Gran Rey de Persia': 'Great King of Persia',
+  'Rey Espartano de las Termópilas': 'Spartan King of Thermopylae',
+  'Vencedor de Zama': 'Victor of Zama',
+  'Estratega de Maratón': 'Strategos of Marathon',
+  'Padre de Alejandro Magno': 'Father of Alexander the Great',
+  'Emperador Budista de India': 'Buddhist Emperor of India',
+  'Dictador y General Romano': 'Roman Dictator and General',
+  'Vencedor de Aníbal en Zama': 'Victor over Hannibal at Zama',
+  'Emperador-Filósofo Guerrero': 'Warrior-Philosopher Emperor',
+  'El Azote de Dios': 'The Scourge of God',
+  'Último Gran General Romano': 'Last Great Roman General',
+  'Señor de la Guerra — Tres Reinos': 'Warlord — Three Kingdoms',
+  'Libertador de Germania': 'Liberator of Germania',
+  'Líder de la Gran Rebelión': 'Leader of the Great Rebellion',
+  'Triunviro y General': 'Triumvir and General',
+  'Optimus Princeps — Conquistador': 'Optimus Princeps — Conqueror',
+  'El Rey de las Victorias Pírricas': 'King of Pyrrhic Victories',
+  'Reina Guerrera Celta': 'Celtic Warrior Queen',
+  'Caudillo Galo de Alesia': 'Gallic Chieftain of Alesia',
+  'Mayor de Palacio Franco': 'Mayor of the Frankish Palace',
+  'Sultán Ayubí de Egipto y Siria': 'Ayyubid Sultan of Egypt and Syria',
+  'Gran Khan del Imperio Mongol': 'Great Khan of the Mongol Empire',
+  'Rey de Inglaterra': 'King of England',
+  'La Doncella de Orléans': 'The Maid of Orléans',
+  'Conquistador Timúrida': 'Timurid Conqueror',
+  'Príncipe de Nóvgorod': 'Prince of Novgorod',
+  'Vencedor de Agincourt': 'Victor of Agincourt',
+  'Destructor de Bagdad': 'Destroyer of Baghdad',
+  'Rey de Escocia': 'King of Scotland',
+  'La Espada de Alá': 'The Sword of Allah',
+  'Sultán Mameluco — Vencedor de los Mongoles': 'Mamluk Sultan — Vanquisher of the Mongols',
+  'El Gran Capitán': 'The Great Captain',
+  'El León del Norte': 'The Lion of the North',
+  'Sultán Otomano': 'Ottoman Sultan',
+  'Sultán en su Apogeo': 'Sultan at His Zenith',
+  'Almirante de Lepanto': 'Admiral of Lepanto',
+  'General Imperial 30 Años': 'Imperial General of 30 Years',
+  'Mariscal de Francia': 'Marshal of France',
+  'Duque — Gran Alianza': 'Duke — Grand Alliance',
+  'Conquistador de México': 'Conqueror of Mexico',
+  'Conquistador del Perú': 'Conqueror of Peru',
+  'El Rey Guerrero': 'The Warrior King',
+  'Rey-Guerrero de Polonia': 'Warrior-King of Poland',
+  'Emperador de Francia': 'Emperor of France',
+  'Duque de Wellington': 'Duke of Wellington',
+  'El Bravo de los Bravos': 'The Bravest of the Brave',
+  'Almirante — Héroe de Trafalgar': 'Admiral — Hero of Trafalgar',
+  'Mariscal Prusiano de Adelante': 'Prussian Field Marshal Forward',
+  'Mariscal Ruso — Defensor de Rusia': 'Russian Marshal — Defender of Russia',
+  'El Grande — Reformador Militar': 'The Great — Military Reformer',
+  'El Mariscal de Hierro': 'The Iron Marshal',
+  'Rey de la Caballería': 'King of Cavalry',
+  'Padre Fundador de EE.UU.': 'Founding Father of the USA',
+  'General Ruso Invicto': 'Undefeated Russian General',
+  'El hijo favorito de la Victoria': 'The Favourite Son of Victory',
+  'Comandante Supremo Aliado': 'Supreme Allied Commander',
+  'Cuartelmaestre General Alemán': 'German Quartermaster General',
+  'Mariscal — Jefe del Estado Mayor': 'Field Marshal — Chief of Staff',
+  'Mariscal Británico del BEF': 'British Field Marshal of the BEF',
+  'Defensor de Gallipoli / Padre de Turquía': 'Defender of Gallipoli / Father of Turkey',
+  'General Ruso — La Gran Ofensiva': 'Russian General — The Great Offensive',
+  'El Barón Rojo — 80 victorias': 'The Red Baron — 80 victories',
+  'Salvador de Verdún': 'Saviour of Verdun',
+  'Estratega de la Revuelta Árabe': 'Strategist of the Arab Revolt',
+  'General del AEF Americano': 'General of the American AEF',
+  'Comandante Supremo Aliado en Europa': 'Supreme Allied Commander in Europe',
+  'Mariscal — El Mejor General Soviético': 'Marshal — The Best Soviet General',
+  'El Zorro del Desierto': 'The Desert Fox',
+  'Almirante — Arquitecto de Pearl Harbor': 'Admiral — Architect of Pearl Harbor',
+  'Mariscal — Vencedor de El Alamein': 'Field Marshal — Victor of El Alamein',
+  'General — El Viejo Sangre y Agallas': 'General — Old Blood and Guts',
+  'Defensor de Stalingrado': 'Defender of Stalingrad',
+  'Almirante del Pacífico': 'Admiral of the Pacific',
+  'El Mejor Estratega Alemán': 'The Best German Strategist',
+  'Mariscal — Operación Bagration': 'Marshal — Operation Bagration',
+  'Comandante de la Luftwaffe': 'Commander of the Luftwaffe',
+  'General del Pacífico — "Volveré"': 'General of the Pacific — "I Shall Return"',
+  'General Supremo en Corea': 'Supreme General in Korea',
+  'Genio Estratégico Vietnamita': 'Vietnamese Strategic Genius',
+  'Ministro Defensa Israel': 'Israeli Defence Minister',
+  'Comandante Guerrillero': 'Guerrilla Commander',
+  'León del Panshir': 'Lion of Panjshir',
+  'Comandante Tormenta del Desierto': 'Commander of Desert Storm',
+  'USAF — Doctrina Nuclear': 'USAF — Nuclear Doctrine',
+  'General Israelí — Cruzador del Canal': 'Israeli General — Canal Crosser',
+  'CINCCENT — Tormenta del Desierto': 'CINCCENT — Desert Storm',
+  'Jefe FFAA Rusas — Doctrina Híbrida': 'Russian Armed Forces Chief — Hybrid Doctrine',
+  'Comandante en Jefe Ucraniano': 'Commander-in-Chief of Ukraine',
+  'Arquitecto de la Contrainsurgencia': 'Architect of Counterinsurgency',
+  'Comandante IRGC / Quds Force': 'IRGC / Quds Force Commander',
+  'Fuerzas Especiales Afganistán': 'Special Forces Afghanistan',
+  'General Ruso — Siria y Ucrania': 'Russian General — Syria and Ukraine',
+  'Presidente-Comandante Turquía': 'President-Commander of Turkey'
+};
+
+// Helper: get translated era name
+function eraName(era) {
+  return LANG === 'en' ? (ERA_NAMES_EN[era.id] || era.name) : era.name;
+}
+
+// Helper: get translated tag
+function tagName(tag) {
+  return LANG === 'en' ? (TAG_EN[tag] || tag) : tag;
+}
+
+// Helper: get translated role
+function roleName(role) {
+  return LANG === 'en' ? (ROLE_EN[role] || role) : role;
+}
+
+// Helper: get translated era overview
+function eraOverview(era) {
+  return LANG === 'en' ? (ERA_OVERVIEWS_EN[era.id] || era.overview) : era.overview;
+}
+
 window.addEventListener('load', async () => {
+  // Run non-blocking UI first
   initHeroCanvas();
   initMap();
   buildEraNav();
   selectEra('ww2');
+  updateNavUI();
+  applyTranslations();
+  initReveal();
+  handleURLRouting();
 
-  // Restaurar sesión de Supabase si el usuario ya estaba logueado
+  // Then do async auth (non-blocking for UI)
+  try {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     const { data: profile } = await sb
@@ -4721,10 +4945,8 @@ window.addEventListener('load', async () => {
     saveState(STATE);
   }
 
-  updateNavUI();
-  initReveal();
-  handleURLRouting();
-  applyTranslations();
+  } catch(e) { console.warn('Auth init error:', e); }
+  updateNavUI(); // refresh after auth
 });
 </script>
 
