@@ -1082,9 +1082,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   <!-- PRICING SECTION -->
   <section id="pricing-section" class="reveal">
     <div class="section-header" style="padding-top:0;">
-      <div class="section-eyebrow">Planes & Precios</div>
-      <h2 class="section-title">Acceso al Conocimiento Total</h2>
-      <p class="section-desc">Desde el curioso hasta el experto — elige tu nivel de acceso a la historia militar</p>
+      <div class="section-eyebrow" id="pricing-eyebrow-el">Planes & Precios</div>
+      <h2 class="section-title" id="pricing-title-el">Acceso al Conocimiento Total</h2>
+      <p class="section-desc" id="pricing-desc-el">Desde el curioso hasta el experto — elige tu nivel de acceso a la historia militar</p>
       <div class="gold-rule"></div>
     </div>
     <div class="pricing-toggle">
@@ -1093,14 +1093,14 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
         <div class="toggle-knob"></div>
       </div>
       <span class="toggle-label" id="toggle-annual-label">Anual</span>
-      <span class="save-badge">AHORRA 40%</span>
+      <span class="save-badge" id="save-badge-el">AHORRA 40%</span>
     </div>
     <div class="pricing-grid">
       <!-- FREE -->
       <div class="price-card">
-        <div class="price-tier">Explorador</div>
+        <div class="price-tier" id="tier-free">Explorador</div>
         <div class="price-amount"><sup>€</sup>0</div>
-        <div class="price-period">Siempre gratis</div>
+        <div class="price-period" id="period-free">Siempre gratis</div>
         <div class="price-annual-note"> </div>
         <div class="price-divider"></div>
         <ul class="price-features">
@@ -1112,11 +1112,11 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
           <li class="disabled"><span class="cross">✗</span> Newsletter premium semanal</li>
           <li class="disabled"><span class="cross">✗</span> Sin publicidad</li>
         </ul>
-        <button class="price-cta ghost" onclick="openAuth('register')">Crear cuenta gratis</button>
+        <button class="price-cta ghost" id="cta-free" onclick="openAuth('register')">Crear cuenta gratis</button>
       </div>
       <!-- PREMIUM -->
       <div class="price-card featured">
-        <div class="price-tier">Comandante</div>
+        <div class="price-tier" id="tier-premium">Comandante</div>
         <div class="price-amount" id="premium-price"><sup>€</sup>6<span style="font-size:1.2rem">.99</span></div>
         <div class="price-period" id="premium-period">por mes</div>
         <div class="price-annual-note" id="premium-note"> </div>
@@ -1130,11 +1130,11 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
           <li><span class="check">✓</span> Sin publicidad nunca</li>
           <li><span class="check">✓</span> Acceso anticipado a nuevas eras</li>
         </ul>
-        <button class="price-cta primary" onclick="openCheckout('premium')">Comenzar ahora →</button>
+        <button class="price-cta primary" id="cta-premium" onclick="openCheckout('premium')">Comenzar ahora →</button>
       </div>
       <!-- INSTITUTIONAL -->
       <div class="price-card">
-        <div class="price-tier">Institucional</div>
+        <div class="price-tier" id="tier-inst">Institucional</div>
         <div class="price-amount"><sup>€</sup>299</div>
         <div class="price-period">por año / institución</div>
         <div class="price-annual-note" style="color:var(--smoke)">Academias, museos, centros educativos</div>
@@ -1156,9 +1156,9 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
   <!-- NEWSLETTER -->
   <section id="newsletter-section" class="reveal">
     <div class="newsletter-inner">
-      <div class="newsletter-badge">📜 Newsletter Semanal · Gratis</div>
-      <h2 class="newsletter-title">La Batalla de la Semana</h2>
-      <p class="newsletter-desc">Cada martes: una batalla analizada en profundidad, un comandante olvidado, una táctica que cambió la historia. Lo que no te enseñaron en el colegio.</p>
+      <div class="newsletter-badge" id="nl-badge">📜 Newsletter Semanal · Gratis</div>
+      <h2 class="newsletter-title" id="nl-title">La Batalla de la Semana</h2>
+      <p class="newsletter-desc" id="nl-desc">Cada martes: una batalla analizada en profundidad, un comandante olvidado, una táctica que cambió la historia. Lo que no te enseñaron en el colegio.</p>
 
       <!-- Beehiiv embed -->
       <script async src="https://subscribe-forms.beehiiv.com/embed.js"></script>
@@ -1172,7 +1172,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       </iframe>
       <script type="text/javascript" async src="https://subscribe-forms.beehiiv.com/attribution.js"></script>
 
-      <div class="newsletter-social-proof">Sin spam · Cada martes · Baja cuando quieras</div>
+      <div class="newsletter-social-proof" id="nl-proof">Sin spam · Cada martes · Baja cuando quieras</div>
     </div>
   </section>
 
@@ -1289,7 +1289,7 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       <p>La enciclopedia militar más completa en español. De Qadesh a Ucrania, pasando por todas las batallas, ejércitos y estrategas de la historia humana.</p>
     </div>
     <div>
-      <div class="footer-col-title">Explorar</div>
+      <div class="footer-col-title" id="footer-explore-title">Explorar</div>
       <ul class="footer-links">
         <li><a onclick="selectEra('ancient')">Antigüedad</a></li>
         <li><a onclick="selectEra('medieval')">Edad Media</a></li>
@@ -1298,30 +1298,30 @@ footer { border-top:1px solid rgba(201,168,76,0.15); padding:4rem 2rem 2rem; }
       </ul>
     </div>
     <div>
-      <div class="footer-col-title">Producto</div>
+      <div class="footer-col-title" id="footer-product-title">Producto</div>
       <ul class="footer-links">
-        <li><a onclick="openPricing()">Precios</a></li>
-        <li><a onclick="openAuth('register')">Crear cuenta</a></li>
+        <li><a id="footer-prices-link" onclick="openPricing()">Precios</a></li>
+        <li><a id="footer-register-link" onclick="openAuth('register')">Crear cuenta</a></li>
         <li><a href="#newsletter-section">Newsletter</a></li>
         <li><a onclick="showToast('API próximamente','success')">API</a></li>
       </ul>
     </div>
     <div>
-      <div class="footer-col-title">Legal</div>
+      <div class="footer-col-title" id="footer-legal-title">Legal</div>
       <ul class="footer-links">
         <li><a>Privacidad</a></li>
         <li><a>Términos</a></li>
         <li><a>Cookies</a></li>
-        <li><a onclick="showToast('hola@bellummundi.com','success')">Contacto</a></li>
+        <li><a id="footer-contact-link" onclick="showToast('hola@bellummundi.com','success')">Contacto</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <div class="footer-copy">© 2025 Bellum Mundi · Todos los derechos reservados</div>
     <div class="footer-legal">
-      <a>Política de Privacidad</a>
-      <a>Términos de Uso</a>
-      <a>Afiliados</a>
+      <a id="footer-pp">Política de Privacidad</a>
+      <a id="footer-tu">Términos de Uso</a>
+      <a id="footer-af">Afiliados</a>
     </div>
   </div>
 </footer>
@@ -3124,9 +3124,9 @@ function buildTacticsGrid(tactics) {
   tactics.forEach(tac => {
     const el = document.createElement('div');
     el.className = 'tactic-card';
-    el.innerHTML = '<div class="tactic-diagram">' + t.icon + '</div>' +
-      '<div class="tactic-name">' + t.name + '</div>' +
-      '<div class="tactic-origin">' + t.origin + '</div>';
+    el.innerHTML = '<div class="tactic-diagram">' + tac.icon + '</div>' +
+      '<div class="tactic-name">' + tac.name + '</div>' +
+      '<div class="tactic-origin">' + tac.origin + '</div>';
     el.onclick = () => openTacticModal(t);
     g.appendChild(el);
   });
@@ -4319,6 +4319,43 @@ const T = {
     newsletter_eyebrow: 'Inteligencia Histórica',
     newsletter_title: 'La Batalla de la Semana',
     newsletter_desc: 'Cada semana: una batalla analizada en profundidad, el perfil de un comandante, y los datos que los libros de historia omiten.',
+    // Pricing
+    pricing_eyebrow: 'Planes & Precios',
+    pricing_title: 'Acceso al Conocimiento Total',
+    pricing_desc: 'Desde el curioso hasta el experto — elige tu nivel de acceso a la historia militar',
+    billing_monthly: 'Mensual',
+    billing_annual: 'Anual',
+    save_badge: 'AHORRA 40%',
+    tier_free: 'Explorador',
+    period_free: 'Siempre gratis',
+    cta_free: 'Crear cuenta gratis',
+    tier_premium: 'Comandante',
+    tier_inst: 'Institucional',
+    price_period_month: 'por mes',
+    // Newsletter
+    nl_badge: '📜 Newsletter Semanal · Gratis',
+    nl_title: 'La Batalla de la Semana',
+    nl_desc: 'Cada martes: una batalla analizada en profundidad, un comandante olvidado, una táctica que cambió la historia. Lo que no te enseñaron en el colegio.',
+    nl_proof: 'Sin spam · Cada martes · Baja cuando quieras',
+    // Footer columns
+    footer_explore_title: 'Explorar',
+    footer_product_title: 'Producto',
+    footer_legal_title: 'Legal',
+    footer_privacy_link: 'Privacidad',
+    footer_terms_link: 'Términos',
+    footer_cookies_link: 'Cookies',
+    footer_contact_link: 'Contacto',
+    footer_prices_link: 'Precios',
+    footer_register_link: 'Crear cuenta',
+    footer_pp: 'Política de Privacidad',
+    footer_tu: 'Términos de Uso',
+    footer_af: 'Afiliados',
+    // Auth modal
+    auth_name_ph: 'Tu nombre',
+    auth_email_ph: 'tu@email.com',
+    auth_pass_ph: 'Contraseña',
+    auth_login: 'Iniciar Sesión',
+    auth_register: 'Crear Cuenta',
     // AI prompts language
     ai_lang: 'es',
     ai_explain_battle: 'Explica en detalle exhaustivo la batalla de {{name}} ({{year}}), entre {{combatants}}. Contexto: {{desc}}. Era: {{era}}.',
@@ -4491,6 +4528,44 @@ const T = {
     newsletter_eyebrow: 'Historical Intelligence',
     newsletter_title: 'Battle of the Week',
     newsletter_desc: 'Every week: a battle analysed in depth, a commander profile, and the data history books leave out.',
+    // Pricing
+    pricing_eyebrow: 'Plans & Pricing',
+    pricing_title: 'Total Access to Knowledge',
+    pricing_desc: 'From the curious to the expert — choose your level of access to military history',
+    billing_monthly: 'Monthly',
+    billing_annual: 'Annual',
+    save_badge: 'SAVE 40%',
+    tier_free: 'Explorer',
+    period_free: 'Always free',
+    cta_free: 'Create free account',
+    tier_premium: 'Commander',
+    tier_inst: 'Institutional',
+    price_period_month: 'per month',
+    // Newsletter
+    nl_badge: '📜 Weekly Newsletter · Free',
+    nl_title: 'Battle of the Week',
+    nl_desc: 'Every Tuesday: a battle analysed in depth, a forgotten commander, a tactic that changed history. What they didn\u2019t teach you in school.',
+    nl_proof: 'No spam · Every Tuesday · Unsubscribe anytime',
+    // Footer columns
+    footer_explore_title: 'Explore',
+    footer_product_title: 'Product',
+    footer_legal_title: 'Legal',
+    footer_privacy_link: 'Privacy',
+    footer_terms_link: 'Terms',
+    footer_cookies_link: 'Cookies',
+    footer_contact_link: 'Contact',
+    footer_prices_link: 'Pricing',
+    footer_register_link: 'Create account',
+    footer_pp: 'Privacy Policy',
+    footer_tu: 'Terms of Use',
+    footer_af: 'Affiliates',
+    // War quote (from current era)
+    // Auth modal
+    auth_name_ph: 'Your name',
+    auth_email_ph: 'your@email.com',
+    auth_pass_ph: 'Password',
+    auth_login: 'Sign In',
+    auth_register: 'Create Account',
     // AI prompts language
     ai_lang: 'en',
     ai_explain_battle: 'Explain in exhaustive detail the battle of {{name}} ({{year}}), between {{combatants}}. Context: {{desc}}. Era: {{era}}. Write entirely in English.',
@@ -4661,7 +4736,143 @@ function applyTranslations() {
   document.querySelectorAll('.lang-option').forEach(el => {
     el.classList.toggle('active', el.dataset.lang === LANG);
   });
+
+  // Pricing
+  const stel = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = t(key); };
+  stel('pricing-eyebrow-el', 'pricing_eyebrow');
+  stel('pricing-title-el', 'pricing_title');
+  stel('pricing-desc-el', 'pricing_desc');
+  stel('toggle-monthly-label', 'billing_monthly');
+  stel('toggle-annual-label', 'billing_annual');
+  stel('save-badge-el', 'save_badge');
+  stel('tier-free', 'tier_free');
+  stel('period-free', 'period_free');
+  stel('cta-free', 'cta_free');
+  stel('tier-premium', 'tier_premium');
+  stel('tier-inst', 'tier_inst');
+  stel('cta-premium', LANG === 'en' ? 'Start now →' : 'Comenzar ahora →');
+
+  // Pricing features (rebuild)
+  translatePricingFeatures();
+
+  // Newsletter
+  stel('nl-badge', 'nl_badge');
+  stel('nl-title', 'nl_title');
+  stel('nl-desc', 'nl_desc');
+  stel('nl-proof', 'nl_proof');
+
+  // Footer columns
+  stel('footer-explore-title', 'footer_explore_title');
+  stel('footer-product-title', 'footer_product_title');
+  stel('footer-legal-title', 'footer_legal_title');
+  stel('footer-prices-link', 'footer_prices_link');
+  stel('footer-register-link', 'footer_register_link');
+  stel('footer-privacy-link', 'footer_privacy_link');
+  stel('footer-terms-link', 'footer_terms_link');
+  stel('footer-cookies-link', 'footer_cookies_link');
+  stel('footer-contact-link', 'footer_contact_link');
+  stel('footer-pp', 'footer_pp');
+  stel('footer-tu', 'footer_tu');
+  stel('footer-af', 'footer_af');
+
+  // Footer era links
+  const footerEraLinks = document.querySelectorAll('.footer-links a[onclick*="selectEra"]');
+  footerEraLinks.forEach(a => {
+    const m = a.getAttribute('onclick').match(/selectEra\('(\w+)\('/);
+    if (m) { const era = ERAS.find(e => e.id === m[1]); if (era) a.textContent = eraName(era); }
+  });
+
+  // War quote — update from current era if selected
+  if (typeof currentEra !== 'undefined' && currentEra) {
+    const qt = currentEra.quote;
+    if (qt) {
+      const qel = document.getElementById('rotating-quote');
+      const ael = document.getElementById('rotating-attr');
+      if (qel) qel.textContent = '"' + qt.text + '"';
+      if (ael) ael.textContent = '— ' + qt.attr;
+    }
+  }
+
   } catch(err) { console.warn('Translation error:', err.message); }
+}
+
+function translatePricingFeatures() {
+  // Free plan features
+  const freeFeatures = LANG === 'en' ? [
+    '✓ Full navigation through eras',
+    '✓ Interactive battle map',
+    '✓ 3 AI queries per day',
+    '✗ Unlimited historical analyses',
+    '✗ Bibliographic recommendations',
+    '✗ Premium weekly newsletter',
+    '✗ Ad-free experience'
+  ] : [
+    '✓ Navegación completa por eras',
+    '✓ Mapa interactivo de batallas',
+    '✓ 3 consultas IA por día',
+    '✗ Análisis históricos ilimitados',
+    '✗ Recomendaciones bibliográficas',
+    '✗ Newsletter premium semanal',
+    '✗ Sin publicidad'
+  ];
+  const premiumFeatures = LANG === 'en' ? [
+    '✓ Everything in Explorer plan',
+    '✓ Unlimited AI queries',
+    '✓ Complete exhaustive analyses',
+    '✓ Bibliography & recommended books',
+    '✓ Exclusive weekly newsletter',
+    '✓ Ad-free forever',
+    '✓ Early access to new eras'
+  ] : [
+    '✓ Todo lo del plan Explorador',
+    '✓ Consultas IA ilimitadas',
+    '✓ Análisis exhaustivos completos',
+    '✓ Bibliografía & libros recomendados',
+    '✓ Newsletter semanal exclusivo',
+    '✓ Sin publicidad nunca',
+    '✓ Acceso anticipado a nuevas eras'
+  ];
+  const instFeatures = LANG === 'en' ? [
+    '✓ Up to 50 simultaneous users',
+    '✓ Everything in Commander plan',
+    '✓ Administration panel',
+    '✓ Content export (PDF)',
+    '✓ Historical data API',
+    '✓ Priority support',
+    '✓ Official invoice'
+  ] : [
+    '✓ Hasta 50 usuarios simultáneos',
+    '✓ Todo el plan Comandante',
+    '✓ Panel de administración',
+    '✓ Exportación de contenido (PDF)',
+    '✓ API de datos históricos',
+    '✓ Soporte prioritario',
+    '✓ Factura oficial'
+  ];
+
+  const cards = document.querySelectorAll('.price-card');
+  if (cards[0]) {
+    const ul = cards[0].querySelector('.price-features');
+    if (ul) ul.innerHTML = freeFeatures.map(f => `<li><span class="${f.startsWith('✓')?'check':'cross'}">${f[0]}</span> ${f.slice(2)}</li>`).join('');
+    const cta = cards[0].querySelector('.price-cta');
+    if (cta) cta.textContent = t('cta_free');
+  }
+  if (cards[1]) {
+    const ul = cards[1].querySelector('.price-features');
+    if (ul) ul.innerHTML = premiumFeatures.map(f => `<li><span class="check">✓</span> ${f.slice(2)}</li>`).join('');
+    const period = document.getElementById('premium-period');
+    if (period) period.textContent = t('price_period_month');
+  }
+  if (cards[2]) {
+    const ul = cards[2].querySelector('.price-features');
+    if (ul) ul.innerHTML = instFeatures.map(f => `<li><span class="check">✓</span> ${f.slice(2)}</li>`).join('');
+    const note = cards[2].querySelector('.price-annual-note');
+    if (note) note.textContent = LANG === 'en' ? 'Academies, museums, educational centres' : 'Academias, museos, centros educativos';
+    const cta = cards[2].querySelector('.price-cta');
+    if (cta) cta.textContent = LANG === 'en' ? 'Contact sales →' : 'Contactar ventas →';
+    const inst_period = cards[2].querySelector('.price-period');
+    if (inst_period) inst_period.textContent = LANG === 'en' ? 'per year / institution' : 'por año / institución';
+  }
 }
 function setText(id, text, isEyebrow) {
   const el = document.getElementById(id) || (isEyebrow && document.querySelector(`[data-t="${id}"]`));
