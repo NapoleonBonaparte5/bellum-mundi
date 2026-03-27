@@ -124,7 +124,7 @@ export function Footer({ lang }: FooterProps) {
         {/* Bottom bar */}
         <div className="border-t border-gold/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase">
-            © 2025 Bellum Mundi ·{' '}
+            © 2026 Bellum Mundi ·{' '}
             {lang === 'en' ? 'All rights reserved' : 'Todos los derechos reservados'}
           </div>
           <div className="flex gap-6">

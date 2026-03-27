@@ -26,27 +26,32 @@ function Cross() {
 export function PricingSection({ lang }: PricingSectionProps) {
   const [annual, setAnnual] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [showEmailForm, setShowEmailForm] = useState(false)
 
   const isES = lang === 'es'
 
   async function handleCheckout() {
+    const trimmed = email.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError(isES ? 'Introduce un email válido' : 'Enter a valid email')
+      return
+    }
+    setEmailError('')
     setLoading(true)
     try {
       const priceId = annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY
-      const email = prompt(
-        isES ? 'Introduce tu email para continuar:' : 'Enter your email to continue:'
-      )
-      if (!email) { setLoading(false); return }
-
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, email }),
+        body: JSON.stringify({ priceId, email: trimmed }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
+      else setEmailError(isES ? 'Error al procesar. Inténtalo de nuevo.' : 'Error processing. Try again.')
     } catch {
-      alert(isES ? 'Error al procesar el pago. Inténtalo de nuevo.' : 'Payment error. Please try again.')
+      setEmailError(isES ? 'Error al procesar. Inténtalo de nuevo.' : 'Error processing. Try again.')
     }
     setLoading(false)
   }
@@ -164,16 +169,46 @@ export function PricingSection({ lang }: PricingSectionProps) {
               </li>
             ))}
           </ul>
-          <button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold bg-gold text-ink hover:bg-gold-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading
-              ? (isES ? 'Procesando...' : 'Processing...')
-              : (isES ? 'Comenzar ahora →' : 'Start now →')
-            }
-          </button>
+          {showEmailForm ? (
+            <div className="space-y-2">
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setEmailError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleCheckout()}
+                placeholder={isES ? 'tu@email.com' : 'your@email.com'}
+                className="w-full bg-ink/60 border border-gold/30 text-cream font-crimson text-sm px-4 py-3 placeholder:text-smoke focus:outline-none focus:border-gold transition-colors"
+                autoFocus
+                disabled={loading}
+              />
+              {emailError && (
+                <p className="font-cinzel text-[0.55rem] tracking-[0.15em] text-crimson-light uppercase">{emailError}</p>
+              )}
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold bg-gold text-ink hover:bg-gold-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loading
+                  ? (isES ? 'Procesando...' : 'Processing...')
+                  : (isES ? 'Pagar con Stripe →' : 'Pay with Stripe →')
+                }
+              </button>
+              <button
+                onClick={() => { setShowEmailForm(false); setEmailError('') }}
+                className="w-full py-2 font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-smoke hover:text-mist transition-colors"
+              >
+                {isES ? 'Cancelar' : 'Cancel'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowEmailForm(true)}
+              className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold bg-gold text-ink hover:bg-gold-light transition-colors"
+            >
+              {isES ? 'Comenzar ahora →' : 'Start now →'}
+            </button>
+          )}
         </div>
 
         {/* INSTITUTIONAL */}
@@ -206,15 +241,12 @@ export function PricingSection({ lang }: PricingSectionProps) {
               </li>
             ))}
           </ul>
-          <button
-            onClick={() => {
-              const msg = isES ? 'Contáctanos: hola@bellummundi.com' : 'Contact us: hola@bellummundi.com'
-              alert(msg)
-            }}
-            className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-gold border border-gold/40 hover:bg-gold/10 transition-colors"
+          <a
+            href="mailto:hola@bellummundi.com"
+            className="block w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-gold border border-gold/40 hover:bg-gold/10 transition-colors text-center"
           >
             {isES ? 'Contactar ventas →' : 'Contact sales →'}
-          </button>
+          </a>
         </div>
       </div>
     </section>

@@ -68,7 +68,7 @@ export function StatsSection({ lang }: StatsSectionProps) {
       <div className="stats-row">
         <StatCounter value={50000} suffix="+" label={t(lang, 'stat_years')} />
         <StatCounter value={429} suffix="+" label={t(lang, 'stat_battles')} duration={1400} />
-        <StatCounter value={87} suffix="+" label={t(lang, 'stat_civs')} duration={1600} />
+        <StatCounter value={63} suffix="+" label={t(lang, 'stat_civs')} duration={1600} />
         <StatCounter value={109} suffix="+" label={t(lang, 'stat_commanders')} duration={1200} />
       </div>
     </section>

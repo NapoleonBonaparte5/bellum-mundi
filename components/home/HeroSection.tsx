@@ -101,7 +101,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col justify-center items-center text-center relative overflow-hidden px-8 py-16 isolation-isolate"
+      className="min-h-screen flex flex-col justify-center items-center text-center relative overflow-hidden px-8 py-16 isolate"
     >
       {/* Canvas */}
       <canvas
