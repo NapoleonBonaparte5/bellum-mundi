@@ -7,17 +7,19 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { FlatBattle, Lang, EraId } from '@/lib/data/types'
-import { ERA_EMOJIS } from '@/lib/data/helpers'
+import { getAllBattles, ERA_EMOJIS } from '@/lib/data/helpers'
+import { ERAS } from '@/lib/data/eras'
 
 interface BattlesClientProps {
-  battles: FlatBattle[]
-  eras: { id: string; name: string }[]
   lang: Lang
 }
 
 const PAGE_SIZE = 48
 
-export function BattlesClient({ battles, eras, lang }: BattlesClientProps) {
+export function BattlesClient({ lang }: BattlesClientProps) {
+  // Load data directly — avoids large server→client prop serialization
+  const battles = useMemo(() => getAllBattles(), [])
+  const eras = useMemo(() => ERAS.map(e => ({ id: e.id, name: e.name })), [])
   const isES = lang === 'es'
   const [query, setQuery] = useState('')
   const [eraFilter, setEraFilter] = useState<string>('all')

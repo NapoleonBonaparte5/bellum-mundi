@@ -5,7 +5,6 @@
 
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
-import { ERAS } from '@/lib/data/eras'
 import { t } from '@/lib/i18n/translations'
 import { HeroSection } from '@/components/home/HeroSection'
 import { StatsSection } from '@/components/home/StatsSection'
@@ -65,7 +64,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <StatsSection lang={l} />
 
       {/* Timeline + Era explorer */}
-      <TimelineSection lang={l} eras={ERAS} />
+      <TimelineSection lang={l} />
 
       {/* Pricing */}
       <PricingSection lang={l} />

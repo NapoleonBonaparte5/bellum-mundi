@@ -4,15 +4,15 @@
 // Visual timeline → Era selector → Tabbed explorer + Map
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { Lang, Era, EraId } from '@/lib/data/types'
+import { ERAS } from '@/lib/data/eras'
 import { t } from '@/lib/i18n/translations'
 import { ERA_EMOJIS, ERA_COLORS, slugify } from '@/lib/data/helpers'
 
 interface TimelineSectionProps {
   lang: Lang
-  eras: Era[]
 }
 
 type Tab = 'battles' | 'commanders' | 'weapons' | 'civs' | 'tactics' | 'docs'
@@ -26,13 +26,15 @@ const TABS: { id: Tab; labelKey: string }[] = [
   { id: 'docs', labelKey: 'tab_docs' },
 ]
 
-export function TimelineSection({ lang, eras }: TimelineSectionProps) {
+export function TimelineSection({ lang }: TimelineSectionProps) {
   const [activeEra, setActiveEra] = useState<Era | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('battles')
   const [battleSearch, setBattleSearch] = useState('')
   const [cmdSearch, setCmdSearch] = useState('')
   const [showMoreBattles, setShowMoreBattles] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
+  const eras = ERAS
   const activeIdx = activeEra ? eras.findIndex(e => e.id === activeEra.id) : -1
   const fillPct = activeIdx >= 0 ? (activeIdx / (eras.length - 1)) * 100 : 0
 
@@ -42,6 +44,10 @@ export function TimelineSection({ lang, eras }: TimelineSectionProps) {
     setBattleSearch('')
     setCmdSearch('')
     setShowMoreBattles(false)
+    // Scroll content into view after state update
+    setTimeout(() => {
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
   }, [])
 
   // Filtered battles
@@ -64,7 +70,7 @@ export function TimelineSection({ lang, eras }: TimelineSectionProps) {
     : []
 
   return (
-    <section id="timeline" className="py-8 px-4">
+    <section id="timeline" className="py-8 px-4 md:px-8">
       {/* Section header */}
       <div className="text-center pb-8 pt-4 reveal visible">
         <div className="eyebrow mb-4">{t(lang, 'timeline_eyebrow')}</div>
@@ -125,7 +131,7 @@ export function TimelineSection({ lang, eras }: TimelineSectionProps) {
 
         {/* Era overview + stats */}
         {activeEra ? (
-          <div>
+          <div ref={contentRef}>
             {/* Overview */}
             <p className="font-crimson text-parchment-dark text-lg leading-relaxed mb-6 max-w-4xl mx-auto text-center italic px-4">
               {activeEra.overview}

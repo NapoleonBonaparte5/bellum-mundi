@@ -76,7 +76,7 @@ export function NavBar({ lang }: NavBarProps) {
         </Link>
 
         {/* Desktop nav links */}
-        <ul className="hidden lg:flex gap-0 list-none flex-1 justify-center" role="list">
+        <ul className="hidden lg:flex gap-1 list-none flex-1 justify-center" role="list">
           {links.map(link => (
             <li key={link.key}>
               <Link

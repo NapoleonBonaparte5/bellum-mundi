@@ -6,10 +6,7 @@
 
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
-import { getAllBattles } from '@/lib/data/helpers'
-import { ERAS } from '@/lib/data/eras'
 import { BattlesClient } from '@/components/battles/BattlesClient'
-import { t } from '@/lib/i18n/translations'
 
 interface BattlesPageProps {
   params: Promise<{ lang: string }>
@@ -32,12 +29,8 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
   const { lang } = await params
   const l = lang as Lang
 
-  // All battles pre-fetched on server
-  const battles = getAllBattles()
-  const eraIds = ERAS.map(e => ({ id: e.id, name: e.name }))
-
   return (
-    <div className="px-8 py-8 max-w-content mx-auto">
+    <div className="px-4 md:px-8 py-8 max-w-content mx-auto">
       {/* Page header */}
       <div className="mb-8">
         <div className="eyebrow mb-2">
@@ -54,8 +47,8 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
         </p>
       </div>
 
-      {/* Interactive client component handles search, filter, compare */}
-      <BattlesClient battles={battles} eras={eraIds} lang={l} />
+      {/* Interactive client component loads data directly */}
+      <BattlesClient lang={l} />
     </div>
   )
 }

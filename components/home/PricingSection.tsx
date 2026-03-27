@@ -60,7 +60,7 @@ export function PricingSection({ lang }: PricingSectionProps) {
   const annualTotal = '50.28'
 
   return (
-    <section id="pricing" className="py-20 px-4">
+    <section id="pricing" className="py-20 px-4 md:px-8">
       <div className="text-center mb-12">
         <div className="eyebrow mb-4">{t(lang, 'pricing_eyebrow')}</div>
         <h2 className="font-playfair font-bold text-cream mb-3" style={{ fontSize: 'clamp(2rem,5vw,3.5rem)' }}>

@@ -64,7 +64,7 @@ interface StatsSectionProps {
 
 export function StatsSection({ lang }: StatsSectionProps) {
   return (
-    <section className="py-4 px-4 max-w-content mx-auto">
+    <section className="py-4 px-4 md:px-8 max-w-content mx-auto">
       <div className="stats-row">
         <StatCounter value={50000} suffix="+" label={t(lang, 'stat_years')} />
         <StatCounter value={429} suffix="+" label={t(lang, 'stat_battles')} duration={1400} />

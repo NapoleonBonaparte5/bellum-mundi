@@ -7,15 +7,16 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { FlatCommander, Lang, EraId } from '@/lib/data/types'
-import { ERA_EMOJIS } from '@/lib/data/helpers'
+import { getAllCommanders, ERA_EMOJIS } from '@/lib/data/helpers'
+import { ERAS } from '@/lib/data/eras'
 
 interface CommandersClientProps {
-  commanders: FlatCommander[]
-  eras: { id: string; name: string }[]
   lang: Lang
 }
 
-export function CommandersClient({ commanders, eras, lang }: CommandersClientProps) {
+export function CommandersClient({ lang }: CommandersClientProps) {
+  const commanders = useMemo(() => getAllCommanders(), [])
+  const eras = useMemo(() => ERAS.map(e => ({ id: e.id, name: e.name })), [])
   const isES = lang === 'es'
   const [query, setQuery] = useState('')
   const [eraFilter, setEraFilter] = useState('all')

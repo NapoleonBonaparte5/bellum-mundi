@@ -15,7 +15,7 @@ export function NewsletterSection({ lang }: NewsletterSectionProps) {
   return (
     <section
       id="newsletter"
-      className="py-16 px-4 border-t border-b border-gold/10"
+      className="py-16 px-4 md:px-8 border-t border-b border-gold/10"
     >
       <div className="max-w-2xl mx-auto text-center">
         <div className="font-cinzel text-[0.6rem] tracking-[0.3em] text-gold uppercase mb-4">
@@ -31,22 +31,21 @@ export function NewsletterSection({ lang }: NewsletterSectionProps) {
           }
         </p>
 
-        {/* Beehiiv embed */}
-        <iframe
-          src="https://subscribe-forms.beehiiv.com/8e5fd67b-15de-4f68-a334-5c5717b166a6"
-          data-test-id="beehiiv-embed"
-          width="100%"
-          height="291"
-          frameBorder={0}
-          scrolling="no"
-          style={{
-            maxWidth: 560,
-            margin: '0 auto 1rem',
-            display: 'block',
-            background: 'transparent',
-            boxShadow: 'none',
-          }}
-        />
+        {/* Beehiiv embed — dark theme via URL params */}
+        <div
+          style={{ maxWidth: 560, margin: '0 auto 1rem', background: '#0A0806', borderRadius: 0 }}
+          className="border border-gold/20"
+        >
+          <iframe
+            src="https://subscribe-forms.beehiiv.com/8e5fd67b-15de-4f68-a334-5c5717b166a6?background_color=0A0806&text_color=F9F5ED&button_color=C9A84C&button_text_color=0A0806"
+            data-test-id="beehiiv-embed"
+            width="100%"
+            height="52"
+            frameBorder={0}
+            scrolling="no"
+            style={{ display: 'block', background: 'transparent', colorScheme: 'dark' }}
+          />
+        </div>
 
         <p className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase">
           {isES ? 'Sin spam · Cada martes · Baja cuando quieras' : 'No spam · Every Tuesday · Unsubscribe anytime'}
