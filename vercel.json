@@ -1,8 +1,14 @@
 {
-  "outputDirectory": "public",
-  "rewrites": [
-    { "source": "/batalla/:slug", "destination": "/index.html" },
-    { "source": "/comandante/:slug", "destination": "/index.html" },
-    { "source": "/success", "destination": "/success.html" }
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "regions": ["mad1"],
+  "headers": [
+    {
+      "source": "/api/stripe-webhook",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
   ]
 }
