@@ -4,7 +4,6 @@
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
-@config '../tailwind.config.ts';
 
 /* ── TAILWIND v4 THEME ──────────────────────────────────────── */
 @theme {
@@ -97,8 +96,10 @@
 }
 
 /* ── BASE ───────────────────────────────────────────────────── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+@layer base {
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar       { width: 6px; }
