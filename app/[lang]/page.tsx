@@ -78,6 +78,13 @@ export default async function HomePage({ params }: HomePageProps) {
       {/* Hero */}
       <HeroSection lang={l} />
 
+      {/* Golden divider strip between Hero and Era bar */}
+      <div aria-hidden="true" style={{
+        height: '2px',
+        background: 'linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.08) 10%, rgba(201,168,76,0.5) 30%, #C9A84C 50%, rgba(201,168,76,0.5) 70%, rgba(201,168,76,0.08) 90%, transparent 100%)',
+        boxShadow: '0 0 16px rgba(201,168,76,0.2)',
+      }} />
+
       {/* Era category bar */}
       <EraCategoryBar lang={l} />
 

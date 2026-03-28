@@ -1281,8 +1281,8 @@ input[type="text"]:focus {
 /* Back to top — enhanced: appear at 20% scroll */
 .back-to-top {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
   width: 2.75rem;
   height: 2.75rem;
   background: rgba(26, 24, 20, 0.95);
@@ -1481,20 +1481,37 @@ input[type="text"]:focus {
 .intensity-dot.on  { background: var(--crimson-light); box-shadow: 0 0 4px rgba(192,57,43,0.5); }
 .intensity-dot.off { background: rgba(255,255,255,0.12); }
 
+/* ── BLOQUE 3 — Museum slide-in animation ───────────────── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── FIX 2 — Mobile grids: single column ───────────────── */
+@media (max-width: 900px) {
+  .battles-grid          { grid-template-columns: 1fr !important; }
+  .commanders-grid       { grid-template-columns: 1fr !important; }
+  .cards-grid            { grid-template-columns: 1fr !important; }
+  .cards-grid-commanders { grid-template-columns: 1fr !important; }
+  .index-grid            { grid-template-columns: 1fr !important; }
+}
+
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .cards-grid {
     grid-template-columns: 1fr;
   }
   .cards-grid-commanders {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
+  .pricing-grid          { grid-template-columns: 1fr !important; }
+  .stats-row             { grid-template-columns: repeat(2, 1fr) !important; }
   .index-header {
     min-height: 28vh;
   }
   .back-to-top {
-    bottom: 1.25rem;
-    right: 1.25rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
   }
 }
 
@@ -1728,4 +1745,194 @@ input[type="text"]:focus {
     0 0, 100% 0, 0 100%, 100% 100%,
     0 0;
   background-repeat: no-repeat;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BLOQUE 1 — COMMANDER CARDS (fixed-size, 3D pentagon, compare)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Fixed-size commander card */
+.commander-card-fixed {
+  width: 100%;
+  min-height: 420px;
+  background: var(--slate);
+  border: 1px solid rgba(201,168,76,0.14);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+.commander-card-fixed:hover {
+  border-color: rgba(201,168,76,0.45);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.18);
+  transform: translateY(-3px);
+}
+
+/* 3D Pentagon container */
+.pentagon-container {
+  perspective: 600px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pentagon-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pentagon-container:hover .pentagon-inner {
+  transform: rotateX(12deg) rotateY(8deg) scale(1.08);
+}
+
+/* Stat tooltip */
+.stat-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(10,8,6,0.95);
+  border: 1px solid rgba(201,168,76,0.45);
+  padding: 0.4rem 0.75rem;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  font-family: var(--font-cinzel), serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+  transform: translate(-50%, -120%);
+}
+.stat-tooltip-value {
+  font-family: var(--font-playfair), serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cream);
+  display: block;
+  text-align: center;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Skill filter badges */
+.skill-badge {
+  display: inline-block;
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.25);
+  color: var(--mist);
+  font-family: var(--font-cinzel), serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+.skill-badge:hover {
+  background: rgba(201,168,76,0.15);
+  border-color: rgba(201,168,76,0.5);
+  color: var(--gold);
+}
+.skill-badge.active {
+  background: rgba(201,168,76,0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 8px rgba(201,168,76,0.2);
+}
+
+/* Commander auto-badge */
+.commander-badge {
+  display: inline-block;
+  font-family: var(--font-cinzel), serif;
+  font-size: 0.44rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 2px;
+}
+
+/* Compare button per card */
+.compare-cmd-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(201,168,76,0.3);
+  background: rgba(10,8,6,0.7);
+  color: var(--gold);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  backdrop-filter: blur(4px);
+}
+.compare-cmd-btn:hover {
+  background: rgba(201,168,76,0.15);
+  border-color: var(--gold);
+  transform: scale(1.1);
+}
+.compare-cmd-btn.selected {
+  background: rgba(201,168,76,0.25);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(201,168,76,0.3);
+}
+
+/* Compare panel */
+.compare-panel {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  background: rgba(10,8,6,0.85);
+  border: 1px solid rgba(201,168,76,0.25);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  backdrop-filter: blur(8px);
+}
+.compare-panel-vs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  align-self: center;
+}
+.compare-panel-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.compare-panel-ai {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(201,168,76,0.12);
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+}
+@media (max-width: 700px) {
+  .compare-panel {
+    grid-template-columns: 1fr;
+  }
+  .compare-panel-vs {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .compare-panel-ai {
+    grid-column: 1;
+  }
+}
+
+/* Commanders index grid */
+.commanders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 1.5rem;
+  align-items: start;
 }

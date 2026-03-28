@@ -198,7 +198,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
       {/* Split layout */}
       <div
         className="relative z-10 max-w-content mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-16"
-        style={{ minHeight: '100vh', paddingTop: '7rem', paddingBottom: '5rem' }}
+        style={{ minHeight: '100vh', paddingTop: '5rem', paddingBottom: '3rem' }}
       >
         {/* ── LEFT: text column ── */}
         <div className="flex-1 flex flex-col items-start">
@@ -333,13 +333,65 @@ export function HeroSection({ lang }: HeroSectionProps) {
           </div>
         </div>
 
-        {/* ── RIGHT: live battle feed ── */}
-        <div
-          className="lg:w-[400px] xl:w-[460px] w-full flex-shrink-0 flex flex-col"
-          style={{ height: '440px' }}
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        {/* ── RIGHT: BOTD card + live battle feed ── */}
+        <div className="lg:w-[400px] xl:w-[460px] w-full flex-shrink-0 flex flex-col" style={{ gap: '1rem' }}>
+
+          {/* Batalla del Día — prominent card */}
+          <Link
+            href={`/${lang}/batallas/${dailyBattle.slug}`}
+            style={{ textDecoration: 'none' }}
+          >
+            <div
+              style={{
+                background: 'linear-gradient(135deg, rgba(139,26,26,0.25) 0%, rgba(10,8,6,0.9) 100%)',
+                border: '1px solid rgba(192,57,43,0.4)',
+                borderLeft: '3px solid var(--crimson)',
+                padding: '1.1rem 1.4rem',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(192,57,43,0.75)'
+                el.style.boxShadow = '0 8px 30px rgba(139,26,26,0.3)'
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(192,57,43,0.4)'
+                el.style.boxShadow = 'none'
+              }}
+            >
+              {/* Glow effect */}
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 10% 50%, rgba(139,26,26,0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem', position: 'relative' }}>
+                <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '0.44rem', letterSpacing: '0.28em', color: 'var(--crimson-light)', textTransform: 'uppercase', fontWeight: 700, border: '1px solid rgba(192,57,43,0.45)', padding: '2px 7px', flexShrink: 0 }}>
+                  {isES ? '⚔ Batalla del Día' : '⚔ Battle of the Day'}
+                </span>
+                <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '0.52rem', letterSpacing: '0.14em', color: 'var(--gold)', fontWeight: 700 }}>
+                  {dailyBattle.year}
+                </span>
+              </div>
+              <div style={{ fontFamily: 'var(--font-playfair)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--cream)', lineHeight: 1.2, position: 'relative', marginBottom: '0.35rem' }}>
+                {isES ? dailyBattle.nameES : dailyBattle.nameEN}
+              </div>
+              <div style={{ fontFamily: 'var(--font-crimson)', fontStyle: 'italic', fontSize: '0.88rem', color: 'var(--smoke)', lineHeight: 1.4, position: 'relative' }}>
+                {isES ? dailyBattle.factES : dailyBattle.factEN}
+              </div>
+              <div style={{ fontFamily: 'var(--font-cinzel)', fontSize: '0.48rem', letterSpacing: '0.18em', color: 'var(--gold)', marginTop: '0.65rem', position: 'relative', opacity: 0.8 }}>
+                {isES ? '→ VER ANÁLISIS COMPLETO' : '→ VIEW FULL ANALYSIS'}
+              </div>
+            </div>
+          </Link>
+
+          {/* Scrolling battle feed */}
+          <div
+            className="flex flex-col"
+            style={{ height: '380px' }}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
           {/* Feed header */}
           <div
             className="flex items-center justify-between px-4 py-3 flex-shrink-0"
@@ -424,7 +476,8 @@ export function HeroSection({ lang }: HeroSectionProps) {
             </span>
             <span className="text-gold" style={{ fontSize: '0.8rem' }}>→</span>
           </Link>
-        </div>
+          </div>{/* end inner feed wrapper */}
+        </div>{/* end right column */}
       </div>
 
       {/* Scroll indicator */}

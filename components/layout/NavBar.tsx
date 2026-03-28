@@ -400,7 +400,8 @@ export function NavBar({ lang }: NavBarProps) {
           style={{
             position: 'fixed',
             bottom: '1.5rem',
-            right: '1.5rem',
+            left: '1.5rem',
+            right: 'auto',
             zIndex: 900,
             width: '56px',
             height: '56px',

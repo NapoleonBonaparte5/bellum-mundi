@@ -126,6 +126,9 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
   const [queriesLeft, setQueriesLeft] = useState(3)
   const [showPremiumBanner, setShowPremiumBanner] = useState(false)
 
+  // Sidebar toggle
+  const [sidebarOpen, setSidebarOpen]                 = useState(true)
+
   // Counterfactual simulator + 3D tab
   const [activeTab, setActiveTab]                     = useState<'analysis' | 'counterfactual' | 'viz3d'>('analysis')
   const [cfContent, setCfContent]                     = useState<string | null>(null)
@@ -319,7 +322,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
               🔀 {isES ? 'Simulador Contrafactual' : 'Counterfactual Simulator'}
             </button>
             <button
-              onClick={() => setActiveTab('viz3d')}
+              onClick={() => { setActiveTab('viz3d'); setSidebarOpen(false) }}
               className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
                 activeTab === 'viz3d'
                   ? 'text-gold border-gold'
@@ -615,8 +618,35 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
           </>) /* end activeTab === 'analysis' */}
         </div>
 
+        {/* ── SIDEBAR TOGGLE ── */}
+        <button
+          onClick={() => setSidebarOpen(o => !o)}
+          className="font-cinzel text-[0.5rem] tracking-[0.18em] uppercase"
+          style={{
+            position: 'sticky',
+            top: '5rem',
+            alignSelf: 'start',
+            justifySelf: 'end',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            background: 'rgba(10,8,6,0.85)',
+            border: '1px solid rgba(201,168,76,0.25)',
+            color: 'var(--gold)',
+            padding: '0.35rem 0.7rem',
+            cursor: 'pointer',
+            backdropFilter: 'blur(6px)',
+            transition: 'border-color 0.2s',
+            gridColumn: '2',
+          }}
+          title={sidebarOpen ? (isES ? 'Ocultar panel' : 'Hide panel') : (isES ? 'Mostrar panel' : 'Show panel')}
+        >
+          {sidebarOpen ? '⊟' : '⊞'} {sidebarOpen ? (isES ? 'Ocultar' : 'Hide') : (isES ? 'Panel' : 'Panel')}
+        </button>
+
         {/* ── SIDEBAR ── */}
-        <aside className="detail-sidebar">
+        <aside className="detail-sidebar" style={{ display: sidebarOpen ? 'flex' : 'none' }}>
 
           {/* Reading time (after AI loads) */}
           {aiContent && (
