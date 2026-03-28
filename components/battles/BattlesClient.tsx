@@ -8,9 +8,10 @@ import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { FlatBattle, Lang, EraId } from '@/lib/data/types'
-import { getAllBattles, ERA_EMOJIS } from '@/lib/data/helpers'
+import { getAllBattles, ERA_EMOJIS, parseYear } from '@/lib/data/helpers'
 import { ERAS } from '@/lib/data/eras'
 import { ChipScroller } from '@/components/ui/ChipScroller'
+import { ExportMenu } from '@/components/ui/ExportMenu'
 import { getEraName, getTagName, translateCombatants, translateYear, getBattleName, autoTranslateDesc } from '@/lib/i18n'
 
 interface BattlesClientProps {
@@ -32,6 +33,15 @@ export function BattlesClient({ lang }: BattlesClientProps) {
   const [selected, setSelected] = useState<FlatBattle[]>([])
   const [listView, setListView] = useState(false)
 
+  // Advanced filters
+  const [showAdvanced, setShowAdvanced]   = useState(false)
+  const [sortOrder, setSortOrder]         = useState<'chrono-asc' | 'chrono-desc' | 'alpha'>('chrono-asc')
+  const [yearFrom, setYearFrom]           = useState('')
+  const [yearTo, setYearTo]               = useState('')
+  const [onlyMapped, setOnlyMapped]       = useState(false)
+
+  const hasAdvancedActive = sortOrder !== 'chrono-asc' || yearFrom || yearTo || onlyMapped
+
   const filtered = useMemo(() => {
     let res = battles
     if (eraFilter !== 'all') res = res.filter(b => b.eraId === eraFilter)
@@ -44,8 +54,27 @@ export function BattlesClient({ lang }: BattlesClientProps) {
         (b.tag ?? '').toLowerCase().includes(q)
       )
     }
+    // Advanced: year range
+    if (yearFrom.trim()) {
+      const from = parseInt(yearFrom.replace(/\D/g, '')) * (yearFrom.includes('-') ? -1 : 1)
+      res = res.filter(b => parseYear(b.year) >= from)
+    }
+    if (yearTo.trim()) {
+      const to = parseInt(yearTo.replace(/\D/g, '')) * (yearTo.includes('-') ? -1 : 1)
+      res = res.filter(b => parseYear(b.year) <= to)
+    }
+    // Advanced: only battles with coordinates
+    if (onlyMapped) res = res.filter(b => b.lat !== undefined && b.lng !== undefined)
+    // Sort
+    if (sortOrder === 'chrono-asc')  res = [...res].sort((a, b) => parseYear(a.year) - parseYear(b.year))
+    if (sortOrder === 'chrono-desc') res = [...res].sort((a, b) => parseYear(b.year) - parseYear(a.year))
+    if (sortOrder === 'alpha')       res = [...res].sort((a, b) => a.name.localeCompare(b.name))
     return res
-  }, [battles, query, eraFilter])
+  }, [battles, query, eraFilter, sortOrder, yearFrom, yearTo, onlyMapped])
+
+  function resetAdvanced() {
+    setSortOrder('chrono-asc'); setYearFrom(''); setYearTo(''); setOnlyMapped(false)
+  }
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const visible = filtered.slice(0, page * PAGE_SIZE)
@@ -61,7 +90,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
   return (
     <div>
       {/* Controls row */}
-      <div className="flex flex-wrap gap-3 mb-6 items-center">
+      <div className="flex flex-wrap gap-3 mb-4 items-center">
         {/* Search with icon */}
         <div className="relative flex-1 min-w-[240px]">
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gold/50 pointer-events-none" viewBox="0 0 20 20" fill="none">
@@ -108,6 +137,21 @@ export function BattlesClient({ lang }: BattlesClientProps) {
           </button>
         </div>
 
+        {/* Advanced filters toggle */}
+        <button
+          onClick={() => setShowAdvanced(v => !v)}
+          className={`font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-4 py-3 border transition-colors flex-shrink-0 flex items-center gap-2 ${
+            showAdvanced || hasAdvancedActive
+              ? 'bg-gold/10 border-gold text-gold'
+              : 'border-gold/20 text-smoke hover:border-gold/40 hover:text-mist'
+          }`}
+        >
+          ⚙ {isES ? 'Filtros' : 'Filters'}
+          {hasAdvancedActive && (
+            <span className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" />
+          )}
+        </button>
+
         {/* Compare mode toggle */}
         <button
           onClick={() => { setCompareMode(c => !c); setSelected([]) }}
@@ -117,7 +161,95 @@ export function BattlesClient({ lang }: BattlesClientProps) {
         >
           ⚖ {isES ? 'Comparar' : 'Compare'}
         </button>
+
+        {/* Export menu */}
+        <ExportMenu battles={filtered} lang={lang} />
       </div>
+
+      {/* Advanced filters panel */}
+      {showAdvanced && (
+        <div className="mb-5 p-5 border border-gold/20 bg-slate/40">
+          <div className="flex flex-wrap gap-6 items-end">
+
+            {/* Sort order */}
+            <div>
+              <label className="block font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-2">
+                {isES ? 'Ordenar por' : 'Sort by'}
+              </label>
+              <div className="flex gap-2">
+                {([
+                  { id: 'chrono-asc',  labelEs: '↑ Más antigua', labelEn: '↑ Oldest first' },
+                  { id: 'chrono-desc', labelEs: '↓ Más reciente', labelEn: '↓ Newest first' },
+                  { id: 'alpha',       labelEs: 'A–Z Nombre',     labelEn: 'A–Z Name' },
+                ] as const).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSortOrder(opt.id)}
+                    className={`font-cinzel text-[0.55rem] tracking-wider uppercase px-3 py-2 border transition-all ${
+                      sortOrder === opt.id
+                        ? 'border-gold bg-gold/10 text-gold'
+                        : 'border-gold/20 text-smoke hover:border-gold/35 hover:text-mist'
+                    }`}
+                  >
+                    {isES ? opt.labelEs : opt.labelEn}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Year range */}
+            <div>
+              <label className="block font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-2">
+                {isES ? 'Rango de años (negativo = a.C.)' : 'Year range (negative = BC)'}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={yearFrom}
+                  onChange={e => { setYearFrom(e.target.value); setPage(1) }}
+                  placeholder={isES ? 'Desde, ej: -500' : 'From, e.g.: -500'}
+                  className="bg-ink border border-gold/20 text-mist placeholder-smoke/40 font-cinzel text-[0.6rem] tracking-wider px-3 py-2 w-32 focus:outline-none focus:border-gold/50"
+                />
+                <span className="text-smoke font-cinzel text-[0.6rem]">—</span>
+                <input
+                  type="text"
+                  value={yearTo}
+                  onChange={e => { setYearTo(e.target.value); setPage(1) }}
+                  placeholder={isES ? 'Hasta, ej: 1945' : 'To, e.g.: 1945'}
+                  className="bg-ink border border-gold/20 text-mist placeholder-smoke/40 font-cinzel text-[0.6rem] tracking-wider px-3 py-2 w-32 focus:outline-none focus:border-gold/50"
+                />
+              </div>
+            </div>
+
+            {/* Only mapped */}
+            <div>
+              <label className="block font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-2">
+                {isES ? 'Visibilidad' : 'Visibility'}
+              </label>
+              <button
+                onClick={() => setOnlyMapped(v => !v)}
+                className={`font-cinzel text-[0.55rem] tracking-wider uppercase px-3 py-2 border transition-all ${
+                  onlyMapped
+                    ? 'border-gold bg-gold/10 text-gold'
+                    : 'border-gold/20 text-smoke hover:border-gold/35 hover:text-mist'
+                }`}
+              >
+                📍 {isES ? 'Solo en el mapa' : 'Mapped only'}
+              </button>
+            </div>
+
+            {/* Reset */}
+            {hasAdvancedActive && (
+              <button
+                onClick={resetAdvanced}
+                className="font-cinzel text-[0.55rem] tracking-wider uppercase text-smoke hover:text-gold transition-colors border border-gold/15 px-3 py-2 self-end"
+              >
+                {isES ? '✕ Resetear' : '✕ Reset'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Era filter chips — horizontal scroll with arrows */}
       <ChipScroller className="mb-6">
