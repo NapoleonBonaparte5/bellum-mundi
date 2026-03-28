@@ -14,6 +14,7 @@ export const en: Locale = {
     chat: '🤖 AI Chat',
     educacion: '🎓 Education',
     timeline: '📊 Timeline',
+    weapons: '🗡️ Weapons',
     library: '📜 Library',
     civs: '🏛️ Civilizations',
     premium: 'Premium',

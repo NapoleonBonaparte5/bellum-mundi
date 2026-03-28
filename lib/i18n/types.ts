@@ -26,6 +26,7 @@ export interface Locale {
     chat: string
     educacion: string
     timeline: string
+    weapons: string
     library: string
     civs: string
     premium: string

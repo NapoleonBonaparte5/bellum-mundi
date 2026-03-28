@@ -141,6 +141,12 @@ export interface FlatDoc extends HistoricalDoc {
   slug: string
 }
 
+export interface FlatWeapon extends Weapon {
+  eraId: EraId
+  eraName: string
+  slug: string
+}
+
 // ── USER / AUTH ────────────────────────────────────────────
 export interface BellumUser {
   id: string

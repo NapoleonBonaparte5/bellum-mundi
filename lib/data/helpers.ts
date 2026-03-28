@@ -2,7 +2,7 @@
 // BELLUM MUNDI — DATA HELPERS
 // ═══════════════════════════════════════════════════════════
 
-import type { Era, EraId, FlatBattle, FlatCommander, FlatCivilization, FlatDoc, CivMetrics } from './types'
+import type { Era, EraId, FlatBattle, FlatCommander, FlatCivilization, FlatDoc, FlatWeapon, CivMetrics } from './types'
 import { ERAS } from './eras'
 
 // ── SLUG ───────────────────────────────────────────────────
@@ -91,6 +91,22 @@ export function getAllDocs(): FlatDoc[] {
         eraName: era.name,
         category: DOC_CATEGORIES[d.icon] ?? 'documento',
         slug: slugify(d.name),
+      })
+    }
+  }
+  return result
+}
+
+// ── FLATTEN ALL WEAPONS ────────────────────────────────────
+export function getAllWeapons(): FlatWeapon[] {
+  const result: FlatWeapon[] = []
+  for (const era of ERAS) {
+    for (const w of era.weapons) {
+      result.push({
+        ...w,
+        eraId: era.id,
+        eraName: era.name,
+        slug: slugify(w.name),
       })
     }
   }
