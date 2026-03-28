@@ -11,6 +11,7 @@ import type { FlatBattle, Era, Lang } from '@/lib/data/types'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
+import { processContent } from '@/lib/utils/processContent'
 
 const LS_KEY = 'bm_queries_used'
 const PREMIUM_THRESHOLD = 3 // show banner after this many queries
@@ -24,49 +25,6 @@ interface BattleDetailClientProps {
 interface WikiImage {
   url: string
   title: string
-}
-
-// ── Markdown → HTML post-processor ─────────────────────────
-function processContent(raw: string): string {
-  let html = raw
-
-  // PASO 1: Normalizar saltos de línea
-  html = html.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
-
-  // PASO 2: Convertir headers Markdown
-  html = html.replace(/^#{1,2}\s+(.+)$/gm, '\n<h2>$1</h2>\n')
-  html = html.replace(/^#{3}\s+(.+)$/gm, '\n<h3>$1</h3>\n')
-
-  // PASO 3: Títulos inline — negrita sola en su línea
-  html = html.replace(/\*\*([^*\n]{3,60})\*\*\s*\n/g, '\n<h3>$1</h3>\n')
-
-  // PASO 4: Títulos inline pegados al párrafo
-  html = html.replace(/\*\*([^*\n]{3,60})\*\*\s+([A-ZÁÉÍÓÚÑÜ])/g, '</p>\n<h3>$1</h3>\n<p>$2')
-
-  // PASO 5: Negrita/cursiva restante
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-
-  // PASO 6: Convertir párrafos
-  const blocks = html.split(/\n{2,}/)
-  html = blocks.map(block => {
-    block = block.trim()
-    if (!block) return ''
-    if (block.startsWith('<h') || block.startsWith('<table') ||
-        block.startsWith('<figure') || block.startsWith('<div') ||
-        block.startsWith('<ul') || block.startsWith('<ol')) return block
-    return `<p>${block.replace(/\n/g, ' ')}</p>`
-  }).filter(Boolean).join('\n')
-
-  // PASO 7: Limpiar p vacíos y anidados
-  html = html.replace(/<p>\s*<\/p>/g, '')
-  html = html.replace(/<p>(<h[23]>)/g, '$1')
-  html = html.replace(/(<\/h[23]>)<\/p>/g, '$1')
-
-  // Párrafos con datos numéricos
-  html = html.replace(/<p>(?=\d)/g, '<p class="num-data">')
-
-  return html
 }
 
 // ── Stream a response body into a state setter ──────────────
@@ -83,6 +41,52 @@ async function readStream(
     acc += decoder.decode(value, { stream: true })
     setter(processContent(acc))
   }
+}
+
+// ── Counterfactual preset generator ─────────────────────────
+interface Counterfactual {
+  label: string
+  question: string
+  impact: 'high' | 'medium' | 'low' | 'alto' | 'medio' | 'bajo'
+}
+
+function getCounterfactuals(battle: FlatBattle, isES: boolean): Counterfactual[] {
+  const side1 = battle.combatants.split(' vs ')[0]?.trim() ?? battle.combatants
+  return isES
+    ? [
+        {
+          label: 'Refuerzos decisivos',
+          question: `¿Qué habría pasado si ${side1} hubiera recibido refuerzos masivos justo antes de la batalla de ${battle.name}?`,
+          impact: 'alto',
+        },
+        {
+          label: 'Cambio de liderazgo',
+          question: `¿Y si el comandante principal hubiera muerto o caído prisionero antes del inicio de la batalla de ${battle.name}?`,
+          impact: 'alto',
+        },
+        {
+          label: 'Factor climático o logístico',
+          question: `¿Cómo habría cambiado el resultado de ${battle.name} si las condiciones climáticas o logísticas hubieran sido radicalmente distintas?`,
+          impact: 'medio',
+        },
+      ]
+    : [
+        {
+          label: 'Decisive Reinforcements',
+          question: `What would have happened if ${side1} had received massive reinforcements just before the Battle of ${battle.name}?`,
+          impact: 'high',
+        },
+        {
+          label: 'Change of Leadership',
+          question: `What if the main commander had died or been captured before the start of the Battle of ${battle.name}?`,
+          impact: 'high',
+        },
+        {
+          label: 'Weather or Logistics',
+          question: `How would the outcome of the Battle of ${battle.name} have changed if the weather or logistical conditions had been radically different?`,
+          impact: 'medium',
+        },
+      ]
 }
 
 // ── Extract image search terms from prompt ──────────────────
@@ -111,6 +115,15 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
   const [rateLimited, setRateLimited] = useState(false)
   const [queriesLeft, setQueriesLeft] = useState(3)
   const [showPremiumBanner, setShowPremiumBanner] = useState(false)
+
+  // Counterfactual simulator
+  const [activeTab, setActiveTab]                     = useState<'analysis' | 'counterfactual'>('analysis')
+  const [cfContent, setCfContent]                     = useState<string | null>(null)
+  const [cfLoading, setCfLoading]                     = useState(false)
+  const [cfQuestion, setCfQuestion]                   = useState('')
+  const [cfCustomInput, setCfCustomInput]             = useState('')
+  const [cfSelectedPreset, setCfSelectedPreset]       = useState<number | null>(null)
+  const counterfactuals = getCounterfactuals(battle, isES)
 
   useEffect(() => {
     const used = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10)
@@ -211,6 +224,41 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
     setQueriesLeft(q => Math.max(0, q - 1))
   }, [era, isES, topicLoading, rateLimited])
 
+  const runCounterfactual = useCallback(async (question: string) => {
+    if (!question.trim() || cfLoading) return
+    setCfContent(null)
+    setCfLoading(true)
+    setCfQuestion(question)
+
+    const prompt = isES
+      ? `Eres un historiador militar experto en análisis contrafactuales. Analiza el siguiente escenario hipotético sobre la batalla de ${battle.name} (${battle.year}), entre ${battle.combatants}.\n\nEscenario: ${question}\n\nRespóndelo en profundidad (400-600 palabras): qué habría pasado inmediatamente, cómo se habrían desarrollado los eventos a corto plazo, y cuál habría sido el impacto a largo plazo en la historia. Incluye una estimación de probabilidad de resultado alternativo (muy probable / probable / poco probable / casi imposible) con tu justificación.`
+      : `You are a military historian specializing in counterfactual analysis. Analyze the following hypothetical scenario about the Battle of ${battle.name} (${battle.year}), between ${battle.combatants}.\n\nScenario: ${question}\n\nAnswer in depth (400-600 words): what would have happened immediately, how events would have unfolded in the short term, and what the long-term historical impact would have been. Include a probability estimate for the alternative outcome (very likely / likely / unlikely / almost impossible) with your justification.`
+
+    try {
+      const res = await fetch('/api/ai-query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, isPremium: false, lang }),
+      })
+      if (res.status === 429) {
+        setRateLimited(true)
+      } else if (res.ok && res.body) {
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let acc = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          acc += decoder.decode(value, { stream: true })
+          setCfContent(processContent(acc))
+        }
+      }
+    } catch {
+      setCfContent(`<p>${isES ? 'Error al generar el análisis contrafactual.' : 'Error generating counterfactual analysis.'}</p>`)
+    }
+    setCfLoading(false)
+  }, [battle, isES, lang, cfLoading])
+
   const eraEmoji = ERA_EMOJIS[era.id]
 
   return (
@@ -237,6 +285,155 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
 
         {/* ── MAIN COLUMN ── */}
         <div>
+
+          {/* Tab bar */}
+          <div className="flex border-b border-gold/20 mb-8 gap-0">
+            <button
+              onClick={() => setActiveTab('analysis')}
+              className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
+                activeTab === 'analysis'
+                  ? 'text-gold border-gold'
+                  : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
+              }`}
+            >
+              ⚡ {isES ? 'Análisis IA' : 'AI Analysis'}
+            </button>
+            <button
+              onClick={() => setActiveTab('counterfactual')}
+              className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
+                activeTab === 'counterfactual'
+                  ? 'text-gold border-gold'
+                  : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
+              }`}
+            >
+              🔀 {isES ? 'Simulador Contrafactual' : 'Counterfactual Simulator'}
+            </button>
+          </div>
+
+          {/* ── COUNTERFACTUAL SIMULATOR TAB ── */}
+          {activeTab === 'counterfactual' && (
+            <div className="mb-12">
+              <div className="mb-6">
+                <p className="eyebrow mb-2">{isES ? 'Historia Alternativa' : 'Alternative History'}</p>
+                <h2 className="font-playfair font-bold text-cream text-xl mb-2">
+                  {isES ? '¿Y si el resultado hubiera sido diferente?' : 'What if the outcome had been different?'}
+                </h2>
+                <p className="font-crimson text-smoke text-base">
+                  {isES
+                    ? 'Elige uno de los escenarios predefinidos o escribe tu propia variable para simular un resultado alternativo.'
+                    : 'Choose a predefined scenario or write your own variable to simulate an alternative outcome.'}
+                </p>
+              </div>
+
+              {/* Preset scenarios */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                {counterfactuals.map((cf, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setCfSelectedPreset(i)
+                      setCfCustomInput('')
+                      runCounterfactual(cf.question)
+                    }}
+                    disabled={cfLoading}
+                    className={`text-left p-4 border transition-all group disabled:opacity-40 disabled:cursor-not-allowed ${
+                      cfSelectedPreset === i && cfQuestion === cf.question
+                        ? 'border-gold bg-gold/10'
+                        : 'border-gold/25 bg-slate/30 hover:border-gold/50 hover:bg-slate/60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="font-cinzel text-[0.55rem] tracking-[0.15em] text-gold uppercase">
+                        {cf.label}
+                      </span>
+                      <span className={`font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-1.5 py-0.5 flex-shrink-0 ${
+                        cf.impact === 'alto' || cf.impact === 'high'
+                          ? 'text-crimson bg-crimson/10 border border-crimson/30'
+                          : 'text-smoke bg-steel/30 border border-gold/20'
+                      }`}>
+                        {cf.impact}
+                      </span>
+                    </div>
+                    <p className="font-crimson text-smoke text-sm group-hover:text-mist transition-colors leading-snug">
+                      {cf.question}
+                    </p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom variable */}
+              <div className="mb-6">
+                <label className="block font-cinzel text-[0.6rem] tracking-[0.2em] text-smoke uppercase mb-2">
+                  {isES ? 'Variable personalizada' : 'Custom Variable'}
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={cfCustomInput}
+                    onChange={e => { setCfCustomInput(e.target.value); setCfSelectedPreset(null) }}
+                    placeholder={isES
+                      ? '¿Y si... escribe tu propio escenario hipotético'
+                      : 'What if... write your own hypothetical scenario'}
+                    className="flex-1 bg-ink border border-gold/25 text-mist placeholder-smoke/40 text-sm px-4 py-3 focus:outline-none focus:border-gold/60 transition-colors font-crimson"
+                    onKeyDown={e => { if (e.key === 'Enter' && cfCustomInput.trim()) runCounterfactual(cfCustomInput) }}
+                    disabled={cfLoading}
+                  />
+                  <button
+                    onClick={() => runCounterfactual(cfCustomInput)}
+                    disabled={!cfCustomInput.trim() || cfLoading}
+                    className="btn-primary px-5 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isES ? 'Simular' : 'Simulate'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Result */}
+              {cfLoading && !cfContent && (
+                <AILoadingState lang={lang} label={isES ? 'Calculando historia alternativa...' : 'Computing alternative history...'} />
+              )}
+
+              {cfContent && (
+                <div className="bg-slate border border-gold/20 p-8 md:p-10">
+                  <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gold/10">
+                    <span className="text-xl">🔀</span>
+                    <div>
+                      <div className="font-cinzel text-[0.5rem] tracking-[0.2em] text-smoke uppercase mb-0.5">
+                        {isES ? 'Escenario analizado' : 'Analyzed scenario'}
+                      </div>
+                      <p className="font-crimson italic text-mist text-sm leading-snug">{cfQuestion}</p>
+                    </div>
+                  </div>
+                  <div
+                    className="ai-content font-crimson text-parchment-dark text-base leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: cfContent }}
+                  />
+                  <div className="mt-6 pt-4 border-t border-gold/10 flex gap-3 flex-wrap">
+                    <button
+                      onClick={() => { setCfContent(null); setCfQuestion(''); setCfSelectedPreset(null); setCfCustomInput('') }}
+                      className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-smoke hover:text-gold transition-colors border border-gold/20 px-4 py-2"
+                    >
+                      {isES ? '↩ Nuevo escenario' : '↩ New scenario'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {rateLimited && (
+                <div className="bg-slate border border-crimson/40 p-6 text-center">
+                  <p className="font-cinzel text-[0.6rem] tracking-widest text-crimson-light uppercase mb-2">
+                    {isES ? 'Límite diario alcanzado' : 'Daily limit reached'}
+                  </p>
+                  <Link href={`/${lang}#pricing`} className="btn-primary inline-block mt-3">
+                    {isES ? '⚡ Ver Premium' : '⚡ View Premium'}
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── ANALYSIS TAB (existing content) ── */}
+          {activeTab === 'analysis' && (<>
 
           {/* Images */}
           {images.length > 0 && (
@@ -390,6 +587,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
               </div>
             </div>
           )}
+          </>) /* end activeTab === 'analysis' */}
         </div>
 
         {/* ── SIDEBAR ── */}
