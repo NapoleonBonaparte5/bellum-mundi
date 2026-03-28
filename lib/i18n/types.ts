@@ -24,6 +24,7 @@ export interface Locale {
     commanders: string
     worldmap: string
     chat: string
+    educacion: string
     library: string
     civs: string
     premium: string

@@ -22,6 +22,7 @@ const NAV_LINKS = (lang: Lang) => [
   { key: 'commanders',    label: t(lang, 'nav.commanders'),  href: `/${lang}/comandantes` },
   { key: 'worldmap',      label: t(lang, 'nav.worldmap'),    href: `/${lang}/mapa` },
   { key: 'chat',          label: t(lang, 'nav.chat'),        href: `/${lang}/chat` },
+  { key: 'educacion',     label: t(lang, 'nav.educacion'),   href: `/${lang}/educacion` },
   { key: 'library',       label: t(lang, 'nav.library'),     href: `/${lang}/biblioteca` },
   { key: 'civilizations', label: t(lang, 'nav.civs'),        href: `/${lang}/civilizaciones` },
   { key: 'premium',       label: t(lang, 'nav.premium'),     href: `/${lang}#pricing` },

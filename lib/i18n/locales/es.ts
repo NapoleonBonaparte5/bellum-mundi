@@ -13,6 +13,7 @@ export const es: Locale = {
     commanders: '👑 Comandantes',
     worldmap: '🗺️ Mapa Global',
     chat: '🤖 Chat IA',
+    educacion: '🎓 Educación',
     library: '📜 Biblioteca',
     civs: '🏛️ Civilizaciones',
     premium: 'Premium',
