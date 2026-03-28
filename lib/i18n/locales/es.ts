@@ -14,6 +14,7 @@ export const es: Locale = {
     worldmap: '🗺️ Mapa Global',
     chat: '🤖 Chat IA',
     educacion: '🎓 Educación',
+    timeline: '📊 Cronología',
     library: '📜 Biblioteca',
     civs: '🏛️ Civilizaciones',
     premium: 'Premium',

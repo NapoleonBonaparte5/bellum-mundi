@@ -25,6 +25,7 @@ export interface Locale {
     worldmap: string
     chat: string
     educacion: string
+    timeline: string
     library: string
     civs: string
     premium: string

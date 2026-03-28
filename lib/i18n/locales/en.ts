@@ -13,6 +13,7 @@ export const en: Locale = {
     worldmap: '🗺️ World Map',
     chat: '🤖 AI Chat',
     educacion: '🎓 Education',
+    timeline: '📊 Timeline',
     library: '📜 Library',
     civs: '🏛️ Civilizations',
     premium: 'Premium',
