@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase/client'
 
 interface ChatInterfaceProps {
   lang: Lang
+  compact?: boolean
 }
 
 interface Message {
@@ -75,7 +76,7 @@ const UI = {
   },
 }
 
-export function ChatInterface({ lang }: ChatInterfaceProps) {
+export function ChatInterface({ lang, compact = false }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -202,16 +203,21 @@ export function ChatInterface({ lang }: ChatInterfaceProps) {
   const showLimit = !isPremium && usedCount >= FREE_LIMIT
 
   return (
-    <div className="min-h-screen bg-ink flex flex-col">
+    <div
+      className="bg-ink flex flex-col"
+      style={compact ? { height: '480px', overflow: 'hidden' } : { minHeight: '100vh' }}
+    >
       {/* Header */}
-      <div className="border-b border-gold/20 bg-slate/50 px-6 py-5">
-        <div className="max-w-3xl mx-auto flex items-start justify-between gap-4">
+      <div className={`border-b border-gold/20 bg-slate/50 ${compact ? 'px-4 py-3' : 'px-6 py-5'}`}>
+        <div className={`${compact ? '' : 'max-w-3xl mx-auto'} flex items-start justify-between gap-4`}>
           <div>
-            <p className="eyebrow mb-1">
-              {lang === 'en' ? 'AI Military History' : 'Historia Militar con IA'}
-            </p>
-            <h1 className="font-cinzel text-gold text-2xl font-bold">{ui.title}</h1>
-            <p className="text-smoke text-sm mt-1">{ui.subtitle}</p>
+            {!compact && (
+              <p className="eyebrow mb-1">
+                {lang === 'en' ? 'AI Military History' : 'Historia Militar con IA'}
+              </p>
+            )}
+            <h1 className={`font-cinzel text-gold font-bold ${compact ? 'text-base' : 'text-2xl'}`}>{ui.title}</h1>
+            {!compact && <p className="text-smoke text-sm mt-1">{ui.subtitle}</p>}
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 pt-1">
             {/* Tutor mode toggle */}
@@ -241,14 +247,14 @@ export function ChatInterface({ lang }: ChatInterfaceProps) {
       </div>
 
       {/* Conversation area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div className={`flex-1 overflow-y-auto ${compact ? 'px-3 py-3' : 'px-4 py-6'}`}>
+        <div className={`${compact ? '' : 'max-w-3xl mx-auto'} space-y-6`}>
 
           {/* Suggestions — shown when no messages */}
           {messages.length === 0 && (
             <div>
               <p className="eyebrow text-center mb-5">{ui.suggestTitle}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={`grid gap-2 ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 {suggestions.map((s, i) => (
                   <button
                     key={i}

@@ -1363,6 +1363,124 @@ input[type="text"]:focus {
   box-shadow: 0 0 6px rgba(201, 168, 76, 0.4);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SECCIÓN 2A — ERA CARD COLORS
+   ═══════════════════════════════════════════════════════════ */
+.card-battle[data-era="prehistoric"]  { --card-accent: #6B4C2A; --card-glow: rgba(107,76,42,0.15); }
+.card-battle[data-era="ancient"]      { --card-accent: #C9A84C; --card-glow: rgba(201,168,76,0.12); }
+.card-battle[data-era="classical"]    { --card-accent: #8B1A1A; --card-glow: rgba(139,26,26,0.15); }
+.card-battle[data-era="medieval"]     { --card-accent: #4A6B8A; --card-glow: rgba(74,107,138,0.12); }
+.card-battle[data-era="early_modern"] { --card-accent: #6B4C8A; --card-glow: rgba(107,76,138,0.12); }
+.card-battle[data-era="napoleon"]     { --card-accent: #C9A84C; --card-glow: rgba(201,168,76,0.15); }
+.card-battle[data-era="ww1"]          { --card-accent: #6B6560; --card-glow: rgba(107,101,96,0.2);  }
+.card-battle[data-era="ww2"]          { --card-accent: #4A5568; --card-glow: rgba(74,85,104,0.2);   }
+.card-battle[data-era="cold_war"]     { --card-accent: #2D6A8A; --card-glow: rgba(45,106,138,0.15); }
+.card-battle[data-era="contemporary"] { --card-accent: #2D8A5A; --card-glow: rgba(45,138,90,0.12);  }
+
+.card-battle {
+  background: linear-gradient(135deg, var(--slate) 0%, color-mix(in srgb, var(--slate) 85%, var(--card-accent, #C9A84C)) 100%);
+  box-shadow: inset 0 0 60px var(--card-glow, rgba(201,168,76,0.05));
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECCIÓN 7A — MICRO-ANIMACIONES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Hover lift universal */
+.card-battle, .card-commander, .card-bm {
+  will-change: transform;
+}
+
+/* Shimmer en hover de botones primarios */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-15deg);
+  transition: none;
+}
+.btn-primary:hover::after {
+  left: 150%;
+  transition: left 0.5s ease;
+}
+
+/* Focus ring accesible */
+.card-battle:focus-visible,
+.card-commander:focus-visible,
+.chip:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Chat FAB oculto en impresión */
+.chat-fab { /* marked for print hide */ }
+
+/* Print styles para exportación PDF */
+@media print {
+  nav, footer, .no-print, .btn-primary, .btn-ghost,
+  .chat-fab, .back-to-top { display: none !important; }
+  body { background: white !important; color: #1a1a1a !important; }
+  .ai-content { color: #1a1a1a !important; }
+  .ai-content h2 { color: #333 !important; border-bottom: 1px solid #ccc; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 0.7rem; color: #666; }
+}
+
+/* Scrollbar oculta en chips/filtros */
+.chip-scroll-container { scrollbar-width: none; }
+.chip-scroll-container::-webkit-scrollbar { display: none; }
+
+/* ── Chat FAB drawer ─────────────────────────────────────── */
+.chat-fab-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  max-width: 100vw;
+  z-index: 899;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--slate);
+  border-left: 1px solid rgba(201,168,76,0.2);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+.chat-fab-drawer.open {
+  transform: translateX(0);
+}
+.chat-fab-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 898;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.chat-fab-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Intensity dots ──────────────────────────────────────── */
+.intensity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.intensity-dot.on  { background: var(--crimson-light); box-shadow: 0 0 4px rgba(192,57,43,0.5); }
+.intensity-dot.off { background: rgba(255,255,255,0.12); }
+
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .cards-grid {

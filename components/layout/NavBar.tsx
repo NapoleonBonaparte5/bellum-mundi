@@ -2,15 +2,24 @@
 // ═══════════════════════════════════════════════════════════
 // BELLUM MUNDI — NAVIGATION BAR
 // Full nav with mobile hamburger, lang switcher, auth
+// + Floating Chat FAB (1B) + Streak badge (8B)
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import type { Lang } from '@/lib/data/types'
 import { t } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
 import type { BellumUser } from '@/lib/data/types'
+import { getStreak, getSavedCount } from '@/lib/utils/collection'
+
+// Lazy load ChatInterface only when FAB drawer is opened
+const ChatInterface = dynamic(
+  () => import('@/components/chat/ChatInterface').then(m => m.ChatInterface),
+  { ssr: false }
+)
 
 interface NavBarProps {
   lang: Lang
@@ -38,8 +47,14 @@ export function NavBar({ lang }: NavBarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState<BellumUser | null>(null)
   const [isPremium, setIsPremium] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
+  const [streak, setStreak] = useState(0)
+  const [savedCount, setSavedCount] = useState(0)
+  const drawerRef = useRef<HTMLDivElement>(null)
 
-  // Load user on mount
+  const isOnChatPage = pathname.includes('/chat')
+
+  // Load user + gamification data on mount
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
@@ -51,6 +66,16 @@ export function NavBar({ lang }: NavBarProps) {
         }
       }
     })
+    // Gamification: streak + saved count (client-only)
+    setStreak(getStreak())
+    setSavedCount(getSavedCount())
+  }, [])
+
+  // Close chat drawer on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setChatOpen(false) }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
   }, [])
 
   const switchLang = () => {
@@ -68,6 +93,7 @@ export function NavBar({ lang }: NavBarProps) {
   }
 
   return (
+    <>
     <nav
       id="nav"
       className="sticky top-0 z-[500] bg-ink/95 backdrop-blur-xl border-b border-gold/20"
@@ -134,6 +160,16 @@ export function NavBar({ lang }: NavBarProps) {
               >
                 {user.name.charAt(0).toUpperCase()}
               </button>
+              {/* Streak badge (8B) — visible when streak >= 2 */}
+              {streak >= 2 && (
+                <span
+                  className="hidden md:inline font-cinzel text-[0.5rem] tracking-wider px-2 py-0.5 font-bold"
+                  style={{ background: 'rgba(255,90,0,0.15)', border: '1px solid rgba(255,90,0,0.3)', color: '#FF7A3D' }}
+                  title={lang === 'en' ? `${streak}-day streak!` : `¡Racha de ${streak} días!`}
+                >
+                  🔥 {streak}
+                </span>
+              )}
               {isPremium && (
                 <span className="hidden md:inline bg-gradient-to-r from-gold-dark to-gold text-ink font-cinzel text-[0.5rem] tracking-[0.15em] px-2 py-0.5 font-bold uppercase">
                   PREMIUM
@@ -222,5 +258,73 @@ export function NavBar({ lang }: NavBarProps) {
         </div>
       </div>
     </nav>
+    {/* ── Floating Chat FAB (1B) — hidden on /chat page ── */}
+    {!isOnChatPage && (
+      <>
+        {/* Overlay */}
+        <div
+          className={`chat-fab-overlay ${chatOpen ? 'open' : ''}`}
+          onClick={() => setChatOpen(false)}
+          aria-hidden="true"
+        />
+
+        {/* Drawer */}
+        <div
+          ref={drawerRef}
+          className={`chat-fab-drawer ${chatOpen ? 'open' : ''}`}
+          role="dialog"
+          aria-label={lang === 'en' ? 'AI Military History Chat' : 'Chat de Historia Militar con IA'}
+          aria-modal="true"
+        >
+          {/* Drawer header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gold/20 bg-slate flex-shrink-0">
+            <span className="font-cinzel text-gold text-[0.65rem] tracking-[0.2em] uppercase">
+              {lang === 'en' ? '⚔ AI History Chat' : '⚔ Chat Historia IA'}
+            </span>
+            <button
+              onClick={() => setChatOpen(false)}
+              className="text-smoke hover:text-gold transition-colors text-xl leading-none"
+              aria-label={lang === 'en' ? 'Close chat' : 'Cerrar chat'}
+            >
+              ×
+            </button>
+          </div>
+          {/* Embedded ChatInterface in compact mode */}
+          <div className="flex-1 overflow-hidden">
+            {chatOpen && <ChatInterface lang={lang} compact={true} />}
+          </div>
+        </div>
+
+        {/* FAB button */}
+        <button
+          className="chat-fab"
+          onClick={() => setChatOpen(o => !o)}
+          aria-label={lang === 'en' ? 'Open AI chat' : 'Abrir chat IA'}
+          style={{
+            position: 'fixed',
+            bottom: '1.5rem',
+            right: '1.5rem',
+            zIndex: 900,
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: 'var(--crimson)',
+            border: '2px solid rgba(201,168,76,0.3)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.4rem',
+            boxShadow: '0 4px 20px rgba(139,26,26,0.5), 0 0 0 0 rgba(139,26,26,0)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.1)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
+        >
+          {chatOpen ? '×' : '💬'}
+        </button>
+      </>
+    )}
+  </>
   )
 }

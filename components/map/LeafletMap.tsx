@@ -1,13 +1,12 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — LEAFLET MAP (dynamic import only)
+// BELLUM MUNDI — LEAFLET MAP (6C)
+// Enriched popups + onZoomChange callback
 // ═══════════════════════════════════════════════════════════
 
 import { useEffect, useRef } from 'react'
 import type { FlatBattle, Lang, EraId } from '@/lib/data/types'
 
-// Leaflet CSS must be imported globally — done in globals.css via CDN override
-// We import it here for the JS bundle
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -16,12 +15,26 @@ interface LeafletMapProps {
   lang: Lang
   eraColors: Record<string, string>
   onSelect: (battle: FlatBattle) => void
+  onZoomChange?: (zoom: number) => void
 }
 
-export default function LeafletMap({ battles, lang, eraColors, onSelect }: LeafletMapProps) {
+// Era label mapping for badges
+const ERA_LABELS_ES: Record<string, string> = {
+  prehistoric: 'Prehistórico', ancient: 'Antigüedad', classical: 'Clásico',
+  medieval: 'Medieval', early_modern: 'Moderna', napoleon: 'Napoleónico',
+  ww1: 'I GM', ww2: 'II GM', cold_war: 'Guerra Fría', contemporary: 'Contemporáneo',
+}
+const ERA_LABELS_EN: Record<string, string> = {
+  prehistoric: 'Prehistoric', ancient: 'Antiquity', classical: 'Classical',
+  medieval: 'Medieval', early_modern: 'Early Modern', napoleon: 'Napoleonic',
+  ww1: 'WWI', ww2: 'WWII', cold_war: 'Cold War', contemporary: 'Contemporary',
+}
+
+export default function LeafletMap({ battles, lang, eraColors, onSelect, onZoomChange }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const markersRef = useRef<L.LayerGroup | null>(null)
+  const isES = lang === 'es'
 
   // Init map once
   useEffect(() => {
@@ -38,6 +51,11 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
       attribution: '© OpenStreetMap contributors',
     }).addTo(map)
 
+    // Zoom change callback (6A)
+    if (onZoomChange) {
+      map.on('zoomend', () => onZoomChange(map.getZoom()))
+    }
+
     mapRef.current = map
     markersRef.current = L.layerGroup().addTo(map)
 
@@ -45,9 +63,10 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
       map.remove()
       mapRef.current = null
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Update markers when battles change — with spring-scale stagger animation
+  // Update markers when battles change
   useEffect(() => {
     if (!mapRef.current || !markersRef.current) return
 
@@ -72,30 +91,50 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
         iconAnchor: [5, 5],
       })
 
+      // Era badge color
+      const eraLabel = isES
+        ? (ERA_LABELS_ES[battle.eraId] ?? battle.eraName)
+        : (ERA_LABELS_EN[battle.eraId] ?? battle.eraName)
+
+      // Enriched popup (6C)
+      const descSnippet = battle.desc ? battle.desc.slice(0, 80) + (battle.desc.length > 80 ? '…' : '') : ''
+      const detailUrl = `/${lang}/batallas/${battle.slug}`
+
+      const popupHTML = `
+        <div style="font-family:Georgia,serif;min-width:220px;max-width:280px">
+          <!-- Era badge -->
+          <div style="display:inline-block;font-size:0.48rem;font-family:sans-serif;letter-spacing:0.12em;text-transform:uppercase;padding:2px 7px;background:${color}22;border:1px solid ${color}55;color:${color};margin-bottom:8px;border-radius:1px">${eraLabel}</div>
+          <!-- Year -->
+          <div style="font-size:0.58rem;font-family:sans-serif;color:#C9A84C;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:5px;font-weight:700">${battle.year}</div>
+          <!-- Name -->
+          <div style="font-weight:700;color:#F9F5ED;font-size:1rem;line-height:1.25;margin-bottom:5px">${battle.name}</div>
+          <!-- Combatants -->
+          <div style="color:#9B9590;font-size:0.8rem;margin-bottom:${descSnippet ? '6px' : '0'};font-style:italic">${battle.combatants}</div>
+          ${descSnippet ? `<div style="color:#9B9590;font-size:0.78rem;line-height:1.45;margin-bottom:8px">${descSnippet}</div>` : ''}
+          <!-- Detail link -->
+          <a href="${detailUrl}" style="display:inline-block;font-size:0.5rem;font-family:sans-serif;letter-spacing:0.15em;text-transform:uppercase;padding:5px 10px;background:rgba(139,26,26,0.2);border:1px solid rgba(139,26,26,0.4);color:#E07070;text-decoration:none;margin-top:4px;transition:background 0.15s" onmouseover="this.style.background='rgba(139,26,26,0.35)'" onmouseout="this.style.background='rgba(139,26,26,0.2)'">
+            📍 ${isES ? 'Ver en detalle' : 'View detail'}
+          </a>
+        </div>
+      `
+
       const marker = L.marker([battle.lat, battle.lng], { icon })
-        .bindPopup(`
-          <div style="font-family:Georgia,serif;min-width:180px">
-            <div style="font-size:0.6rem;font-family:serif;color:#C9A84C;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:bold">${battle.year}</div>
-            <div style="font-weight:bold;color:#F9F5ED;font-size:1.05rem;line-height:1.25;margin-bottom:5px">${battle.name}</div>
-            <div style="color:#9B9590;font-size:0.82rem;margin-bottom:${battle.tag ? '6px' : '0'}">${battle.combatants}</div>
-            ${battle.tag ? `<div style="display:inline-block;font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 6px;background:rgba(139,26,26,0.35);border:1px solid rgba(139,26,26,0.5);color:#E07070;">${battle.tag}</div>` : ''}
-          </div>
-        `, {
+        .bindPopup(popupHTML, {
           className: 'bm-popup',
-          maxWidth: 280,
+          maxWidth: 300,
         })
         .on('click', () => onSelect(battle))
 
       markersRef.current!.addLayer(marker)
     })
-  }, [battles, eraColors, onSelect])
+  }, [battles, eraColors, onSelect, isES, lang])
 
   return (
     <div
       ref={containerRef}
       className="w-full map-mobile-height"
       style={{ height: 600 }}
-      aria-label={lang === 'en' ? 'World battle map' : 'Mapa mundial de batallas'}
+      aria-label={isES ? 'Mapa mundial de batallas' : 'World battle map'}
     />
   )
 }

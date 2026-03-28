@@ -4,7 +4,7 @@
 // Parallel streaming: analysis + books via Promise.all
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { FlatDoc, Era, Lang } from '@/lib/data/types'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
@@ -58,6 +58,138 @@ const CAT_LABELS: Record<string, { es: string; en: string }> = {
   obra:      { es: 'Obra',      en: 'Work' },
   documento: { es: 'Documento', en: 'Document' },
   carta:     { es: 'Carta',     en: 'Letter' },
+}
+
+// ── Mini chat "Leer con IA" (5B) ─────────────────────────
+const FREE_CHAT_LIMIT = 3
+
+function DocMiniChat({ doc, lang }: { doc: FlatDoc; lang: Lang }) {
+  const isES = lang === 'es'
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; html: string }[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [usedCount, setUsedCount] = useState(0)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  const canSend = usedCount < FREE_CHAT_LIMIT
+
+  const send = useCallback(async (text?: string) => {
+    const q = (text ?? input).trim()
+    if (!q || loading || !canSend) return
+    setInput('')
+    setLoading(true)
+    const userMsg = { role: 'user' as const, html: `<p>${q}</p>` }
+    setMessages(prev => [...prev, userMsg, { role: 'assistant', html: '' }])
+    setUsedCount(n => n + 1)
+
+    const systemCtx = isES
+      ? `Eres un experto en el documento histórico "${doc.name}" (${doc.year}). Responde preguntas sobre su contenido, contexto histórico, impacto y relevancia. Sé preciso y cita el texto original cuando sea relevante.`
+      : `You are an expert on the historical document "${doc.name}" (${doc.year}). Answer questions about its content, historical context, impact and relevance. Be precise and cite the original text when relevant.`
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'user', content: systemCtx + '\n\n' + q },
+          ],
+          lang,
+          tutorMode: false,
+        }),
+      })
+      if (!res.ok || !res.body) { setLoading(false); return }
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let acc = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        acc += decoder.decode(value, { stream: true })
+        setMessages(prev => {
+          const updated = [...prev]
+          updated[updated.length - 1] = { role: 'assistant', html: processContent(acc) }
+          return updated
+        })
+      }
+    } catch { /* silent */ } finally {
+      setLoading(false)
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [input, loading, canSend, doc, isES, lang])
+
+  return (
+    <div className="mt-8 bg-slate border border-gold/15">
+      <div className="px-6 py-4 border-b border-gold/10 flex items-center justify-between">
+        <div>
+          <p className="font-cinzel text-[0.5rem] tracking-[0.25em] text-gold/60 uppercase mb-0.5">
+            {isES ? 'Preguntar sobre este documento' : 'Ask about this document'}
+          </p>
+          <h3 className="font-cinzel text-gold text-sm font-bold">
+            {isES ? '💬 Leer con IA' : '💬 Read with AI'}
+          </h3>
+        </div>
+        <span className="font-cinzel text-[0.5rem] tracking-wider text-smoke/50 uppercase">
+          {isES ? `${Math.max(0, FREE_CHAT_LIMIT - usedCount)} consultas restantes` : `${Math.max(0, FREE_CHAT_LIMIT - usedCount)} queries left`}
+        </span>
+      </div>
+
+      {/* Messages */}
+      {messages.length > 0 && (
+        <div className="px-6 py-4 space-y-4 max-h-64 overflow-y-auto">
+          {messages.map((m, i) => (
+            <div key={i} className={`${m.role === 'user' ? 'text-right' : 'text-left'}`}>
+              <div
+                className={`inline-block px-4 py-2 max-w-[85%] font-crimson text-sm leading-relaxed ${
+                  m.role === 'user'
+                    ? 'bg-gold/10 border border-gold/20 text-cream'
+                    : 'bg-ink/40 border border-gold/10 text-parchment-dark ai-content'
+                }`}
+                dangerouslySetInnerHTML={{ __html: m.html }}
+              />
+            </div>
+          ))}
+          {loading && (
+            <div className="flex gap-1.5 items-center">
+              <div className="loading-dots"><span /><span /><span /></div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+      )}
+
+      {/* Input */}
+      {canSend ? (
+        <div className="px-4 py-3 border-t border-gold/10 flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+            placeholder={isES ? `Pregunta sobre "${doc.name}"...` : `Ask about "${doc.name}"...`}
+            className="flex-1 bg-ink/60 border border-gold/15 px-3 py-2 text-cream font-crimson text-sm outline-none focus:border-gold/40 placeholder:text-smoke/50"
+            disabled={loading}
+          />
+          <button
+            onClick={() => send()}
+            disabled={loading || !input.trim()}
+            className="font-cinzel text-[0.55rem] tracking-wider uppercase px-4 py-2 bg-gold/15 border border-gold/30 text-gold hover:bg-gold/25 transition-colors disabled:opacity-40"
+          >
+            {isES ? 'Enviar' : 'Send'}
+          </button>
+        </div>
+      ) : (
+        <div className="px-6 py-4 text-center">
+          <p className="font-cinzel text-[0.55rem] tracking-wider text-smoke uppercase mb-2">
+            {isES ? 'Límite de consultas gratuitas alcanzado' : 'Free query limit reached'}
+          </p>
+          <Link href={`/${lang}#pricing`} className="font-cinzel text-[0.6rem] tracking-wider text-gold hover:text-gold-light uppercase">
+            {isES ? '⚡ Ver Premium →' : '⚡ View Premium →'}
+          </Link>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function DocDetailClient({ doc, era, lang }: DocDetailClientProps) {
@@ -214,6 +346,9 @@ export function DocDetailClient({ doc, era, lang }: DocDetailClientProps) {
             </div>
           )}
         </div>
+
+        {/* Mini chat "Leer con IA" (5B) — only shown after main analysis */}
+        {aiContent && <DocMiniChat doc={doc} lang={lang} />}
 
         {/* Related documents from same era */}
         {relatedDocs.length > 0 && (

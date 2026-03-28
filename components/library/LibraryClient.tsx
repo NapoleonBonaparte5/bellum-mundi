@@ -101,8 +101,22 @@ export function LibraryClient({ docs, eras, lang }: LibraryClientProps) {
         </div>
       ) : (
         <div className="index-grid">
-          {filtered.map((doc, i) => (
-            <Link key={i} href={`/${lang}/biblioteca/${doc.slug}`} className="card-bm flex items-start gap-4">
+          {filtered.map((doc, i) => {
+            // Category background accent (5A)
+            const catBg: Record<string, string> = {
+              tratado:   'rgba(139,26,26,0.08)',
+              obra:      'rgba(201,168,76,0.06)',
+              documento: 'rgba(74,107,138,0.08)',
+              carta:     'rgba(107,76,42,0.08)',
+            }
+            const accentBg = catBg[doc.category] ?? 'transparent'
+            return (
+            <Link
+              key={i}
+              href={`/${lang}/biblioteca/${doc.slug}`}
+              className="card-bm flex items-start gap-4"
+              style={{ background: `linear-gradient(135deg, var(--slate) 60%, ${accentBg})` }}
+            >
               <span className="text-2xl flex-shrink-0 mt-0.5">{doc.icon}</span>
               <div className="min-w-0 flex-1">
                 <div className="font-playfair font-bold text-cream text-lg leading-tight mb-1">{getDocName(lang, doc.name)}</div>
@@ -114,7 +128,8 @@ export function LibraryClient({ docs, eras, lang }: LibraryClientProps) {
                 </div>
               </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

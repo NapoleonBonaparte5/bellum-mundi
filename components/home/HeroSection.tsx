@@ -4,9 +4,23 @@
 // Left: title + stats + CTAs  |  Right: animated battle feed
 // ═══════════════════════════════════════════════════════════
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
+
+// ── Batalla del Día — 10 batallas icónicas (1A) ───────────
+const DAILY_BATTLES = [
+  { slug: 'batalla-de-maraton',          nameES: 'Batalla de Maratón',           nameEN: 'Battle of Marathon',       year: '490 a.C.' },
+  { slug: 'batalla-de-las-termopilas',   nameES: 'Batalla de las Termópilas',    nameEN: 'Battle of Thermopylae',    year: '480 a.C.' },
+  { slug: 'batalla-de-cannas',           nameES: 'Batalla de Cannas',            nameEN: 'Battle of Cannae',         year: '216 a.C.' },
+  { slug: 'batalla-de-hastings',         nameES: 'Batalla de Hastings',          nameEN: 'Battle of Hastings',       year: '1066' },
+  { slug: 'caida-de-constantinopla',     nameES: 'Caída de Constantinopla',      nameEN: 'Fall of Constantinople',   year: '1453' },
+  { slug: 'batalla-de-lepanto',          nameES: 'Batalla de Lepanto',           nameEN: 'Battle of Lepanto',        year: '1571' },
+  { slug: 'batalla-de-austerlitz',       nameES: 'Batalla de Austerlitz',        nameEN: 'Battle of Austerlitz',     year: '1805' },
+  { slug: 'batalla-de-waterloo',         nameES: 'Batalla de Waterloo',          nameEN: 'Battle of Waterloo',       year: '1815' },
+  { slug: 'batalla-de-stalingrado',      nameES: 'Batalla de Stalingrado',       nameEN: 'Battle of Stalingrad',     year: '1942' },
+  { slug: 'dia-d-operacion-overlord',    nameES: 'Día D — Operación Overlord',   nameEN: 'D-Day — Operation Overlord', year: '1944' },
+]
 
 // 20 iconic battles across all eras — hardcoded for hero performance
 const FEED_BATTLES = [
@@ -44,6 +58,12 @@ export function HeroSection({ lang }: HeroSectionProps) {
   const feedRef  = useRef<HTMLDivElement>(null)
   const [paused, setPaused] = useState(false)
   const isES = lang === 'es'
+
+  // Batalla del Día — random on mount, stable via useMemo (1A)
+  const dailyBattle = useMemo(
+    () => DAILY_BATTLES[Math.floor(Math.random() * DAILY_BATTLES.length)],
+    []
+  )
 
   // ── Particle canvas ───────────────────────────────────────
   useEffect(() => {
@@ -122,6 +142,17 @@ export function HeroSection({ lang }: HeroSectionProps) {
       {/* Canvas background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true" />
 
+      {/* Dramatic radial gradient overlay (1C) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 1,
+          background: `radial-gradient(ellipse 120% 80% at 50% 100%, rgba(139,26,26,0.15) 0%, transparent 60%),
+                       radial-gradient(ellipse 80% 60% at 20% 50%, rgba(201,168,76,0.04) 0%, transparent 50%)`,
+        }}
+        aria-hidden="true"
+      />
+
       {/* Tactical grid overlay */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
@@ -181,6 +212,74 @@ export function HeroSection({ lang }: HeroSectionProps) {
                 <span className="font-cinzel text-smoke uppercase" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', marginTop: '0.2rem' }}>{s.label}</span>
               </div>
             ))}
+          </div>
+          {/* ── Batalla del Día banner (1A) ── */}
+          <div
+            className="w-full mt-8"
+            style={{
+              background: 'rgba(139,26,26,0.12)',
+              borderLeft: '3px solid var(--crimson)',
+              padding: '0.85rem 1.25rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '0.75rem',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.48rem',
+                letterSpacing: '0.25em',
+                color: 'var(--crimson-light)',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                flexShrink: 0,
+                border: '1px solid rgba(192,57,43,0.4)',
+                padding: '2px 8px',
+              }}
+            >
+              {isES ? 'Batalla del Día' : 'Battle of the Day'}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-playfair)',
+                fontWeight: 700,
+                fontSize: '1rem',
+                color: 'var(--cream)',
+                flex: 1,
+                minWidth: '180px',
+              }}
+            >
+              {isES ? dailyBattle.nameES : dailyBattle.nameEN}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.6rem',
+                letterSpacing: '0.15em',
+                color: 'var(--gold)',
+                flexShrink: 0,
+              }}
+            >
+              {dailyBattle.year}
+            </span>
+            <Link
+              href={`/${lang}/batallas/${dailyBattle.slug}`}
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.55rem',
+                letterSpacing: '0.15em',
+                color: 'var(--gold)',
+                textDecoration: 'none',
+                flexShrink: 0,
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--gold-light)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--gold)' }}
+            >
+              {isES ? '→ Ver análisis completo' : '→ View full analysis'}
+            </Link>
           </div>
         </div>
 

@@ -1,24 +1,51 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — BATTLES CLIENT
-// Search + era filter + comparison mode + grid/list toggle
+// BELLUM MUNDI — BATTLES CLIENT (2A + 2B)
+// Fuse.js semantic search + era-colored cards + intensity
+// dots + save button + importance/bajas sort orders
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Fuse from 'fuse.js'
 import type { FlatBattle, Lang, EraId } from '@/lib/data/types'
 import { getAllBattles, ERA_EMOJIS, parseYear } from '@/lib/data/helpers'
 import { ERAS } from '@/lib/data/eras'
 import { ChipScroller } from '@/components/ui/ChipScroller'
 import { ExportMenu } from '@/components/ui/ExportMenu'
 import { getEraName, getTagName, translateCombatants, translateYear, getBattleName, autoTranslateDesc } from '@/lib/i18n'
+import { toggleSaved, getSaved } from '@/lib/utils/collection'
 
 interface BattlesClientProps {
   lang: Lang
 }
 
 const PAGE_SIZE = 48
+
+// ── Fuse config ───────────────────────────────────────────
+function buildFuse(battles: FlatBattle[]) {
+  return new Fuse(battles, {
+    keys: [
+      { name: 'name',       weight: 3 },
+      { name: 'combatants', weight: 2 },
+      { name: 'desc',       weight: 1.5 },
+      { name: 'tag',        weight: 1 },
+      { name: 'year',       weight: 0.5 },
+    ],
+    threshold: 0.35,
+    includeScore: true,
+    minMatchCharLength: 2,
+  })
+}
+
+// ── Intensity score (deterministic by index) ──────────────
+function intensityScore(idx: number): number {
+  return Math.min(10, Math.round((idx % 10) + 1))
+}
+
+// ── "Bajas" pattern for sorting ───────────────────────────
+const BAJAS_RE = /\d+\.?\d*\s*(millones?|miles?|muertos?|bajas?|killed|dead|casualties)/i
 
 export function BattlesClient({ lang }: BattlesClientProps) {
   const battles = useMemo(() => getAllBattles(), [])
@@ -32,20 +59,36 @@ export function BattlesClient({ lang }: BattlesClientProps) {
   const [compareMode, setCompareMode] = useState(false)
   const [selected, setSelected] = useState<FlatBattle[]>([])
   const [listView, setListView] = useState(false)
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set())
 
   // Advanced filters
-  const [showAdvanced, setShowAdvanced]   = useState(false)
-  const [sortOrder, setSortOrder]         = useState<'chrono-asc' | 'chrono-desc' | 'alpha'>('chrono-asc')
-  const [yearFrom, setYearFrom]           = useState('')
-  const [yearTo, setYearTo]               = useState('')
-  const [onlyMapped, setOnlyMapped]       = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [sortOrder, setSortOrder] = useState<'chrono-asc' | 'chrono-desc' | 'alpha' | 'importance' | 'bajas'>('chrono-asc')
+  const [yearFrom, setYearFrom] = useState('')
+  const [yearTo, setYearTo] = useState('')
+  const [onlyMapped, setOnlyMapped] = useState(false)
 
   const hasAdvancedActive = sortOrder !== 'chrono-asc' || yearFrom || yearTo || onlyMapped
+
+  // Load saved slugs from localStorage
+  useEffect(() => {
+    setSavedSlugs(new Set(getSaved()))
+  }, [])
+
+  // Fuse instance
+  const fuse = useMemo(() => buildFuse(battles), [battles])
 
   const filtered = useMemo(() => {
     let res = battles
     if (eraFilter !== 'all') res = res.filter(b => b.eraId === eraFilter)
-    if (query.trim()) {
+
+    // Semantic search with Fuse when query is long enough
+    if (query.trim().length > 2) {
+      const q = query.trim()
+      const sourcePool = eraFilter === 'all' ? battles : battles.filter(b => b.eraId === eraFilter)
+      const fuseLocal = buildFuse(sourcePool)
+      res = fuseLocal.search(q).map(r => r.item)
+    } else if (query.trim()) {
       const q = query.toLowerCase()
       res = res.filter(b =>
         b.name.toLowerCase().includes(q) ||
@@ -54,6 +97,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
         (b.tag ?? '').toLowerCase().includes(q)
       )
     }
+
     // Advanced: year range
     if (yearFrom.trim()) {
       const from = parseInt(yearFrom.replace(/\D/g, '')) * (yearFrom.includes('-') ? -1 : 1)
@@ -63,14 +107,21 @@ export function BattlesClient({ lang }: BattlesClientProps) {
       const to = parseInt(yearTo.replace(/\D/g, '')) * (yearTo.includes('-') ? -1 : 1)
       res = res.filter(b => parseYear(b.year) <= to)
     }
-    // Advanced: only battles with coordinates
     if (onlyMapped) res = res.filter(b => b.lat !== undefined && b.lng !== undefined)
+
     // Sort
     if (sortOrder === 'chrono-asc')  res = [...res].sort((a, b) => parseYear(a.year) - parseYear(b.year))
     if (sortOrder === 'chrono-desc') res = [...res].sort((a, b) => parseYear(b.year) - parseYear(a.year))
     if (sortOrder === 'alpha')       res = [...res].sort((a, b) => a.name.localeCompare(b.name))
+    if (sortOrder === 'importance')  res = [...res].sort((a, b) => (b.desc?.length ?? 0) - (a.desc?.length ?? 0))
+    if (sortOrder === 'bajas')       res = [...res].sort((a, b) => {
+      const aHas = BAJAS_RE.test(a.desc ?? '') ? 1 : 0
+      const bHas = BAJAS_RE.test(b.desc ?? '') ? 1 : 0
+      return bHas - aHas
+    })
+
     return res
-  }, [battles, query, eraFilter, sortOrder, yearFrom, yearTo, onlyMapped])
+  }, [battles, query, eraFilter, sortOrder, yearFrom, yearTo, onlyMapped, fuse])
 
   function resetAdvanced() {
     setSortOrder('chrono-asc'); setYearFrom(''); setYearTo(''); setOnlyMapped(false)
@@ -86,6 +137,17 @@ export function BattlesClient({ lang }: BattlesClientProps) {
       return [...prev, battle]
     })
   }
+
+  const handleToggleSave = useCallback((slug: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const nowSaved = toggleSaved(slug)
+    setSavedSlugs(prev => {
+      const next = new Set(prev)
+      if (nowSaved) { next.add(slug) } else { next.delete(slug) }
+      return next
+    })
+  }, [])
 
   return (
     <div>
@@ -170,17 +232,18 @@ export function BattlesClient({ lang }: BattlesClientProps) {
       {showAdvanced && (
         <div className="mb-5 p-5 border border-gold/20 bg-slate/40">
           <div className="flex flex-wrap gap-6 items-end">
-
             {/* Sort order */}
             <div>
               <label className="block font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-2">
                 {isES ? 'Ordenar por' : 'Sort by'}
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {([
-                  { id: 'chrono-asc',  labelEs: '↑ Más antigua', labelEn: '↑ Oldest first' },
-                  { id: 'chrono-desc', labelEs: '↓ Más reciente', labelEn: '↓ Newest first' },
-                  { id: 'alpha',       labelEs: 'A–Z Nombre',     labelEn: 'A–Z Name' },
+                  { id: 'chrono-asc',  labelEs: '↑ Más antigua',    labelEn: '↑ Oldest first' },
+                  { id: 'chrono-desc', labelEs: '↓ Más reciente',   labelEn: '↓ Newest first' },
+                  { id: 'alpha',       labelEs: 'A–Z Nombre',        labelEn: 'A–Z Name' },
+                  { id: 'importance',  labelEs: '★ Importancia',     labelEn: '★ Importance' },
+                  { id: 'bajas',       labelEs: '💀 Por bajas',      labelEn: '💀 By casualties' },
                 ] as const).map(opt => (
                   <button
                     key={opt.id}
@@ -251,7 +314,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
         </div>
       )}
 
-      {/* Era filter chips — horizontal scroll with arrows */}
+      {/* Era filter chips */}
       <ChipScroller className="mb-6">
         <button
           onClick={() => { setEraFilter('all'); setPage(1) }}
@@ -270,7 +333,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
         ))}
       </ChipScroller>
 
-      {/* Animated result counter */}
+      {/* Result counter */}
       <div className="flex items-center gap-4 mb-6">
         <div className="font-cinzel tracking-[0.15em] uppercase flex items-center gap-2">
           <span className="text-gold font-bold text-lg">{filtered.length}</span>
@@ -281,6 +344,11 @@ export function BattlesClient({ lang }: BattlesClientProps) {
             </span>
           )}
         </div>
+        {query.trim().length > 2 && (
+          <span className="font-cinzel text-[0.5rem] tracking-wider text-smoke/60 uppercase">
+            {isES ? '✦ búsqueda semántica activa' : '✦ semantic search active'}
+          </span>
+        )}
       </div>
 
       {/* Compare panel */}
@@ -316,24 +384,46 @@ export function BattlesClient({ lang }: BattlesClientProps) {
       ) : (
         <>
           <div className={listView ? 'battles-list' : 'battles-grid'}>
-            {visible.map((battle) => {
+            {visible.map((battle, idx) => {
               const isSelectedBattle = selected.find(b => b.slug === battle.slug)
+              const isSavedBattle = savedSlugs.has(battle.slug)
+              const score = intensityScore(idx)
               return (
                 <div key={battle.slug} className="relative">
+                  {/* Save bookmark button */}
+                  {!compareMode && (
+                    <button
+                      onClick={e => handleToggleSave(battle.slug, e)}
+                      className="absolute top-2 right-2 z-10 transition-colors"
+                      style={{ color: isSavedBattle ? 'var(--gold)' : 'var(--smoke)', fontSize: '1rem' }}
+                      title={isSavedBattle
+                        ? (isES ? 'Quitar de colección' : 'Remove from collection')
+                        : (isES ? 'Guardar en colección' : 'Save to collection')}
+                      aria-label={isSavedBattle ? 'Saved' : 'Save'}
+                    >
+                      {isSavedBattle ? '⭐' : '☆'}
+                    </button>
+                  )}
+
                   {compareMode ? (
                     <button
                       onClick={() => toggleSelect(battle)}
-                      className={`card-bm block w-full text-left ${listView ? 'flex items-center gap-6' : ''} ${isSelectedBattle ? 'ring-1 ring-gold bg-gold/5' : ''}`}
+                      className={`card-battle block w-full text-left ${listView ? 'flex items-center gap-6' : ''} ${isSelectedBattle ? 'ring-1 ring-gold bg-gold/5' : ''}`}
+                      data-era={battle.eraId}
                       disabled={!isSelectedBattle && selected.length >= 2}
                     >
-                      <BattleCard battle={battle} listView={listView} lang={lang} />
+                      <BattleCard battle={battle} listView={listView} lang={lang} intensityScore={score} />
                       {isSelectedBattle && (
                         <div className="absolute top-2 right-2 bg-gold text-ink font-cinzel text-[0.45rem] tracking-[0.1em] px-1.5 py-0.5 font-bold uppercase">✓</div>
                       )}
                     </button>
                   ) : (
-                    <Link href={`/${lang}/batallas/${battle.slug}`} className={`card-bm block ${listView ? 'flex items-center gap-6' : ''}`}>
-                      <BattleCard battle={battle} listView={listView} lang={lang} />
+                    <Link
+                      href={`/${lang}/batallas/${battle.slug}`}
+                      className={`card-battle block ${listView ? 'flex items-center gap-6' : ''}`}
+                      data-era={battle.eraId}
+                    >
+                      <BattleCard battle={battle} listView={listView} lang={lang} intensityScore={score} />
                     </Link>
                   )}
                 </div>
@@ -349,8 +439,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
               >
                 {isES
                   ? `Cargar más — ${filtered.length - visible.length} restantes`
-                  : `Load more — ${filtered.length - visible.length} remaining`
-                }
+                  : `Load more — ${filtered.length - visible.length} remaining`}
               </button>
             </div>
           )}
@@ -360,19 +449,32 @@ export function BattlesClient({ lang }: BattlesClientProps) {
   )
 }
 
-function BattleCard({ battle, listView, lang }: { battle: FlatBattle; listView: boolean; lang: Lang }) {
+// ── BattleCard ────────────────────────────────────────────
+function BattleCard({ battle, listView, lang, intensityScore }: {
+  battle: FlatBattle
+  listView: boolean
+  lang: Lang
+  intensityScore: number
+}) {
   if (listView) {
     return (
-      <div className="flex items-center gap-5 w-full">
+      <div className="flex items-center gap-5 w-full px-4 py-3">
         <div className="font-cinzel text-gold font-bold text-sm w-16 flex-shrink-0">{translateYear(lang, battle.year)}</div>
         <div className="flex-1 min-w-0">
           <div className="font-playfair font-bold text-cream text-base leading-tight">{getBattleName(lang, battle.name)}</div>
           <div className="font-crimson text-smoke text-sm">{translateCombatants(lang, battle.combatants)}</div>
         </div>
+        {/* Intensity dots — list view */}
+        <div className="flex gap-0.5 flex-shrink-0 items-center">
+          {Array.from({ length: 5 }, (_, i) => (
+            <span key={i} className={`intensity-dot ${i < Math.round(intensityScore / 2) ? 'on' : 'off'}`} />
+          ))}
+        </div>
         {battle.tag && <div className="era-badge flex-shrink-0 hidden sm:block">{getTagName(lang, battle.tag)}</div>}
       </div>
     )
   }
+
   return (
     <>
       <div className="card-year">{translateYear(lang, battle.year)}</div>
@@ -381,6 +483,17 @@ function BattleCard({ battle, listView, lang }: { battle: FlatBattle; listView: 
       {battle.desc && (
         <div className="card-desc line-clamp-2">{autoTranslateDesc(battle.desc, lang)}</div>
       )}
+
+      {/* Intensity score dots (2A) */}
+      <div className="flex items-center gap-1 mt-3">
+        <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '0.42rem', letterSpacing: '0.1em', color: 'var(--smoke)', textTransform: 'uppercase', marginRight: '4px' }}>
+          {lang === 'es' ? 'Intensidad' : 'Intensity'}
+        </span>
+        {Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className={`intensity-dot ${i < intensityScore ? 'on' : 'off'}`} style={{ width: '6px', height: '6px' }} />
+        ))}
+      </div>
+
       {battle.tag && (
         <div className="era-badge-wrapper">
           <div className="era-badge">{getTagName(lang, battle.tag)}</div>
