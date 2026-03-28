@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-03-27T22:18:43.057Z",
+  "totals": {
+    "battleNames": 617,
+    "commanderNames": 234,
+    "commanderRoles": 240,
+    "docNames": 0,
+    "tags": 144
+  },
+  "missing": {
+    "BATTLE_NAME_EN": [
+      "Batalla de Mortimer\\",
+      "Campaña de Alejandro en Bactria",
+      "Campaña de Asurnasipal II en Siria",
+      "Campaña de Bindusara en el Decán",
+      "Campaña de Darío contra los Escitas",
+      "Campaña de Italia de Napoleón",
+      "Campaña de Nabucodonosor en Egipto",
+      "Campaña de Naram-Sin en los Zagros",
+      "Campaña de Salmanasar III contra Damasco",
+      "Campaña de Sargón II contra Urartu",
+      "Campaña de Sargón contra Elam",
+      "Campaña de Sargón en Anatolia",
+      "Campaña de Senaquerib en Babilonia",
+      "Campaña de Shamshi-Adad V contra Babilonia",
+      "Campañas de Bai Qi contra Zhao",
+      "Conquista de Larsa por Hammurabi",
+      "Cruce de los Alpes de Aníbal",
+      "Destrucción del Templo de Salomón",
+      "Guerras de Asurbanipal contra Elam",
+      "Invasión de Sisak de Egipto a Israel",
+      "Invasión de África por Agátocles",
+      "Paz del Rey (Paz de Antálcidas)",
+      "Rebelión de Boudica"
+    ],
+    "CMD_NAME_EN": [
+      "Ernesto \"Che\" Guevara"
+    ],
+    "ROLE_EN": [
+      "\"Stormin\\",
+      "Diádoco — Aspirante al Imperio de Alejandro",
+      "Fundador del Grupo Wagner — El Cocinero de Putin",
+      "Gran Mariscal de Napoleón",
+      "Jefe de Estado Mayor de Napoleón",
+      "Mariscal — Adversario de Wellington"
+    ],
+    "DOC_NAME_EN": [],
+    "TAG_EN": []
+  }
+}

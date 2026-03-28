@@ -2,7 +2,7 @@
 // BELLUM MUNDI — DATA HELPERS
 // ═══════════════════════════════════════════════════════════
 
-import type { Era, EraId, FlatBattle, FlatCommander, FlatCivilization, FlatDoc } from './types'
+import type { Era, EraId, FlatBattle, FlatCommander, FlatCivilization, FlatDoc, CivMetrics } from './types'
 import { ERAS } from './eras'
 
 // ── SLUG ───────────────────────────────────────────────────
@@ -47,12 +47,25 @@ export function getAllCommanders(): FlatCommander[] {
   return result
 }
 
+// ── POWER SCORE FORMULA ────────────────────────────────────
+export function calcPowerScore(m: CivMetrics): number {
+  return (
+    m.territory  * 0.15 +
+    m.duration   * 0.15 +
+    m.victories  * 0.25 +
+    m.innovation * 0.15 +
+    m.projection * 0.15 +
+    m.economy    * 0.10 +
+    m.legacy     * 0.05
+  )
+}
+
 // ── FLATTEN ALL CIVS ───────────────────────────────────────
 export function getAllCivs(): FlatCivilization[] {
   const result: FlatCivilization[] = []
   for (const era of ERAS) {
     for (const c of era.civs) {
-      result.push({ ...c, eraId: era.id, eraName: era.name })
+      result.push({ ...c, eraId: era.id, eraName: era.name, powerScore: calcPowerScore(c.metrics), slug: slugify(c.name) })
     }
   }
   return result
@@ -77,6 +90,7 @@ export function getAllDocs(): FlatDoc[] {
         eraId: era.id,
         eraName: era.name,
         category: DOC_CATEGORIES[d.icon] ?? 'documento',
+        slug: slugify(d.name),
       })
     }
   }
@@ -94,6 +108,36 @@ export function getBattleBySlug(slug: string): { battle: FlatBattle; era: Era } 
     for (const b of era.battles_data) {
       if (slugify(b.name) === slug) {
         return { battle: { ...b, eraId: era.id, eraName: era.name, slug }, era }
+      }
+    }
+  }
+  return null
+}
+
+// ── GET CIV BY SLUG ───────────────────────────────────────
+export function getCivBySlug(slug: string): { civ: FlatCivilization; era: Era } | null {
+  for (const era of ERAS) {
+    for (const c of era.civs) {
+      if (slugify(c.name) === slug) {
+        return {
+          civ: { ...c, eraId: era.id, eraName: era.name, powerScore: calcPowerScore(c.metrics), slug },
+          era,
+        }
+      }
+    }
+  }
+  return null
+}
+
+// ── GET DOC BY SLUG ───────────────────────────────────────
+export function getDocBySlug(slug: string): { doc: FlatDoc; era: Era } | null {
+  for (const era of ERAS) {
+    for (const d of era.docs) {
+      if (slugify(d.name) === slug) {
+        return {
+          doc: { ...d, eraId: era.id, eraName: era.name, category: DOC_CATEGORIES[d.icon] ?? 'documento', slug },
+          era,
+        }
       }
     }
   }

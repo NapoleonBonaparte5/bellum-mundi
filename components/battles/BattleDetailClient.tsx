@@ -1,14 +1,19 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
 // BELLUM MUNDI — BATTLE DETAIL CLIENT
-// AI analysis + Wikipedia images + related battles
+// Parallel streaming: analysis + books via Promise.all
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { FlatBattle, Era, Lang } from '@/lib/data/types'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
+import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
+import { AILoadingState } from '@/components/ui/AILoadingState'
+
+const LS_KEY = 'bm_queries_used'
+const PREMIUM_THRESHOLD = 3 // show banner after this many queries
 
 interface BattleDetailClientProps {
   battle: FlatBattle
@@ -21,17 +26,97 @@ interface WikiImage {
   title: string
 }
 
+// ── Markdown → HTML post-processor ─────────────────────────
+function processContent(raw: string): string {
+  let html = raw
+
+  // PASO 1: Normalizar saltos de línea
+  html = html.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  // PASO 2: Convertir headers Markdown
+  html = html.replace(/^#{1,2}\s+(.+)$/gm, '\n<h2>$1</h2>\n')
+  html = html.replace(/^#{3}\s+(.+)$/gm, '\n<h3>$1</h3>\n')
+
+  // PASO 3: Títulos inline — negrita sola en su línea
+  html = html.replace(/\*\*([^*\n]{3,60})\*\*\s*\n/g, '\n<h3>$1</h3>\n')
+
+  // PASO 4: Títulos inline pegados al párrafo
+  html = html.replace(/\*\*([^*\n]{3,60})\*\*\s+([A-ZÁÉÍÓÚÑÜ])/g, '</p>\n<h3>$1</h3>\n<p>$2')
+
+  // PASO 5: Negrita/cursiva restante
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+
+  // PASO 6: Convertir párrafos
+  const blocks = html.split(/\n{2,}/)
+  html = blocks.map(block => {
+    block = block.trim()
+    if (!block) return ''
+    if (block.startsWith('<h') || block.startsWith('<table') ||
+        block.startsWith('<figure') || block.startsWith('<div') ||
+        block.startsWith('<ul') || block.startsWith('<ol')) return block
+    return `<p>${block.replace(/\n/g, ' ')}</p>`
+  }).filter(Boolean).join('\n')
+
+  // PASO 7: Limpiar p vacíos y anidados
+  html = html.replace(/<p>\s*<\/p>/g, '')
+  html = html.replace(/<p>(<h[23]>)/g, '$1')
+  html = html.replace(/(<\/h[23]>)<\/p>/g, '$1')
+
+  // Párrafos con datos numéricos
+  html = html.replace(/<p>(?=\d)/g, '<p class="num-data">')
+
+  return html
+}
+
+// ── Stream a response body into a state setter ──────────────
+async function readStream(
+  body: ReadableStream<Uint8Array>,
+  setter: (v: string) => void,
+): Promise<void> {
+  const reader = body.getReader()
+  const decoder = new TextDecoder()
+  let acc = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    acc += decoder.decode(value, { stream: true })
+    setter(processContent(acc))
+  }
+}
+
+// ── Extract image search terms from prompt ──────────────────
+function extractImageTerms(prompt: string): string[] {
+  const terms: string[] = []
+  const m1 = prompt.match(/batalla de ([^(,\n]+)/i)
+  if (m1) terms.push(m1[1].trim() + ' battle historical')
+  const m2 = prompt.match(/vida militar de ([^,\n]+)/i)
+  if (m2) terms.push(m2[1].trim() + ' portrait historical')
+  return terms.slice(0, 2)
+}
+
 export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProps) {
   const isES = lang === 'es'
-  const [aiContent, setAiContent] = useState<string | null>(null)
-  const [images, setImages] = useState<WikiImage[]>([])
-  const [loading, setLoading] = useState(false)
+
+  const [aiContent, setAiContent]     = useState<string | null>(null)
+  const [booksContent, setBooksContent] = useState<string | null>(null)
+  const [topicContent, setTopicContent] = useState<string | null>(null)
+  const [topicLabel, setTopicLabel]   = useState<string | null>(null)
+  const [images, setImages]           = useState<WikiImage[]>([])
+  const [loading, setLoading]         = useState(false)
+  const [booksLoading, setBooksLoading] = useState(false)
+  const [topicLoading, setTopicLoading] = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
-  const [queried, setQueried] = useState(false)
+  const [queried, setQueried]         = useState(false)
   const [rateLimited, setRateLimited] = useState(false)
   const [queriesLeft, setQueriesLeft] = useState(3)
+  const [showPremiumBanner, setShowPremiumBanner] = useState(false)
 
-  // Related battles from same era
+  useEffect(() => {
+    const used = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10)
+    if (used >= PREMIUM_THRESHOLD) setShowPremiumBanner(true)
+  }, [])
+
   const related = era.battles_data
     .filter(b => slugify(b.name) !== battle.slug)
     .slice(0, 6)
@@ -41,10 +126,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
     setImageLoading(true)
     try {
       const res = await fetch(`/api/get-images?terms=${encodeURIComponent(terms.join('|'))}`)
-      if (res.ok) {
-        const data = await res.json()
-        setImages(data.images ?? [])
-      }
+      if (res.ok) setImages((await res.json()).images ?? [])
     } catch { /* silent */ }
     setImageLoading(false)
   }, [])
@@ -52,190 +134,353 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
   const runQuery = useCallback(async () => {
     if (loading || queried) return
     setLoading(true)
+    setBooksLoading(true)
 
-    const prompt = isES
+    const mainPrompt = isES
       ? `Analiza en detalle la batalla de ${battle.name} (${battle.year}). Combatientes: ${battle.combatants}. ${battle.desc}`
       : `Analyze in detail the Battle of ${battle.name} (${battle.year}). Combatants: ${battle.combatants}. ${battle.desc}`
+
+    const booksPrompt = isES
+      ? `Eres un librero especialista en historia militar. Lista exactamente 5 libros reales y publicados sobre ${battle.name} (${battle.year}). Responde ÚNICAMENTE con este HTML, sin texto adicional:\n<div class="book-card">\n  <strong>TÍTULO DEL LIBRO</strong>\n  <span>AUTOR · AÑO</span>\n  <p>Una frase de por qué es esencial.</p>\n  <a href="https://amazon.es/s?k=TITULO+AUTOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
+      : `You are a specialist military history bookseller. List exactly 5 real published books about ${battle.name} (${battle.year}). Respond ONLY with this HTML, no extra text:\n<div class="book-card">\n  <strong>BOOK TITLE</strong>\n  <span>AUTHOR · YEAR</span>\n  <p>One sentence on why it is essential.</p>\n  <a href="https://amazon.es/s?k=TITLE+AUTHOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
+
+    const HEADERS = { 'Content-Type': 'application/json' }
+
+    try {
+      // Fire both fetches simultaneously
+      const mainFetch  = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: mainPrompt,  isPremium: false, lang }) })
+      const booksFetch = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: booksPrompt, isPremium: false, booksOnly: true, lang }) })
+
+      const [mainRes, booksRes] = await Promise.all([mainFetch, booksFetch])
+
+      if (mainRes.status === 429) {
+        setRateLimited(true)
+        setLoading(false)
+        setBooksLoading(false)
+        return
+      }
+
+      setQueried(true)
+      setQueriesLeft(q => Math.max(0, q - 1))
+      // Track usage in localStorage for premium upsell
+      const used = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10) + 1
+      localStorage.setItem(LS_KEY, String(used))
+      if (used >= PREMIUM_THRESHOLD) setShowPremiumBanner(true)
+
+      // Stream both bodies concurrently
+      await Promise.all([
+        mainRes.body
+          ? readStream(mainRes.body, setAiContent).then(() => {
+              setLoading(false)
+              fetchImages(extractImageTerms(mainPrompt))
+            })
+          : Promise.resolve(),
+        (booksRes.ok && booksRes.body)
+          ? readStream(booksRes.body, setBooksContent).then(() => setBooksLoading(false))
+          : Promise.resolve(),
+      ])
+    } catch {
+      setAiContent(`<p>${isES ? 'Error al obtener el análisis. Inténtalo de nuevo.' : 'Error fetching analysis. Please try again.'}</p>`)
+      setLoading(false)
+      setBooksLoading(false)
+    }
+  }, [battle, isES, loading, queried, fetchImages])
+
+  const runTopicQuery = useCallback(async (name: string, type: 'táctica' | 'arma' | 'tactic' | 'weapon') => {
+    if (topicLoading || rateLimited) return
+    setTopicLoading(true)
+    setTopicLabel(name)
+    setTopicContent(null)
+
+    const prompt = isES
+      ? `Explica en detalle la ${type === 'táctica' ? 'táctica militar' : 'arma histórica'} "${name}" de la era ${era.name}. Proporciona contexto histórico, uso en batalla, evolución y legado militar.`
+      : `Explain in detail the ${type === 'tactic' ? 'military tactic' : 'historical weapon'} "${name}" from the ${era.name} era. Provide historical context, use in battle, evolution and military legacy.`
 
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false }),
+        body: JSON.stringify({ prompt, isPremium: false, lang }),
       })
-
-      if (res.status === 429) {
-        setRateLimited(true)
-        setLoading(false)
-        return
-      }
-
-      const data = await res.json()
-      if (data.content) {
-        setAiContent(data.content)
-        setQueried(true)
-        setQueriesLeft(q => Math.max(0, q - 1))
-        if (data.imageTerms?.length) {
-          fetchImages(data.imageTerms)
-        }
-      }
+      if (res.status === 429) { setRateLimited(true) }
+      else if (res.ok && res.body) await readStream(res.body, setTopicContent)
     } catch {
-      setAiContent(`<p>${isES ? 'Error al obtener el análisis. Inténtalo de nuevo.' : 'Error fetching analysis. Please try again.'}</p>`)
+      setTopicContent(`<p>${isES ? 'Error al obtener el análisis.' : 'Error fetching analysis.'}</p>`)
     }
-    setLoading(false)
-  }, [battle, isES, loading, queried, fetchImages])
+    setTopicLoading(false)
+    setQueriesLeft(q => Math.max(0, q - 1))
+  }, [era, isES, topicLoading, rateLimited])
 
   const eraEmoji = ERA_EMOJIS[era.id]
 
   return (
     <article className="min-h-screen">
       {/* Header */}
-      <header className="bg-gradient-to-b from-crimson/20 to-transparent px-6 py-16 max-w-content mx-auto">
+      <header className="bg-gradient-to-b from-crimson/20 to-transparent px-6 py-16 max-w-content mx-auto detail-header-enter">
         <nav className="mb-6 flex items-center gap-2 font-cinzel text-[0.55rem] tracking-[0.15em] text-smoke uppercase">
-          <Link href={`/${lang}`} className="hover:text-gold transition-colors">
-            {isES ? 'Inicio' : 'Home'}
-          </Link>
+          <Link href={`/${lang}`} className="hover:text-gold transition-colors">{isES ? 'Inicio' : 'Home'}</Link>
           <span>/</span>
-          <Link href={`/${lang}/batallas`} className="hover:text-gold transition-colors">
-            {isES ? 'Batallas' : 'Battles'}
-          </Link>
+          <Link href={`/${lang}/batallas`} className="hover:text-gold transition-colors">{isES ? 'Batallas' : 'Battles'}</Link>
           <span>/</span>
           <span className="text-mist">{battle.name}</span>
         </nav>
-
-        <div className="eyebrow mb-4">
-          {eraEmoji} {era.name} · {battle.year}
-        </div>
-        <h1 className="font-playfair font-black text-cream mb-4 leading-tight"
-          style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}
-        >
+        <div className="eyebrow mb-4 detail-meta-enter">{eraEmoji} {getEraName(lang, era.id, era.name)} · {translateYear(lang, battle.year)}</div>
+        <h1 className="font-playfair font-black text-cream mb-4 leading-tight detail-title-enter" style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}>
           {battle.name}
         </h1>
-        <p className="font-crimson italic text-parchment-dark text-xl mb-4">{battle.combatants}</p>
-        {battle.desc && (
-          <p className="font-crimson text-smoke text-lg max-w-2xl">{battle.desc}</p>
-        )}
-        {battle.tag && (
-          <div className="era-badge mt-4">{battle.tag}</div>
-        )}
+        <p className="font-crimson italic text-parchment-dark text-xl mb-4 detail-combatants-enter">{translateCombatants(lang, battle.combatants)}</p>
+        {battle.desc && <p className="font-crimson text-smoke text-lg max-w-2xl">{battle.desc}</p>}
+        {battle.tag && <div className="era-badge mt-4">{getTagName(lang, battle.tag)}</div>}
       </header>
 
-      <div className="max-w-content mx-auto px-6 pb-16">
+      <div className="max-w-content mx-auto px-6 pb-16 detail-grid">
 
-        {/* Images (after AI query) */}
-        {images.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-8">
-            {images.map((img, i) => (
-              <div key={i} className="relative aspect-video bg-steel overflow-hidden">
-                <Image
-                  src={img.url}
-                  alt={img.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-ink/70 px-2 py-1">
-                  <p className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke truncate">{img.title}</p>
+        {/* ── MAIN COLUMN ── */}
+        <div>
+
+          {/* Images */}
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-8">
+              {images.map((img, i) => (
+                <div key={i} className="relative aspect-video bg-steel overflow-hidden">
+                  <Image src={img.url} alt={img.title} fill className="object-cover" sizes="(max-width: 768px) 50vw, 33vw" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-ink/70 px-2 py-1">
+                    <p className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke truncate">{img.title}</p>
+                  </div>
                 </div>
+              ))}
+              {imageLoading && (
+                <div className="aspect-video bg-slate flex items-center justify-center">
+                  <div className="loading-dots"><span /><span /><span /></div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AI section */}
+          <div className="mb-12">
+            {!queried && !loading && !rateLimited && (
+              <div className="bg-slate border border-gold/20 p-8 text-center">
+                <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-gold uppercase mb-3">
+                  {isES ? 'Análisis con Inteligencia Artificial' : 'AI-Powered Analysis'}
+                </div>
+                <p className="font-crimson italic text-smoke text-lg mb-6 max-w-lg mx-auto">
+                  {isES
+                    ? `Genera un análisis histórico completo de la ${battle.name} con Claude AI — contexto, tácticas, consecuencias y bibliografía.`
+                    : `Generate a complete historical analysis of ${battle.name} with Claude AI — context, tactics, consequences and bibliography.`}
+                </p>
+                <div className="font-cinzel text-[0.55rem] tracking-[0.15em] text-smoke mb-6">
+                  {isES ? `${queriesLeft} consultas gratuitas disponibles hoy` : `${queriesLeft} free queries available today`}
+                </div>
+                <button onClick={runQuery} className="btn-primary">
+                  {isES ? '⚡ Analizar con IA' : '⚡ Analyze with AI'}
+                </button>
               </div>
-            ))}
-            {imageLoading && (
-              <div className="aspect-video bg-slate flex items-center justify-center">
-                <div className="loading-dots">
-                  <span /><span /><span />
+            )}
+
+            {loading && !aiContent && (
+              <AILoadingState
+                lang={lang}
+                label={isES ? 'Analizando la batalla...' : 'Analyzing the battle...'}
+              />
+            )}
+
+            {rateLimited && (
+              <div className="bg-slate border border-crimson/40 p-8 text-center">
+                <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-crimson-light uppercase mb-3">
+                  {isES ? 'Límite diario alcanzado' : 'Daily limit reached'}
+                </div>
+                <p className="font-crimson italic text-smoke text-lg mb-6">
+                  {isES ? 'Has utilizado tus 3 consultas gratuitas de hoy. Actualiza a Premium para consultas ilimitadas.' : 'You have used your 3 free queries for today. Upgrade to Premium for unlimited queries.'}
+                </p>
+                <Link href={`/${lang}#pricing`} className="btn-primary inline-block">
+                  {isES ? '⚡ Ver Premium' : '⚡ View Premium'}
+                </Link>
+              </div>
+            )}
+
+            {aiContent && (
+              <div className="bg-slate border border-gold/10 p-8 md:p-12">
+                <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-6 pb-4 border-b border-gold/10">
+                  {isES ? '✦ Análisis generado con Claude AI' : '✦ Analysis generated with Claude AI'}
+                </div>
+                <div className="ai-content font-crimson text-parchment-dark text-lg leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: aiContent }} />
+                {/* Share button */}
+                <div className="mt-8 pt-6 border-t border-gold/10 flex items-center gap-4 flex-wrap">
+                  <span className="font-cinzel text-[0.5rem] tracking-[0.15em] text-smoke uppercase">
+                    {isES ? 'Compartir análisis' : 'Share analysis'}
+                  </span>
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      isES
+                        ? `Acabo de leer el análisis de la ${battle.name} en @BellumMundi — historia militar como nunca la habías visto 🗡️`
+                        : `Just read the analysis of ${getBattleName('en', battle.name)} on @BellumMundi — military history like you've never seen it 🗡️`
+                    )}&url=${encodeURIComponent(`https://bellummundi.com/${lang}/batallas/${battle.slug}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase border border-gold/30 text-gold px-4 py-2 hover:border-gold/60 hover:bg-gold/5 transition-colors"
+                  >
+                    𝕏 {isES ? 'Compartir en X' : 'Share on X'}
+                  </a>
                 </div>
               </div>
             )}
+
+            {/* Books — parallel phase */}
+            {(booksLoading || booksContent) && (
+              <div className="mt-4 bg-slate border border-gold/10 p-8 md:p-12">
+                <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-6 pb-4 border-b border-gold/10">
+                  {isES ? '📚 Libros Recomendados' : '📚 Recommended Books'}
+                </div>
+                {booksLoading && !booksContent && (
+                  <div className="flex items-center gap-3 text-smoke">
+                    <div className="loading-dots"><span /><span /><span /></div>
+                    <span className="font-crimson italic">{isES ? 'Seleccionando libros esenciales...' : 'Selecting essential books...'}</span>
+                  </div>
+                )}
+                {booksContent && <div className="ai-content" dangerouslySetInnerHTML={{ __html: booksContent }} />}
+              </div>
+            )}
           </div>
-        )}
 
-        {/* AI analysis */}
-        <div className="mb-12">
-          {!queried && !loading && !rateLimited && (
-            <div className="bg-slate border border-gold/20 p-8 text-center">
-              <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-gold uppercase mb-3">
-                {isES ? 'Análisis con Inteligencia Artificial' : 'AI-Powered Analysis'}
+          {/* Topic query result */}
+          {(topicLoading || topicContent) && (
+            <div className="mb-10 bg-slate border border-gold/20 p-8 md:p-12">
+              {topicLabel && (
+                <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-gold uppercase mb-6 pb-4 border-b border-gold/10">
+                  ⚡ {topicLabel}
+                </div>
+              )}
+              {topicLoading && !topicContent && (
+                <AILoadingState lang={lang} />
+              )}
+              {topicContent && (
+                <div className="ai-content font-crimson text-parchment-dark text-lg leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: topicContent }} />
+              )}
+            </div>
+          )}
+
+          {/* Premium upsell banner */}
+          {showPremiumBanner && (
+            <div className="mb-10 border border-gold/40 bg-gold/5 p-8 text-center">
+              <div className="font-cinzel text-[0.55rem] tracking-[0.3em] text-gold uppercase mb-3">
+                ⚔ {isES ? 'Desbloquea el Conocimiento Completo' : 'Unlock Complete Knowledge'}
               </div>
-              <p className="font-crimson italic text-smoke text-lg mb-6 max-w-lg mx-auto">
+              <h3 className="font-playfair font-bold text-cream text-2xl mb-3">
+                {isES ? 'Has leído 3 análisis — actualiza a Premium' : 'You\'ve read 3 analyses — upgrade to Premium'}
+              </h3>
+              <p className="font-crimson italic text-smoke text-lg max-w-lg mx-auto mb-6">
                 {isES
-                  ? `Genera un análisis histórico completo de la ${battle.name} con Claude AI — contexto, tácticas, consecuencias y bibliografía.`
-                  : `Generate a complete historical analysis of ${battle.name} with Claude AI — context, tactics, consequences and bibliography.`
+                  ? 'Con Premium obtienes análisis ilimitados, acceso a los 8.000+ registros y sin límite de consultas de IA.'
+                  : 'With Premium you get unlimited analyses, access to 8,000+ records and unlimited AI queries.'
                 }
               </p>
-              <div className="font-cinzel text-[0.55rem] tracking-[0.15em] text-smoke mb-6">
-                {isES ? `${queriesLeft} consultas gratuitas disponibles hoy` : `${queriesLeft} free queries available today`}
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <Link href={`/${lang}#pricing`} className="btn-primary">
+                  {isES ? '⚡ Ver planes Premium' : '⚡ View Premium plans'}
+                </Link>
+                <button
+                  onClick={() => setShowPremiumBanner(false)}
+                  className="font-cinzel text-[0.55rem] tracking-[0.15em] text-smoke hover:text-gold uppercase"
+                >
+                  {isES ? 'Ahora no' : 'Not now'}
+                </button>
               </div>
-              <button
-                onClick={runQuery}
-                className="btn-primary"
+            </div>
+          )}
+        </div>
+
+        {/* ── SIDEBAR ── */}
+        <aside className="detail-sidebar">
+
+          {/* Reading time (after AI loads) */}
+          {aiContent && (
+            <div className="sidebar-card mb-4">
+              <div className="sidebar-card-title">
+                {isES ? '⏱ Tiempo de lectura' : '⏱ Reading time'}
+              </div>
+              <div className="font-cinzel text-2xl text-gold font-black">
+                {Math.max(1, Math.round(aiContent.replace(/<[^>]+>/g, '').split(/\s+/).length / 238))} min
+              </div>
+            </div>
+          )}
+
+          {/* Map link if coordinates available */}
+          {(battle.lat !== undefined && battle.lng !== undefined) && (
+            <div className="sidebar-card mb-4">
+              <div className="sidebar-card-title">
+                {isES ? '📍 Ubicación' : '📍 Location'}
+              </div>
+              <Link
+                href={`/${lang}/mapa`}
+                className="font-cinzel text-[0.55rem] tracking-[0.15em] text-gold hover:text-gold-light uppercase transition-colors block"
               >
-                {isES ? '⚡ Analizar con IA' : '⚡ Analyze with AI'}
-              </button>
-            </div>
-          )}
-
-          {loading && (
-            <div className="bg-slate border border-gold/20 p-12 flex flex-col items-center gap-4">
-              <div className="loading-dots">
-                <span /><span /><span />
-              </div>
-              <p className="font-cinzel text-[0.6rem] tracking-[0.2em] text-smoke uppercase">
-                {isES ? 'Analizando la batalla...' : 'Analyzing the battle...'}
-              </p>
-            </div>
-          )}
-
-          {rateLimited && (
-            <div className="bg-slate border border-crimson/40 p-8 text-center">
-              <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-crimson-light uppercase mb-3">
-                {isES ? 'Límite diario alcanzado' : 'Daily limit reached'}
-              </div>
-              <p className="font-crimson italic text-smoke text-lg mb-6">
-                {isES
-                  ? 'Has utilizado tus 3 consultas gratuitas de hoy. Actualiza a Premium para consultas ilimitadas.'
-                  : 'You have used your 3 free queries for today. Upgrade to Premium for unlimited queries.'
-                }
-              </p>
-              <Link href={`/${lang}#pricing`} className="btn-primary inline-block">
-                {isES ? '⚡ Ver Premium' : '⚡ View Premium'}
+                {battle.lat.toFixed(2)}°, {battle.lng.toFixed(2)}° →
               </Link>
             </div>
           )}
 
-          {aiContent && (
-            <div className="bg-slate border border-gold/10 p-8 md:p-12">
-              <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-6 pb-4 border-b border-gold/10">
-                {isES ? '✦ Análisis generado con Claude AI' : '✦ Analysis generated with Claude AI'}
+          {/* Era tactics */}
+          {era.tactics.length > 0 && (
+            <div className="sidebar-card mb-4">
+              <div className="sidebar-card-title">
+                {isES ? 'Tácticas de la era' : 'Era Tactics'}
               </div>
-              <div
-                className="ai-content font-crimson text-parchment-dark text-lg leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: aiContent }}
-              />
+              <div className="flex flex-col gap-2">
+                {era.tactics.map((tactic, i) => (
+                  <button key={i} onClick={() => runTopicQuery(tactic.name, isES ? 'táctica' : 'tactic')}
+                    className="text-left flex items-center gap-2 hover:text-gold transition-colors group" disabled={topicLoading || rateLimited}>
+                    <span className="text-lg flex-shrink-0">{tactic.icon}</span>
+                    <div>
+                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{tactic.name}</div>
+                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{tactic.origin}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Related battles */}
-        {related.length > 0 && (
-          <div>
-            <div className="eyebrow mb-4">
-              {isES ? 'Batallas de la misma era' : 'Battles from the same era'}
+          {/* Era weapons */}
+          {era.weapons.length > 0 && (
+            <div className="sidebar-card mb-4">
+              <div className="sidebar-card-title">
+                {isES ? 'Armamento del período' : 'Period Weaponry'}
+              </div>
+              <div className="flex flex-col gap-2">
+                {era.weapons.slice(0, 6).map((weapon, i) => (
+                  <button key={i} onClick={() => runTopicQuery(weapon.name, isES ? 'arma' : 'weapon')}
+                    className="text-left flex items-center gap-2 hover:text-gold transition-colors group" disabled={topicLoading || rateLimited}>
+                    <span className="text-lg flex-shrink-0">{weapon.icon}</span>
+                    <div>
+                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{weapon.name}</div>
+                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{weapon.period}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="battles-grid">
-              {related.map((b, i) => (
-                <Link
-                  key={i}
-                  href={`/${lang}/batallas/${slugify(b.name)}`}
-                  className="card-bm block"
-                >
-                  <div className="font-cinzel text-[0.5rem] tracking-[0.15em] text-smoke uppercase mb-1">{b.year}</div>
-                  <div className="font-playfair font-bold text-cream text-base leading-tight">{b.name}</div>
-                  <div className="font-crimson text-smoke text-sm mt-1">{b.combatants}</div>
-                </Link>
-              ))}
+          )}
+
+          {/* Related battles */}
+          {related.length > 0 && (
+            <div className="sidebar-card">
+              <div className="sidebar-card-title">
+                {isES ? 'Batallas de la misma era' : 'Battles from the same era'}
+              </div>
+              <div className="flex flex-col gap-3">
+                {related.map((b, i) => (
+                  <Link key={i} href={`/${lang}/batallas/${slugify(b.name)}`} className="group">
+                    <div className="font-cinzel text-[0.45rem] tracking-[0.12em] text-smoke uppercase mb-0.5">{b.year}</div>
+                    <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors leading-tight">{b.name}</div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </aside>
       </div>
     </article>
   )

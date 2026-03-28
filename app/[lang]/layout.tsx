@@ -9,6 +9,8 @@ import type { Lang } from '@/lib/data/types'
 import { NavBar } from '@/components/layout/NavBar'
 import { Footer } from '@/components/layout/Footer'
 import { Toaster } from '@/components/ui/Toaster'
+import { BackToTopButton } from '@/components/ui/BackToTopButton'
+import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 export const SUPPORTED_LANGS: Lang[] = ['es', 'en']
 
@@ -66,6 +68,8 @@ export default async function LangLayout({ children, params }: LangLayoutProps) 
 
       <Footer lang={validLang} />
       <Toaster />
+      <BackToTopButton />
+      <ReadingProgress />
     </>
   )
 }

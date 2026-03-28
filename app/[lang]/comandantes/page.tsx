@@ -7,6 +7,8 @@ import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { CommandersClient } from '@/components/commanders/CommandersClient'
 
+export const revalidate = 3600
+
 interface CommandersPageProps {
   params: Promise<{ lang: string }>
 }
@@ -28,20 +30,21 @@ export default async function CommandersPage({ params }: CommandersPageProps) {
   const isEN = l === 'en'
 
   return (
-    <div className="px-4 md:px-8 py-8 max-w-content mx-auto">
-      <div className="mb-8">
-        <div className="eyebrow mb-2">
+    <div className="px-4 md:px-8 pt-8 pb-4 max-w-content mx-auto">
+      <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+        <div className="eyebrow mb-3 w-full text-center">
           {isEN ? 'Military Encyclopedia' : 'Enciclopedia Militar'}
         </div>
-        <h1 className="font-playfair text-4xl md:text-5xl font-bold text-cream mb-3">
+        <h1 className="font-playfair font-bold text-cream mb-4 w-full text-center" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)' }}>
           👑 {isEN ? 'Military Commanders' : 'Comandantes Militares'}
         </h1>
-        <p className="font-crimson italic text-smoke text-lg">
+        <p className="font-crimson italic text-mist text-xl max-w-2xl mb-6 text-center mx-auto">
           {isEN
             ? 'Complete index · Click any commander to view their full profile and AI analysis'
             : 'Índice completo · Haz clic en cualquier comandante para ver su perfil y análisis con IA'
           }
         </p>
+        <div className="gold-divider mx-auto" />
       </div>
       <CommandersClient lang={l} />
     </div>

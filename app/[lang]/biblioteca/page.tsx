@@ -6,6 +6,8 @@
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { getAllDocs } from '@/lib/data/helpers'
+
+export const revalidate = 3600
 import { ERAS } from '@/lib/data/eras'
 import { LibraryClient } from '@/components/library/LibraryClient'
 
@@ -33,18 +35,19 @@ export default async function LibraryPage({ params }: LibraryPageProps) {
   const eraIds = ERAS.map(e => ({ id: e.id, name: e.name }))
 
   return (
-    <div className="px-8 py-8 max-w-content mx-auto">
-      <div className="mb-8">
-        <div className="eyebrow mb-2">{isEN ? 'Military Encyclopedia' : 'Enciclopedia Militar'}</div>
-        <h1 className="font-playfair text-4xl md:text-5xl font-bold text-cream mb-3">
+    <div className="px-4 md:px-8 pt-8 pb-4 max-w-content mx-auto">
+      <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+        <div className="eyebrow mb-3 w-full text-center">{isEN ? 'Military Encyclopedia' : 'Enciclopedia Militar'}</div>
+        <h1 className="font-playfair font-bold text-cream mb-4 w-full text-center" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)' }}>
           📜 {isEN ? 'Military Library' : 'Biblioteca Militar'}
         </h1>
-        <p className="font-crimson italic text-smoke text-lg">
+        <p className="font-crimson italic text-mist text-xl max-w-2xl mb-6 text-center mx-auto">
           {isEN
             ? 'Treaties, works and historical documents that defined warfare'
             : 'Tratados, obras y documentos históricos que definieron la guerra'
           }
         </p>
+        <div className="gold-divider mx-auto" />
       </div>
       <LibraryClient docs={docs} eras={eraIds} lang={l} />
     </div>

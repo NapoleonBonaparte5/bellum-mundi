@@ -6,7 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n/translations'
+import { t } from '@/lib/i18n'
 
 interface StatProps {
   value: number
@@ -31,7 +31,7 @@ function StatCounter({ value, suffix = '', label, duration = 1800 }: StatProps) 
           const start = performance.now()
           const step = (now: number) => {
             const progress = Math.min((now - start) / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+            const eased = 1 - Math.pow(2, -10 * progress) // easeOutExpo
             setDisplay(Math.floor(eased * value))
             if (progress < 1) requestAnimationFrame(step)
             else setDisplay(value)
@@ -66,10 +66,10 @@ export function StatsSection({ lang }: StatsSectionProps) {
   return (
     <section className="py-4 px-4 md:px-8 max-w-content mx-auto">
       <div className="stats-row">
-        <StatCounter value={50000} suffix="+" label={t(lang, 'stat_years')} />
-        <StatCounter value={429} suffix="+" label={t(lang, 'stat_battles')} duration={1400} />
-        <StatCounter value={63} suffix="+" label={t(lang, 'stat_civs')} duration={1600} />
-        <StatCounter value={109} suffix="+" label={t(lang, 'stat_commanders')} duration={1200} />
+        <StatCounter value={890} suffix="+" label={t(lang, 'home.stats.battles')} duration={1400} />
+        <StatCounter value={244} suffix="+" label={t(lang, 'home.stats.commanders')} duration={1200} />
+        <StatCounter value={118} suffix="+" label={t(lang, 'home.stats.civs')} duration={1600} />
+        <StatCounter value={100} suffix="+" label={t(lang, 'home.stats.docs')} />
       </div>
     </section>
   )

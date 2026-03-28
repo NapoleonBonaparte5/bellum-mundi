@@ -6,6 +6,8 @@
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { getAllBattles } from '@/lib/data/helpers'
+
+export const revalidate = 3600
 import { WorldMapClient } from '@/components/map/WorldMapClient'
 
 interface MapPageProps {
@@ -32,19 +34,22 @@ export default async function MapPage({ params }: MapPageProps) {
 
   return (
     <div>
-      <div className="px-8 py-8 max-w-content mx-auto">
-        <div className="eyebrow mb-2">
-          {l === 'en' ? 'Military Encyclopedia' : 'Enciclopedia Militar'}
+      <div className="px-4 md:px-8 max-w-content mx-auto">
+        <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+          <div className="eyebrow mb-3 w-full text-center">
+            {l === 'en' ? 'Historical Cartography' : 'Cartografía Histórica'}
+          </div>
+          <h1 className="font-playfair font-bold text-cream mb-4 w-full text-center" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)' }}>
+            🗺️ {l === 'en' ? 'World Battle Map' : 'Mapa Mundial de Batallas'}
+          </h1>
+          <p className="font-crimson italic text-mist text-xl max-w-2xl mb-4 text-center mx-auto">
+            {l === 'en'
+              ? `${battles.length} battles with geolocation · Click any marker to view details`
+              : `${battles.length} batallas con geolocalización · Haz clic en cualquier marcador`
+            }
+          </p>
+          <div className="gold-divider mx-auto" />
         </div>
-        <h1 className="font-playfair text-4xl md:text-5xl font-bold text-cream mb-3">
-          🗺️ {l === 'en' ? 'World Battle Map' : 'Mapa Mundial de Batallas'}
-        </h1>
-        <p className="font-crimson italic text-smoke text-lg">
-          {l === 'en'
-            ? `${battles.length} battles with geolocation · Click any marker to view details`
-            : `${battles.length} batallas con geolocalización · Haz clic en cualquier marcador`
-          }
-        </p>
       </div>
       <WorldMapClient battles={battles} lang={l} />
     </div>

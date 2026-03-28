@@ -47,22 +47,25 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
     }
   }, [])
 
-  // Update markers when battles change
+  // Update markers when battles change — with spring-scale stagger animation
   useEffect(() => {
     if (!mapRef.current || !markersRef.current) return
 
     markersRef.current.clearLayers()
 
-    battles.forEach(battle => {
+    battles.forEach((battle, idx) => {
       if (battle.lat === undefined || battle.lng === undefined) return
 
       const color = eraColors[battle.eraId] ?? '#C9A84C'
+      const delay = idx * 10
+
       const icon = L.divIcon({
-        html: `<div style="
+        html: `<div class="map-marker-dot" style="
           width:10px;height:10px;border-radius:50%;
           background:${color};
           border:1px solid rgba(255,255,255,0.4);
           box-shadow:0 0 6px ${color}88;
+          animation: markerSpring 400ms cubic-bezier(0.34,1.56,0.64,1) ${delay}ms both;
         "></div>`,
         className: '',
         iconSize: [10, 10],
@@ -71,14 +74,15 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
 
       const marker = L.marker([battle.lat, battle.lng], { icon })
         .bindPopup(`
-          <div style="font-family:serif;min-width:160px">
-            <div style="font-size:0.65rem;color:#9B9590;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">${battle.year}</div>
-            <div style="font-weight:bold;color:#F9F5ED;font-size:1rem;line-height:1.2">${battle.name}</div>
-            <div style="color:#9B9590;font-size:0.85rem;margin-top:4px">${battle.combatants}</div>
+          <div style="font-family:Georgia,serif;min-width:180px">
+            <div style="font-size:0.6rem;font-family:serif;color:#C9A84C;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:bold">${battle.year}</div>
+            <div style="font-weight:bold;color:#F9F5ED;font-size:1.05rem;line-height:1.25;margin-bottom:5px">${battle.name}</div>
+            <div style="color:#9B9590;font-size:0.82rem;margin-bottom:${battle.tag ? '6px' : '0'}">${battle.combatants}</div>
+            ${battle.tag ? `<div style="display:inline-block;font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 6px;background:rgba(139,26,26,0.35);border:1px solid rgba(139,26,26,0.5);color:#E07070;">${battle.tag}</div>` : ''}
           </div>
         `, {
           className: 'bm-popup',
-          maxWidth: 260,
+          maxWidth: 280,
         })
         .on('click', () => onSelect(battle))
 
@@ -89,7 +93,7 @@ export default function LeafletMap({ battles, lang, eraColors, onSelect }: Leafl
   return (
     <div
       ref={containerRef}
-      className="w-full"
+      className="w-full map-mobile-height"
       style={{ height: 600 }}
       aria-label={lang === 'en' ? 'World battle map' : 'Mapa mundial de batallas'}
     />

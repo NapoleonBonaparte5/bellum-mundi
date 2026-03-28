@@ -4,6 +4,8 @@
 
 import type { Metadata } from 'next'
 import { Cinzel, Playfair_Display, Crimson_Pro, IM_Fell_English } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 // ── FONTS ──────────────────────────────────────────────────
@@ -68,6 +70,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${cinzel.variable} ${playfair.variable} ${crimsonPro.variable} ${imFell.variable}`}
       style={{ background: '#0A0806', color: '#F9F5ED' }}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        )}
+      </head>
       <body className="bg-ink text-cream font-crimson text-lg leading-relaxed overflow-x-hidden">
         {/* Noise texture overlay */}
         <div
@@ -78,6 +87,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           aria-hidden="true"
         />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

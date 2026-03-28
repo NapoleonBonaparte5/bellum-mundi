@@ -21,15 +21,33 @@ export async function generateStaticParams() {
   )
 }
 
+const BASE = 'https://bellummundi.com'
+
 export async function generateMetadata({ params }: CommanderPageProps): Promise<Metadata> {
   const { lang, slug } = await params
+  const isEN = lang === 'en'
   const result = getCommanderBySlug(slug)
   if (!result) return {}
   const { commander, era } = result
+  const description = `${commander.role} · ${era.name} · ${isEN ? 'Military profile and AI analysis' : 'Perfil militar y análisis con IA'}`
+  const pageUrl = `${BASE}/${lang}/comandantes/${slug}`
   return {
     title: commander.name,
-    description: `${commander.role} · ${era.name} · ${lang === 'en' ? 'Military profile and AI analysis' : 'Perfil militar y análisis con IA'}`,
-    openGraph: { title: `${commander.name} — Bellum Mundi` },
+    description,
+    alternates: {
+      canonical: pageUrl,
+      languages: {
+        es: `${BASE}/es/comandantes/${slug}`,
+        en: `${BASE}/en/comandantes/${slug}`,
+      },
+    },
+    openGraph: {
+      title: `${commander.name} — Bellum Mundi`,
+      description,
+      url: pageUrl,
+      images: [{ url: `${BASE}/opengraph-image.png`, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image', title: `${commander.name} — Bellum Mundi`, description },
   }
 }
 

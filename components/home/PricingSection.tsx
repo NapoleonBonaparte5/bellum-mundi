@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n/translations'
+import { t } from '@/lib/i18n'
 
 const STRIPE_PRICE_MONTHLY = 'price_1TEremLQnw3S1NGVUciHDGGH'
 const STRIPE_PRICE_ANNUAL  = 'price_1TErfcLQnw3S1NGVNa7flWZ7'
@@ -62,11 +62,11 @@ export function PricingSection({ lang }: PricingSectionProps) {
   return (
     <section id="pricing" className="py-20 px-4 md:px-8">
       <div className="text-center mb-12">
-        <div className="eyebrow mb-4">{t(lang, 'pricing_eyebrow')}</div>
+        <div className="eyebrow mb-4">{t(lang, 'home.pricing.eyebrow')}</div>
         <h2 className="font-playfair font-bold text-cream mb-3" style={{ fontSize: 'clamp(2rem,5vw,3.5rem)' }}>
-          {t(lang, 'pricing_title')}
+          {t(lang, 'home.pricing.title')}
         </h2>
-        <p className="font-crimson italic text-smoke text-lg">{t(lang, 'pricing_desc')}</p>
+        <p className="font-crimson italic text-smoke text-lg">{t(lang, 'home.pricing.desc')}</p>
 
         {/* Monthly / Annual toggle */}
         <div className="flex items-center justify-center gap-4 mt-8">
@@ -89,7 +89,7 @@ export function PricingSection({ lang }: PricingSectionProps) {
           </span>
           {annual && (
             <span className="bg-emerald text-cream font-cinzel text-[0.5rem] tracking-[0.15em] px-2 py-0.5 uppercase font-bold">
-              {t(lang, 'plan_annual_badge')}
+              {t(lang, 'home.pricing.planAnnualBadge')}
             </span>
           )}
         </div>
@@ -99,13 +99,13 @@ export function PricingSection({ lang }: PricingSectionProps) {
         {/* FREE */}
         <div className="bg-slate p-10">
           <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-gold uppercase mb-4">
-            {t(lang, 'plan_free_name')}
+            {t(lang, 'home.pricing.planFreeName')}
           </div>
           <div className="font-playfair font-black text-cream text-5xl leading-none mb-1">
             <sup className="text-xl text-smoke">€</sup>0
           </div>
           <div className="font-cinzel text-[0.6rem] tracking-[0.15em] text-smoke uppercase mb-1">
-            {t(lang, 'plan_free_price')}
+            {t(lang, 'home.pricing.planFreePrice')}
           </div>
           <div className="font-crimson italic text-smoke text-sm mb-6 min-h-[1.2em]"> </div>
           <div className="h-px bg-gold/15 mb-6" />
@@ -136,11 +136,11 @@ export function PricingSection({ lang }: PricingSectionProps) {
         >
           {/* Popular badge */}
           <div className="absolute -top-px left-1/2 -translate-x-1/2 bg-gold text-ink font-cinzel text-[0.5rem] tracking-[0.2em] px-4 py-1 font-bold uppercase">
-            {t(lang, 'plan_premium_badge')}
+            {t(lang, 'home.pricing.planPremiumBadge')}
           </div>
 
           <div className="font-cinzel text-[0.65rem] tracking-[0.3em] text-gold uppercase mb-4 mt-2">
-            {t(lang, 'plan_premium_name')}
+            {t(lang, 'home.pricing.planPremiumName')}
           </div>
           <div className="font-playfair font-black text-cream text-5xl leading-none mb-1">
             <sup className="text-xl text-smoke">€</sup>{monthlyPrice}

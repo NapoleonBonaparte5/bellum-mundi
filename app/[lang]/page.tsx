@@ -5,10 +5,12 @@
 
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n/translations'
+
 import { HeroSection } from '@/components/home/HeroSection'
 import { StatsSection } from '@/components/home/StatsSection'
+import { FeaturesSection } from '@/components/home/FeaturesSection'
 import { TimelineSection } from '@/components/home/TimelineSection'
+import { WarQuoteSection } from '@/components/home/WarQuoteSection'
 import { PricingSection } from '@/components/home/PricingSection'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
 
@@ -21,18 +23,34 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   const l = lang as Lang
   const isEN = l === 'en'
 
+  const BASE = 'https://bellummundi.com'
+  const pageUrl = `${BASE}/${l}`
+  const title = isEN ? 'Bellum Mundi — Universal Military History Encyclopedia' : 'Bellum Mundi — Historia Militar Universal'
+  const description = isEN
+    ? 'The most complete military history encyclopedia. 8,000+ battles, 1,200+ commanders, interactive maps and AI analysis. From Antiquity to the 21st Century.'
+    : 'La enciclopedia más completa de historia militar en español. 8.000+ batallas, 1.200+ comandantes, mapas interactivos y análisis con IA.'
+  const ogImage = `${BASE}/opengraph-image.png`
+
   return {
-    title: isEN
-      ? 'Bellum Mundi — Universal Military History Encyclopedia'
-      : 'Bellum Mundi — Historia Militar Universal',
-    description: isEN
-      ? 'The most complete military history encyclopedia. 8,000+ battles, 1,200+ commanders, interactive maps and AI analysis. From Antiquity to the 21st Century.'
-      : 'La enciclopedia más completa de historia militar en español. 8.000+ batallas, 1.200+ comandantes, mapas interactivos y análisis con IA.',
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+      languages: { es: `${BASE}/es`, en: `${BASE}/en`, 'x-default': `${BASE}/es` },
+    },
     openGraph: {
-      title: 'Bellum Mundi — ' + (isEN ? 'Universal Military History' : 'Historia Militar Universal'),
-      description: isEN
-        ? 'The most complete military encyclopedia. Battles, commanders, maps and AI analysis.'
-        : 'La enciclopedia más completa de historia militar. Batallas, comandantes, mapas y análisis con IA.',
+      title,
+      description,
+      url: pageUrl,
+      type: 'website',
+      siteName: 'Bellum Mundi',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: 'Bellum Mundi' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
     },
   }
 }
@@ -63,8 +81,14 @@ export default async function HomePage({ params }: HomePageProps) {
       {/* Stats */}
       <StatsSection lang={l} />
 
+      {/* Features */}
+      <FeaturesSection lang={l} />
+
       {/* Timeline + Era explorer */}
       <TimelineSection lang={l} />
+
+      {/* War Quote */}
+      <WarQuoteSection lang={l} />
 
       {/* Pricing */}
       <PricingSection lang={l} />

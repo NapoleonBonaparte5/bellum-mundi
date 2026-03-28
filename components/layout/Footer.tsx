@@ -5,7 +5,6 @@
 
 import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n/translations'
 
 interface FooterProps {
   lang: Lang

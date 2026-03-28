@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n/translations'
+import { t } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
 import type { BellumUser } from '@/lib/data/types'
 
@@ -17,14 +17,14 @@ interface NavBarProps {
 }
 
 const NAV_LINKS = (lang: Lang) => [
-  { key: 'home',          label: t(lang, 'nav_eras'),        href: `/${lang}#timeline` },
-  { key: 'battles',       label: t(lang, 'nav_battles'),     href: `/${lang}/batallas` },
-  { key: 'commanders',    label: t(lang, 'nav_commanders'),  href: `/${lang}/comandantes` },
-  { key: 'worldmap',      label: t(lang, 'nav_worldmap'),    href: `/${lang}/mapa` },
-  { key: 'library',       label: t(lang, 'nav_library'),     href: `/${lang}/biblioteca` },
-  { key: 'civilizations', label: t(lang, 'nav_civs'),        href: `/${lang}/civilizaciones` },
-  { key: 'premium',       label: t(lang, 'nav_premium'),     href: `/${lang}#pricing` },
-  { key: 'newsletter',    label: t(lang, 'nav_newsletter'),  href: `/${lang}#newsletter` },
+  { key: 'home',          label: t(lang, 'nav.eras'),        href: `/${lang}#timeline` },
+  { key: 'battles',       label: t(lang, 'nav.battles'),     href: `/${lang}/batallas` },
+  { key: 'commanders',    label: t(lang, 'nav.commanders'),  href: `/${lang}/comandantes` },
+  { key: 'worldmap',      label: t(lang, 'nav.worldmap'),    href: `/${lang}/mapa` },
+  { key: 'library',       label: t(lang, 'nav.library'),     href: `/${lang}/biblioteca` },
+  { key: 'civilizations', label: t(lang, 'nav.civs'),        href: `/${lang}/civilizaciones` },
+  { key: 'premium',       label: t(lang, 'nav.premium'),     href: `/${lang}#pricing` },
+  { key: 'newsletter',    label: t(lang, 'nav.newsletter'),  href: `/${lang}#newsletter` },
 ]
 
 export function NavBar({ lang }: NavBarProps) {
@@ -57,6 +57,11 @@ export function NavBar({ lang }: NavBarProps) {
 
   const links = NAV_LINKS(lang)
 
+  const isActive = (href: string) => {
+    if (href.includes('#')) return false
+    return pathname === href || pathname.startsWith(href + '/')
+  }
+
   return (
     <nav
       id="nav"
@@ -76,15 +81,19 @@ export function NavBar({ lang }: NavBarProps) {
         </Link>
 
         {/* Desktop nav links */}
-        <ul className="hidden lg:flex gap-6 list-none flex-1 justify-center" role="list">
-          {links.map(link => (
-            <li key={link.key}>
+        <ul className="hidden lg:flex list-none flex-1 justify-center" role="list">
+          {links.map((link, i) => (
+            <li key={link.key} className="flex items-center">
+              {i > 0 && <span className="w-px h-3 bg-gold/15 flex-shrink-0" aria-hidden="true" />}
               <Link
                 href={link.href}
-                className="font-cinzel text-[0.6rem] tracking-[0.2em] text-mist hover:text-gold transition-colors px-3 py-2 uppercase block"
-                aria-current={pathname.includes(link.key) ? 'page' : undefined}
+                className={`font-cinzel text-[0.6rem] tracking-[0.2em] transition-colors px-3 py-2 uppercase block relative ${
+                  isActive(link.href) ? 'text-gold nav-link-active' : 'text-mist hover:text-gold nav-link'
+                }`}
+                aria-current={isActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
+                <span className="nav-underline" />
               </Link>
             </li>
           ))}
@@ -135,14 +144,13 @@ export function NavBar({ lang }: NavBarProps) {
           {/* Language switcher */}
           <button
             onClick={switchLang}
-            className="flex items-center gap-1 font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke hover:text-gold transition-colors px-2 py-1 border border-transparent hover:border-gold/20"
+            className="flex items-center gap-1.5 font-cinzel text-[0.55rem] tracking-[0.18em] text-smoke hover:text-gold transition-all px-2.5 py-1.5 border border-gold/15 hover:border-gold/40 hover:bg-gold/5 uppercase"
             aria-label={lang === 'en' ? 'Cambiar a Español' : 'Switch to English'}
           >
-            <span className="text-base leading-none">{lang === 'en' ? '🇬🇧' : '🇪🇸'}</span>
-            <span>{lang === 'en' ? 'EN' : 'ES'}</span>
-            <svg className="w-2 h-2 opacity-60" viewBox="0 0 10 6" fill="none">
-              <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <span className="text-sm leading-none">{lang === 'en' ? '🇬🇧' : '🇪🇸'}</span>
+            <span className="font-bold">{lang === 'en' ? 'EN' : 'ES'}</span>
+            <span className="text-[0.55rem] leading-none opacity-50">→</span>
+            <span className="opacity-60">{lang === 'en' ? 'ES' : 'EN'}</span>
           </button>
 
           {/* Mobile hamburger */}
@@ -163,47 +171,51 @@ export function NavBar({ lang }: NavBarProps) {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div
-          id="mobile-menu"
-          className="lg:hidden bg-slate border-t border-gold/10"
-          role="menu"
-        >
-          <ul className="list-none py-2" role="list">
-            {links.map(link => (
-              <li key={link.key} role="none">
-                <Link
-                  href={link.href}
-                  className="block font-cinzel text-[0.65rem] tracking-[0.2em] text-mist hover:text-gold hover:bg-gold/5 transition-colors px-6 py-3 uppercase"
-                  onClick={() => setMenuOpen(false)}
-                  role="menuitem"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Mobile auth row */}
-          <div className="px-6 pb-4 flex gap-3 border-t border-gold/10 pt-3">
-            {!user && (
-              <button className="flex-1 border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 hover:text-gold hover:border-gold transition-colors">
-                {lang === 'en' ? 'Sign In' : 'Entrar'}
-              </button>
-            )}
-            {!isPremium && (
+      {/* Mobile menu — CSS transition for smooth open/close */}
+      <div
+        id="mobile-menu"
+        className="lg:hidden bg-slate border-t border-gold/10 overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ maxHeight: menuOpen ? '600px' : '0', opacity: menuOpen ? 1 : 0 }}
+        role="menu"
+        aria-hidden={!menuOpen}
+      >
+        <ul className="list-none py-2" role="list">
+          {links.map(link => (
+            <li key={link.key} role="none">
               <Link
-                href={`/${lang}#pricing`}
-                className="flex-1 bg-gradient-to-r from-gold-dark to-gold text-ink font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 text-center font-bold"
+                href={link.href}
+                className={`block font-cinzel text-[0.65rem] tracking-[0.2em] hover:bg-gold/5 transition-colors px-6 py-3 uppercase border-b border-gold/5 last:border-0 flex items-center justify-between ${
+                  isActive(link.href) ? 'text-gold' : 'text-mist hover:text-gold'
+                }`}
                 onClick={() => setMenuOpen(false)}
+                role="menuitem"
+                tabIndex={menuOpen ? 0 : -1}
               >
-                ⚡ Premium
+                {link.label}
+                {isActive(link.href) && <span className="w-1 h-1 rounded-full bg-gold flex-shrink-0" />}
               </Link>
-            )}
-          </div>
+            </li>
+          ))}
+        </ul>
+
+        {/* Mobile auth row */}
+        <div className="px-6 pb-4 flex gap-3 border-t border-gold/10 pt-3">
+          {!user && (
+            <button className="flex-1 border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 hover:text-gold hover:border-gold transition-colors">
+              {lang === 'en' ? 'Sign In' : 'Entrar'}
+            </button>
+          )}
+          {!isPremium && (
+            <Link
+              href={`/${lang}#pricing`}
+              className="flex-1 bg-gradient-to-r from-gold-dark to-gold text-ink font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 text-center font-bold"
+              onClick={() => setMenuOpen(false)}
+            >
+              ⚡ Premium
+            </Link>
+          )}
         </div>
-      )}
+      </div>
     </nav>
   )
 }

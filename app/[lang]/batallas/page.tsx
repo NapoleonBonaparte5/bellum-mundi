@@ -8,6 +8,8 @@ import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { BattlesClient } from '@/components/battles/BattlesClient'
 
+export const revalidate = 3600
+
 interface BattlesPageProps {
   params: Promise<{ lang: string }>
 }
@@ -30,22 +32,26 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
   const l = lang as Lang
 
   return (
-    <div className="px-4 md:px-8 py-8 max-w-content mx-auto">
+    <div className="px-4 md:px-8 pt-8 pb-4 max-w-content mx-auto">
       {/* Page header */}
-      <div className="mb-8">
-        <div className="eyebrow mb-2">
+      <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+        <div className="eyebrow mb-3 w-full text-center">
           {l === 'en' ? 'Military Encyclopedia' : 'Enciclopedia Militar'}
         </div>
-        <h1 className="font-playfair text-4xl md:text-5xl font-bold text-cream mb-3">
+        <h1 className="font-playfair font-bold text-cream mb-4 w-full text-center" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)' }}>
           {l === 'en' ? '⚔ All Battles' : '⚔ Todas las Batallas'}
         </h1>
-        <p className="font-crimson italic text-smoke text-lg">
+        <p className="font-crimson italic text-mist text-xl max-w-2xl mb-6 text-center mx-auto">
           {l === 'en'
             ? 'Complete index · Click any battle to view the full AI analysis · Enable comparison mode to compare two battles'
             : 'Índice completo · Haz clic en cualquier batalla para ver el análisis completo · Activa el modo comparación para comparar dos batallas'
           }
         </p>
+        <div className="gold-divider mx-auto" />
       </div>
+
+      {/* Gradient separator */}
+      <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent)', margin: '0 0 2rem' }} />
 
       {/* Interactive client component loads data directly */}
       <BattlesClient lang={l} />

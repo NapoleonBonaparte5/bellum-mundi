@@ -50,12 +50,23 @@ export interface Weapon {
   eraId?: EraId
 }
 
+// ── CIVILIZATION METRICS ───────────────────────────────────
+export interface CivMetrics {
+  territory:  number   // Extensión máxima normalizada 0-100
+  duration:   number   // Años de dominio militar activo 0-100
+  victories:  number   // % conflictos ganados documentados 0-100
+  innovation: number   // Innovaciones militares documentadas 0-100
+  projection: number   // Capacidad de proyectar fuerza fuera de región 0-100
+  economy:    number   // Capacidad económica para sostener ejércitos 0-100
+  legacy:     number   // Influencia en doctrinas militares posteriores 0-100
+}
+
 // ── CIVILIZATION ───────────────────────────────────────────
 export interface Civilization {
   name: string
   period: string
   flag: string
-  power: number         // 0-1 power rating
+  metrics: CivMetrics
   eraId?: EraId
   eraName?: string
 }
@@ -119,12 +130,15 @@ export interface FlatCommander extends Commander {
 export interface FlatCivilization extends Civilization {
   eraId: EraId
   eraName: string
+  powerScore: number   // Calculated from metrics
+  slug: string
 }
 
 export interface FlatDoc extends HistoricalDoc {
   eraId: EraId
   eraName: string
   category: 'tratado' | 'obra' | 'documento' | 'carta'
+  slug: string
 }
 
 // ── USER / AUTH ────────────────────────────────────────────
