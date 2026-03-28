@@ -4,8 +4,9 @@
 // AI-powered: lesson plans, quizzes, essays, timelines
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Lang, FlatBattle } from '@/lib/data/types'
+import { supabase } from '@/lib/supabase/client'
 import { processContent } from '@/lib/utils/processContent'
 
 interface LessonGeneratorProps {
@@ -290,6 +291,12 @@ The 3-5 most important military transformations of the period
 // ── Main component ───────────────────────────────────────────
 export function LessonGenerator({ lang, battles }: LessonGeneratorProps) {
   const isES = lang === 'es'
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSessionToken(session?.access_token ?? null)
+    })
+  }, [])
 
   const [topic, setTopic]           = useState('')
   const [level, setLevel]           = useState<Level>('intermediate')
@@ -321,8 +328,11 @@ export function LessonGenerator({ lang, battles }: LessonGeneratorProps) {
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false, lang }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
+        body: JSON.stringify({ prompt, lang }),
       })
 
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)

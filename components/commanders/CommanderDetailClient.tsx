@@ -4,9 +4,10 @@
 // Parallel streaming: analysis + books via Promise.all
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import type { FlatCommander, Era, Lang } from '@/lib/data/types'
+import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { getRoleName, getEraName } from '@/lib/i18n'
@@ -56,6 +57,12 @@ async function readStream(body: ReadableStream<Uint8Array>, setter: (v: string) 
 
 export function CommanderDetailClient({ commander, era, lang }: CommanderDetailClientProps) {
   const isES = lang === 'es'
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSessionToken(session?.access_token ?? null)
+    })
+  }, [])
 
   const [aiContent, setAiContent]       = useState<string | null>(null)
   const [booksContent, setBooksContent] = useState<string | null>(null)
@@ -83,11 +90,14 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
       ? `Eres un librero especialista en historia militar. Lista exactamente 5 libros reales y publicados sobre ${commander.name} o su contexto militar. Responde ÚNICAMENTE con este HTML, sin texto adicional:\n<div class="book-card">\n  <strong>TÍTULO DEL LIBRO</strong>\n  <span>AUTOR · AÑO</span>\n  <p>Una frase de por qué es esencial.</p>\n  <a href="https://amazon.es/s?k=TITULO+AUTOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
       : `You are a specialist military history bookseller. List exactly 5 real published books about ${commander.name} or their military context. Respond ONLY with this HTML, no extra text:\n<div class="book-card">\n  <strong>BOOK TITLE</strong>\n  <span>AUTHOR · YEAR</span>\n  <p>One sentence on why it is essential.</p>\n  <a href="https://amazon.es/s?k=TITLE+AUTHOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
 
-    const HEADERS = { 'Content-Type': 'application/json' }
+    const HEADERS: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+    }
 
     try {
-      const mainFetch  = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: mainPrompt,  isPremium: false, lang }) })
-      const booksFetch = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: booksPrompt, isPremium: false, booksOnly: true, lang }) })
+      const mainFetch  = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: mainPrompt,  lang }) })
+      const booksFetch = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: booksPrompt, booksOnly: true, lang }) })
 
       const [mainRes, booksRes] = await Promise.all([mainFetch, booksFetch])
 
@@ -129,8 +139,11 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false, lang }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
+        body: JSON.stringify({ prompt, lang }),
       })
       if (res.status === 429) setRateLimited(true)
       else if (res.ok && res.body) await readStream(res.body, setTopicContent)

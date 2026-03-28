@@ -8,6 +8,7 @@ import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { FlatBattle, Era, Lang } from '@/lib/data/types'
+import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
@@ -129,6 +130,14 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
   // Sidebar toggle
   const [sidebarOpen, setSidebarOpen]                 = useState(true)
 
+  // Session token for AI auth
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSessionToken(session?.access_token ?? null)
+    })
+  }, [])
+
   // Counterfactual simulator + 3D tab
   const [activeTab, setActiveTab]                     = useState<'analysis' | 'counterfactual' | 'viz3d'>('analysis')
   const [cfContent, setCfContent]                     = useState<string | null>(null)
@@ -170,12 +179,15 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
       ? `Eres un librero especialista en historia militar. Lista exactamente 5 libros reales y publicados sobre ${battle.name} (${battle.year}). Responde ÚNICAMENTE con este HTML, sin texto adicional:\n<div class="book-card">\n  <strong>TÍTULO DEL LIBRO</strong>\n  <span>AUTOR · AÑO</span>\n  <p>Una frase de por qué es esencial.</p>\n  <a href="https://amazon.es/s?k=TITULO+AUTOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
       : `You are a specialist military history bookseller. List exactly 5 real published books about ${battle.name} (${battle.year}). Respond ONLY with this HTML, no extra text:\n<div class="book-card">\n  <strong>BOOK TITLE</strong>\n  <span>AUTHOR · YEAR</span>\n  <p>One sentence on why it is essential.</p>\n  <a href="https://amazon.es/s?k=TITLE+AUTHOR&tag=bellummundi-21" target="_blank">Ver en Amazon →</a>\n</div>`
 
-    const HEADERS = { 'Content-Type': 'application/json' }
+    const HEADERS: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+    }
 
     try {
       // Fire both fetches simultaneously
-      const mainFetch  = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: mainPrompt,  isPremium: false, lang }) })
-      const booksFetch = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: booksPrompt, isPremium: false, booksOnly: true, lang }) })
+      const mainFetch  = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: mainPrompt,  lang }) })
+      const booksFetch = fetch('/api/ai-query', { method: 'POST', headers: HEADERS, body: JSON.stringify({ prompt: booksPrompt, booksOnly: true, lang }) })
 
       const [mainRes, booksRes] = await Promise.all([mainFetch, booksFetch])
 
@@ -225,8 +237,11 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false, lang }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
+        body: JSON.stringify({ prompt, lang }),
       })
       if (res.status === 429) { setRateLimited(true) }
       else if (res.ok && res.body) await readStream(res.body, setTopicContent)
@@ -250,8 +265,11 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false, lang }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
+        body: JSON.stringify({ prompt, lang }),
       })
       if (res.status === 429) {
         setRateLimited(true)
@@ -285,13 +303,40 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
           <span>/</span>
           <span className="text-mist">{battle.name}</span>
         </nav>
-        <div className="eyebrow mb-4 detail-meta-enter">{eraEmoji} {getEraName(lang, era.id, era.name)} · {translateYear(lang, battle.year)}</div>
-        <h1 className="font-playfair font-black text-cream mb-4 leading-tight detail-title-enter" style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}>
-          {battle.name}
-        </h1>
-        <p className="font-crimson italic text-parchment-dark text-xl mb-4 detail-combatants-enter">{translateCombatants(lang, battle.combatants)}</p>
-        {battle.desc && <p className="font-crimson text-smoke text-lg max-w-2xl">{battle.desc}</p>}
-        {battle.tag && <div className="era-badge mt-4">{getTagName(lang, battle.tag)}</div>}
+        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {/* Left: title + meta */}
+          <div style={{ flex: '1 1 55%', minWidth: 0 }}>
+            <div className="eyebrow mb-4 detail-meta-enter">{eraEmoji} {getEraName(lang, era.id, era.name)} · {translateYear(lang, battle.year)}</div>
+            <h1 className="font-playfair font-black text-cream mb-4 leading-tight detail-title-enter" style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}>
+              {battle.name}
+            </h1>
+            <p className="font-crimson italic text-parchment-dark text-xl mb-4 detail-combatants-enter">{translateCombatants(lang, battle.combatants)}</p>
+            {battle.desc && <p className="font-crimson text-smoke text-lg max-w-2xl">{battle.desc}</p>}
+            {battle.tag && <div className="era-badge mt-4">{getTagName(lang, battle.tag)}</div>}
+          </div>
+          {/* Right: 2×2 quick-stats panel */}
+          <div style={{
+            flex: '0 0 auto',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '2px',
+            background: 'rgba(201,168,76,0.08)',
+            marginTop: '2.5rem',
+            minWidth: '260px',
+          }}>
+            {[
+              { label: isES ? 'Año' : 'Year',         value: translateYear(lang, battle.year) },
+              { label: isES ? 'Era' : 'Era',           value: era.name },
+              { label: isES ? 'Combatientes' : 'Combatants', value: translateCombatants(lang, battle.combatants) },
+              { label: isES ? 'Tipo' : 'Type',         value: battle.tag ? getTagName(lang, battle.tag) : '—' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ background: 'var(--slate)', padding: '0.85rem 1.1rem' }}>
+                <div className="font-cinzel text-[0.5rem] tracking-[0.2em] uppercase text-smoke/60 mb-1">{label}</div>
+                <div className="font-crimson text-sm text-cream leading-snug">{value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </header>
 
       <div className="max-w-content mx-auto px-6 pb-16 detail-grid">

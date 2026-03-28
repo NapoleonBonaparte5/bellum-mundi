@@ -100,15 +100,15 @@ export function VirtualMuseum({ lang, eraData }: VirtualMuseumProps) {
       renderer.setSize(container.clientWidth, container.clientHeight)
       renderer.shadowMap.enabled = true
       renderer.shadowMap.type = THREE.PCFSoftShadowMap
-      renderer.toneMapping = THREE.ACESFilmicToneMapping
-      renderer.toneMappingExposure = 0.9
+      renderer.toneMapping = THREE.ReinhardToneMapping
+      renderer.toneMappingExposure = 1.8
       container.appendChild(renderer.domElement)
       rendererRef.current = renderer
 
       // Scene
       const scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x080810)
-      scene.fog = new THREE.Fog(0x080810, 18, 40)
+      scene.background = new THREE.Color(0x0F0C18)
+      scene.fog = new THREE.Fog(0x0F0C18, 20, 45)
       sceneRef.current = scene
 
       // Camera
@@ -141,11 +141,13 @@ export function VirtualMuseum({ lang, eraData }: VirtualMuseumProps) {
       scene.add(ceiling)
 
       // ── Lights ──
-      const ambient = new THREE.AmbientLight(0x222233, 0.8)
+      const ambient = new THREE.AmbientLight(0xFFEEDD, 1.2)
       scene.add(ambient)
-      const centerLight = new THREE.PointLight(palette.light, 1.2, 20, 2)
+      const hemi = new THREE.HemisphereLight(0x8899BB, 0x443322, 0.6)
+      scene.add(hemi)
+      const centerLight = new THREE.PointLight(palette.light, 3.0, 0, 0)
       centerLight.position.set(0, 5.5, 0)
-      centerLight.castShadow = true
+      centerLight.castShadow = false
       scene.add(centerLight)
 
       // ── Weapons on pedestals ──
@@ -191,7 +193,7 @@ export function VirtualMuseum({ lang, eraData }: VirtualMuseumProps) {
         wMesh.userData = { weaponIdx: i }
         scene.add(wMesh)
 
-        const spot = new THREE.SpotLight(palette.light, 1.5, 8, Math.PI / 8, 0.4)
+        const spot = new THREE.SpotLight(palette.light, 3.5, 12, Math.PI / 7, 0.3)
         spot.position.set(x * 0.6, 5.8, z * 0.6)
         spot.target.position.set(x, 1.5, z)
         spot.castShadow = false

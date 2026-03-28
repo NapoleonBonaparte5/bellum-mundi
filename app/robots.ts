@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/success'],
+        disallow: ['/api/', '/success', '/_next/'],
       },
     ],
     sitemap: 'https://bellummundi.com/sitemap.xml',

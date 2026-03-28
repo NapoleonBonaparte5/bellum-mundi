@@ -152,7 +152,7 @@ export interface BellumUser {
   id: string
   name: string
   email: string
-  plan: 'free' | 'premium'
+  plan: 'free' | 'premium' | 'educator' | 'institutional'
 }
 
 // ── AI RESPONSE ────────────────────────────────────────────

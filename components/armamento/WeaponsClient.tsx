@@ -4,7 +4,8 @@
 // Search · Era filter · AI analysis · 400+ weapons
 // ═══════════════════════════════════════════════════════════
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
 import type { FlatWeapon, Lang, EraId } from '@/lib/data/types'
 import { ERA_COLORS, ERA_EMOJIS } from '@/lib/data/helpers'
 import { getEraName, translateYear } from '@/lib/i18n'
@@ -83,6 +84,12 @@ const ERA_NAMES_EN: Record<EraId, string> = {
 // ══════════════════════════════════════════════════════════════
 export function WeaponsClient({ weapons, lang }: WeaponsClientProps) {
   const isES = lang === 'es'
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSessionToken(session?.access_token ?? null)
+    })
+  }, [])
 
   const [search, setSearch]         = useState('')
   const [activeEra, setActiveEra]   = useState<EraId | 'all'>('all')
@@ -126,8 +133,11 @@ export function WeaponsClient({ weapons, lang }: WeaponsClientProps) {
     try {
       const res = await fetch('/api/ai-query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, isPremium: false, lang }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
+        body: JSON.stringify({ prompt, lang }),
       })
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
 

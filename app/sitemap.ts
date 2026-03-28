@@ -18,12 +18,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
 
   const staticRoutes = [
-    { path: '',              priority: 1.0,  freq: 'weekly'  },
-    { path: '/batallas',     priority: 0.9,  freq: 'weekly'  },
-    { path: '/comandantes',  priority: 0.8,  freq: 'weekly'  },
-    { path: '/civilizaciones',priority: 0.7, freq: 'monthly' },
-    { path: '/biblioteca',   priority: 0.7,  freq: 'monthly' },
-    { path: '/mapa',         priority: 0.6,  freq: 'monthly' },
+    { path: '',               priority: 1.0,  freq: 'weekly'  },
+    { path: '/batallas',      priority: 0.9,  freq: 'weekly'  },
+    { path: '/comandantes',   priority: 0.8,  freq: 'weekly'  },
+    { path: '/civilizaciones',priority: 0.7,  freq: 'monthly' },
+    { path: '/biblioteca',    priority: 0.7,  freq: 'monthly' },
+    { path: '/mapa',          priority: 0.6,  freq: 'monthly' },
+    { path: '/chat',          priority: 0.7,  freq: 'weekly'  },
+    { path: '/museo',         priority: 0.6,  freq: 'monthly' },
+    { path: '/armamento',     priority: 0.7,  freq: 'weekly'  },
+    { path: '/timeline',      priority: 0.6,  freq: 'monthly' },
+    { path: '/educacion',     priority: 0.8,  freq: 'weekly'  },
   ] as const
 
   const staticUrls: MetadataRoute.Sitemap = LANGS.flatMap(lang =>

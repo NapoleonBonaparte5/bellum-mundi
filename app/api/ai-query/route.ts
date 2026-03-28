@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // BELLUM MUNDI — AI QUERY API ROUTE
 // POST /api/ai-query  — streaming response via ReadableStream
+// isPremium validated SERVER-SIDE via Supabase — never trusted from client
 // ═══════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,25 +15,18 @@ const anthropic = new Anthropic({
 
 // Rate limiting store (in-memory — use Upstash Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT_WINDOW = 60_000  // 1 minute
 
-const RATE_LIMIT_MAX = 20          // requests per window
-const RATE_LIMIT_WINDOW = 60_000   // 1 minute
-
-function getRateLimit(ip: string): { allowed: boolean; remaining: number } {
+function getRateLimit(key: string, max: number): { allowed: boolean; remaining: number } {
   const now = Date.now()
-  const entry = rateLimitStore.get(ip)
-
+  const entry = rateLimitStore.get(key)
   if (!entry || entry.resetAt < now) {
-    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
-    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 }
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
+    return { allowed: true, remaining: max - 1 }
   }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, remaining: 0 }
-  }
-
+  if (entry.count >= max) return { allowed: false, remaining: 0 }
   entry.count++
-  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count }
+  return { allowed: true, remaining: max - entry.count }
 }
 
 // ── SYSTEM PROMPTS ──────────────────────────────────────────
@@ -115,43 +109,80 @@ IMPORTANTE: Responde ÚNICAMENTE con bloques HTML de book-card. Sin texto introd
 const BOOKS_SYSTEM_PROMPT_EN = `You are an expert military historian. The user requests exactly 5 real published books about a historical-military topic.
 IMPORTANT: Respond ONLY with HTML book-card blocks. No introductory text, no markdown, no additional explanations. Only the 5 exact HTML blocks.`
 
+// ── SERVER-SIDE PREMIUM CHECK ───────────────────────────────
+async function checkPremium(token: string | null): Promise<boolean> {
+  if (!token) return false
+  try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    const { data: { user } } = await admin.auth.getUser(token)
+    if (!user) return false
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single()
+    return (
+      profile?.plan === 'premium' ||
+      profile?.plan === 'educator' ||
+      profile?.plan === 'institutional'
+    )
+  } catch {
+    return false
+  }
+}
+
 // ── HANDLER ────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { prompt, isPremium, booksOnly, lang } = body as {
-      prompt: unknown
-      isPremium?: boolean
+
+    // isPremium is NEVER accepted from client — validated server-side only
+    const { prompt, question, booksOnly, lang } = body as {
+      prompt?: unknown
+      question?: unknown    // alias used by some components
       booksOnly?: boolean
       lang?: string
     }
 
-    if (!prompt || typeof prompt !== 'string') {
+    // Accept both 'prompt' and 'question' field names for compatibility
+    const rawPrompt = prompt ?? question
+
+    if (!rawPrompt || typeof rawPrompt !== 'string') {
       return NextResponse.json({ error: 'Invalid prompt' }, { status: 400 })
     }
-    if (prompt.length > 3000) {
+    if (rawPrompt.length > 3000) {
       return NextResponse.json({ error: 'Prompt too long' }, { status: 400 })
     }
     // Injection guard — reject prompts with instruction override patterns
     const injectionPatterns = /ignore previous|disregard all|you are now|new instructions:|system:|forget your|override your|act as if|pretend you are/i
-    if (injectionPatterns.test(prompt)) {
+    if (injectionPatterns.test(rawPrompt)) {
       return NextResponse.json({ error: 'Invalid prompt content' }, { status: 400 })
     }
 
-    // isPremium must be validated server-side — never trust client claim
+    // Server-side premium validation from Authorization header
+    const authHeader = req.headers.get('authorization')
+    const token = authHeader?.replace('Bearer ', '') ?? null
+    const isPremium = await checkPremium(token)
 
-    // Rate limit only for main queries (books follow-up is free)
+    // Rate limit: 200/min for premium, 3/min for free
+    const RATE_MAX = isPremium ? 200 : 3
     if (!booksOnly) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
-      const { allowed } = getRateLimit(ip)
+      // Use token prefix as key for premium (prevents IP-hopping), IP for free
+      const rateKey = isPremium ? `premium:${(token ?? ip).slice(0, 24)}` : `free:${ip}`
+      const { allowed } = getRateLimit(rateKey, RATE_MAX)
       if (!allowed) {
         return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
       }
     }
 
     const isEN = lang === 'en'
-    const safePrompt = prompt.slice(0, 2000)
+    const safePrompt = rawPrompt.slice(0, 2000)
     const systemPrompt = booksOnly
       ? (isEN ? BOOKS_SYSTEM_PROMPT_EN : BOOKS_SYSTEM_PROMPT_ES)
       : (isEN ? MAIN_SYSTEM_PROMPT_EN : MAIN_SYSTEM_PROMPT_ES)
