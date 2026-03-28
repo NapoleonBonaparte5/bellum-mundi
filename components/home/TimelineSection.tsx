@@ -8,7 +8,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { Lang, Era, EraId } from '@/lib/data/types'
 import { ERAS } from '@/lib/data/eras'
-import { t } from '@/lib/i18n'
+import { t, getEraName } from '@/lib/i18n'
 import { ERA_EMOJIS, ERA_COLORS, slugify, calcPowerScore } from '@/lib/data/helpers'
 
 function useTypewriter(text: string, speed = 15) {
@@ -139,7 +139,7 @@ export function TimelineSection({ lang }: TimelineSectionProps) {
                     className="vtl-node"
                     style={{ left: `${pct}%` }}
                     onClick={() => selectEra(era)}
-                    title={era.name}
+                    title={getEraName(lang, era.id as EraId, era.name)}
                     aria-pressed={isActive}
                   >
                     <div
@@ -151,7 +151,7 @@ export function TimelineSection({ lang }: TimelineSectionProps) {
                     <div className="vtl-label font-cinzel text-[0.48rem] tracking-[0.1em] text-smoke mt-1 whitespace-nowrap"
                       style={{ marginTop: idx % 2 === 0 ? '-3.5rem' : '0.5rem' }}
                     >
-                      {era.name}
+                      {getEraName(lang, era.id as EraId, era.name)}
                     </div>
                   </button>
                 )
@@ -162,7 +162,7 @@ export function TimelineSection({ lang }: TimelineSectionProps) {
           {/* Era name display */}
           <div className="mt-6 text-center">
             <div className="font-cinzel text-sm tracking-[0.2em] text-gold">
-              {activeEra ? activeEra.name : t(lang, 'home.timeline.selectEra')}
+              {activeEra ? getEraName(lang, activeEra.id as EraId, activeEra.name) : t(lang, 'home.timeline.selectEra')}
             </div>
             {activeEra && (
               <div className="font-crimson italic text-smoke text-sm mt-1">{activeEra.years}</div>
