@@ -7,10 +7,9 @@ import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 
 import { HeroSection } from '@/components/home/HeroSection'
-import { StatsSection } from '@/components/home/StatsSection'
-import { FeaturesSection } from '@/components/home/FeaturesSection'
+import { EraCategoryBar } from '@/components/home/EraCategoryBar'
+import { EditorialSection } from '@/components/home/EditorialSection'
 import { TimelineSection } from '@/components/home/TimelineSection'
-import { WarQuoteSection } from '@/components/home/WarQuoteSection'
 import { PricingSection } from '@/components/home/PricingSection'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
 
@@ -78,17 +77,14 @@ export default async function HomePage({ params }: HomePageProps) {
       {/* Hero */}
       <HeroSection lang={l} />
 
-      {/* Stats */}
-      <StatsSection lang={l} />
+      {/* Era category bar */}
+      <EraCategoryBar lang={l} />
 
-      {/* Features */}
-      <FeaturesSection lang={l} />
+      {/* Editorial blocks */}
+      <EditorialSection lang={l} />
 
       {/* Timeline + Era explorer */}
       <TimelineSection lang={l} />
-
-      {/* War Quote */}
-      <WarQuoteSection lang={l} />
 
       {/* Pricing */}
       <PricingSection lang={l} />

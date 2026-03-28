@@ -213,6 +213,18 @@
   background: var(--steel) !important;
 }
 
+/* ── ERA CATEGORY BAR ───────────────────────────────────────── */
+.era-cat-item:hover {
+  background: rgba(201,168,76,0.06) !important;
+  border-bottom-color: rgba(201,168,76,0.5) !important;
+}
+
+/* ── EDITORIAL SECTION ──────────────────────────────────────── */
+.editorial-card:hover {
+  background: var(--steel) !important;
+  border-left-color: var(--crimson) !important;
+}
+
 /* ── BUTTONS ────────────────────────────────────────────────── */
 .btn-primary {
   background: var(--gold);

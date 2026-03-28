@@ -1,204 +1,229 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — HERO SECTION
-// Particle canvas + animated title + CTA buttons
+// BELLUM MUNDI — HERO SECTION (v2 — split layout)
+// Left: title + stats + CTAs  |  Right: featured battle grid
+// Canvas particle background retained
 // ═══════════════════════════════════════════════════════════
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
-import { t } from '@/lib/i18n'
 
-interface HeroSectionProps {
-  lang: Lang
-}
+const FEATURED_BATTLES: { year: string; name: string; nameES: string }[] = [
+  { year: '490 BC',   name: 'Battle of Marathon',     nameES: 'Batalla de Maratón' },
+  { year: '1453',     name: 'Fall of Constantinople', nameES: 'Caída de Constantinopla' },
+  { year: '1815',     name: 'Battle of Waterloo',     nameES: 'Batalla de Waterloo' },
+  { year: '1944',     name: 'D-Day · Normandy',       nameES: 'Día D · Normandía' },
+]
+
+interface HeroSectionProps { lang: Lang }
 
 export function HeroSection({ lang }: HeroSectionProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const isES = lang === 'es'
 
-  // ── Particle canvas animation ───────────────────────────
+  // ── Particle canvas animation ─────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let W = canvas.width = window.innerWidth
+    let W = canvas.width  = window.innerWidth
     let H = canvas.height = window.innerHeight
     let animId: number
 
-    const onResize = () => {
-      W = canvas.width = window.innerWidth
-      H = canvas.height = window.innerHeight
-    }
+    const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
     window.addEventListener('resize', onResize)
 
-    // Three particle types: star (twinkle), dust (horizontal float), ember (rises)
-    type ParticleType = 'star' | 'dust' | 'ember'
-    interface Particle {
-      x: number; y: number; vx: number; vy: number
-      r: number; a: number; aBase: number
-      type: ParticleType; phase: number; speed: number
-    }
+    type PType = 'star' | 'dust' | 'ember'
+    interface P { x:number;y:number;vx:number;vy:number;r:number;a:number;aBase:number;type:PType;phase:number;speed:number }
 
-    function makeParticle(): Particle {
+    const makeP = (): P => {
       const roll = Math.random()
-      const type: ParticleType = roll < 0.5 ? 'star' : roll < 0.8 ? 'dust' : 'ember'
-      return {
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: type === 'dust' ? (Math.random() * 0.4 + 0.1) : (Math.random() - 0.5) * 0.2,
-        vy: type === 'ember' ? -(Math.random() * 0.5 + 0.2) : (Math.random() - 0.5) * 0.15,
-        r: type === 'star' ? (Math.random() * 1.2 + 0.6) : (Math.random() * 0.8 + 0.3),
-        a: Math.random() * 0.35 + 0.08,
-        aBase: Math.random() * 0.35 + 0.08,
-        type,
-        phase: Math.random() * Math.PI * 2,
-        speed: Math.random() * 0.02 + 0.005,
-      }
+      const type: PType = roll < 0.5 ? 'star' : roll < 0.8 ? 'dust' : 'ember'
+      return { x:Math.random()*W, y:Math.random()*H,
+        vx: type==='dust'?(Math.random()*0.4+0.1):(Math.random()-0.5)*0.2,
+        vy: type==='ember'?-(Math.random()*0.5+0.2):(Math.random()-0.5)*0.15,
+        r: type==='star'?(Math.random()*1.2+0.6):(Math.random()*0.8+0.3),
+        a:Math.random()*0.35+0.08, aBase:Math.random()*0.35+0.08,
+        type, phase:Math.random()*Math.PI*2, speed:Math.random()*0.02+0.005 }
     }
 
-    const pts: Particle[] = Array.from({ length: 100 }, makeParticle)
+    const pts: P[] = Array.from({ length: 90 }, makeP)
     let tick = 0
 
     function draw() {
       if (!ctx) return
-      ctx.clearRect(0, 0, W, H)
+      ctx.clearRect(0,0,W,H)
       tick++
+      const g = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)/1.5)
+      g.addColorStop(0,'rgba(50,20,5,0.7)'); g.addColorStop(0.5,'rgba(20,8,3,0.85)'); g.addColorStop(1,'rgba(5,3,1,1)')
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H)
 
-      // Radial gradient background
-      const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) / 1.5)
-      g.addColorStop(0, 'rgba(50,20,5,0.6)')
-      g.addColorStop(0.5, 'rgba(20,8,3,0.8)')
-      g.addColorStop(1, 'rgba(5,3,1,1)')
-      ctx.fillStyle = g
-      ctx.fillRect(0, 0, W, H)
-
-      // Particles
       pts.forEach(p => {
-        if (p.type === 'star') {
-          // Sinusoidal twinkle
-          p.a = p.aBase * (0.5 + 0.5 * Math.sin(tick * p.speed + p.phase))
-          p.x += p.vx
-          p.y += p.vy
-        } else if (p.type === 'dust') {
-          // Horizontal float with gentle undulation
-          p.x += p.vx
-          p.y += Math.sin(tick * p.speed + p.phase) * 0.3
-          if (p.x > W + 10) { p.x = -10; p.y = Math.random() * H }
-        } else {
-          // Ember rises and fades
-          p.vy -= 0.002
-          p.x += p.vx + Math.sin(tick * p.speed + p.phase) * 0.4
-          p.y += p.vy
-          p.a = p.aBase * Math.max(0, p.y / H)
-          if (p.y < -10) {
-            p.y = H + 10
-            p.x = Math.random() * W
-            p.vy = -(Math.random() * 0.5 + 0.2)
-            p.a = p.aBase
-          }
-        }
-        if (p.x < -10) p.x = W + 10
-        if (p.x > W + 10) p.x = -10
-        if (p.y < -10 && p.type !== 'ember') { p.y = H + 10 }
-        if (p.y > H + 10 && p.type !== 'ember') { p.y = -10 }
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = p.type === 'ember'
-          ? `rgba(220,140,60,${p.a})`
-          : `rgba(201,168,76,${p.a})`
-        ctx.fill()
+        if (p.type==='star') { p.a=p.aBase*(0.5+0.5*Math.sin(tick*p.speed+p.phase)); p.x+=p.vx; p.y+=p.vy }
+        else if (p.type==='dust') { p.x+=p.vx; p.y+=Math.sin(tick*p.speed+p.phase)*0.3; if(p.x>W+10){p.x=-10;p.y=Math.random()*H} }
+        else { p.vy-=0.002; p.x+=p.vx+Math.sin(tick*p.speed+p.phase)*0.4; p.y+=p.vy; p.a=p.aBase*Math.max(0,p.y/H); if(p.y<-10){p.y=H+10;p.x=Math.random()*W;p.vy=-(Math.random()*0.5+0.2);p.a=p.aBase} }
+        if(p.x<-10)p.x=W+10; if(p.x>W+10)p.x=-10
+        if(p.y<-10&&p.type!=='ember')p.y=H+10; if(p.y>H+10&&p.type!=='ember')p.y=-10
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2)
+        ctx.fillStyle=p.type==='ember'?`rgba(220,140,60,${p.a})`:`rgba(201,168,76,${p.a})`; ctx.fill()
       })
 
-      // Connecting lines (stars only)
-      const stars = pts.filter(p => p.type === 'star')
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const dx = stars[i].x - stars[j].x
-          const dy = stars[i].y - stars[j].y
-          const d = Math.sqrt(dx * dx + dy * dy)
-          if (d < 110) {
-            ctx.beginPath()
-            ctx.moveTo(stars[i].x, stars[i].y)
-            ctx.lineTo(stars[j].x, stars[j].y)
-            ctx.strokeStyle = `rgba(201,168,76,${0.07 * (1 - d / 110)})`
-            ctx.lineWidth = 0.5
-            ctx.stroke()
-          }
-        }
+      const stars = pts.filter(p=>p.type==='star')
+      for(let i=0;i<stars.length;i++) for(let j=i+1;j<stars.length;j++) {
+        const dx=stars[i].x-stars[j].x, dy=stars[i].y-stars[j].y, d=Math.sqrt(dx*dx+dy*dy)
+        if(d<110){ ctx.beginPath(); ctx.moveTo(stars[i].x,stars[i].y); ctx.lineTo(stars[j].x,stars[j].y)
+          ctx.strokeStyle=`rgba(201,168,76,${0.06*(1-d/110)})`; ctx.lineWidth=0.5; ctx.stroke() }
       }
-
       animId = requestAnimationFrame(draw)
     }
-
     draw()
-
-    return () => {
-      window.removeEventListener('resize', onResize)
-      cancelAnimationFrame(animId)
-    }
+    return () => { window.removeEventListener('resize',onResize); cancelAnimationFrame(animId) }
   }, [])
 
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col justify-center items-center text-center relative overflow-hidden px-8 py-16 isolate"
+      className="relative overflow-hidden isolate"
+      style={{ minHeight: '100vh' }}
     >
-      {/* Canvas */}
-      <canvas
-        ref={canvasRef}
+      {/* Canvas background */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true" />
+
+      {/* Tactical grid overlay */}
+      <div
         className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='0.4' opacity='0.06'%3E%3Cpath d='M0 30h60M30 0v60'/%3E%3C/g%3E%3C/svg%3E")`,
+        }}
         aria-hidden="true"
       />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl">
-        <p className="font-cinzel text-[0.75rem] tracking-[0.5em] text-gold uppercase mb-8 opacity-0 animate-[fadeUp_1s_0.3s_forwards]">
-          {t(lang, 'home.hero.ornament')}
-        </p>
-
-        <h1 className="font-cinzel font-black text-cream leading-[0.9] tracking-tight [text-shadow:0_0_80px_rgba(201,168,76,0.3),0_4px_40px_rgba(0,0,0,0.8)] opacity-0 animate-[fadeUp_1s_0.5s_forwards]"
-          style={{ fontSize: 'clamp(3.5rem,10vw,9rem)' }}
-        >
-          BELLUM <span className="text-gold">MUNDI</span>
-        </h1>
-
-        <p
-          className="font-playfair italic text-parchment-dark mt-6 tracking-[0.05em] opacity-0 animate-[fadeUp_1s_0.7s_forwards]"
-          style={{ fontSize: 'clamp(1.1rem,2.5vw,1.6rem)' }}
-          dangerouslySetInnerHTML={{ __html: t(lang, 'home.hero.subtitle') }}
-        />
-
-        {/* Gold rule */}
-        <div className="w-[200px] h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto my-8 opacity-0 animate-[fadeUp_1s_0.9s_forwards]" />
-
-        <p className="font-cinzel text-[0.7rem] tracking-[0.4em] text-smoke opacity-0 animate-[fadeUp_1s_1.1s_forwards]">
-          {t(lang, 'home.hero.meta')}
-        </p>
-
-        <div className="flex gap-4 justify-center mt-10 flex-wrap opacity-0 animate-[fadeUp_1s_1.3s_forwards] relative z-10">
-          <button
-            className="btn-primary"
-            onClick={() => document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' })}
+      {/* Split layout */}
+      <div
+        className="relative z-10 max-w-content mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-16"
+        style={{ minHeight: '100vh', paddingTop: '7rem', paddingBottom: '5rem' }}
+      >
+        {/* ── LEFT: text column ── */}
+        <div className="flex-1 flex flex-col items-start">
+          {/* Eyebrow */}
+          <p
+            className="font-cinzel text-gold uppercase mb-6"
+            style={{ fontSize: '0.68rem', letterSpacing: '0.45em' }}
           >
-            {t(lang, 'home.hero.explore')}
-          </button>
-          <Link href={`/${lang}#pricing`} className="btn-ghost">
-            {t(lang, 'home.hero.premium')}
-          </Link>
+            Encyclopaedia Militaris Universalis
+          </p>
+
+          {/* Title */}
+          <h1
+            className="font-cinzel font-black text-cream leading-none mb-6"
+            style={{
+              fontSize: 'clamp(3rem,8vw,7rem)',
+              letterSpacing: '-0.02em',
+              textShadow: '0 0 60px rgba(201,168,76,0.25), 0 4px 30px rgba(0,0,0,0.8)',
+            }}
+          >
+            BELLUM{' '}
+            <span style={{ background: 'linear-gradient(135deg,#C9A84C,#E8C97A,#C9A84C)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+              MUNDI
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            className="font-playfair italic text-parchment-dark mb-8"
+            style={{ fontSize: 'clamp(1rem,2vw,1.35rem)', lineHeight: 1.6, maxWidth: '520px' }}
+          >
+            {isES
+              ? 'Historia militar del mundo — desde los primeros conflictos prehistóricos hasta la guerra moderna. Análisis con IA, mapas interactivos y 12.000 años de estrategia.'
+              : 'Military history of the world — from the first prehistoric conflicts to modern warfare. AI-powered analysis, interactive maps and 12,000 years of strategy.'}
+          </p>
+
+          {/* CTAs */}
+          <div className="flex gap-4 flex-wrap mb-10">
+            <Link
+              href={`/${lang}/batallas`}
+              className="btn-primary"
+              style={{ fontSize: '0.65rem', letterSpacing: '0.2em' }}
+            >
+              {isES ? '⚔ Explorar Batallas' : '⚔ Explore Battles'}
+            </Link>
+            <Link
+              href={`/${lang}/comandantes`}
+              className="btn-ghost"
+              style={{ fontSize: '0.65rem', letterSpacing: '0.2em' }}
+            >
+              {isES ? '👑 Ver Comandantes' : '👑 Browse Commanders'}
+            </Link>
+          </div>
+
+          {/* Inline stats bar */}
+          <div
+            className="flex flex-wrap gap-6 items-center"
+            style={{ borderTop: '1px solid rgba(201,168,76,0.2)', paddingTop: '1.5rem' }}
+          >
+            {[
+              { n: '890+', label: isES ? 'Batallas' : 'Battles' },
+              { n: '500+', label: isES ? 'Comandantes' : 'Commanders' },
+              { n: '118',  label: isES ? 'Civilizaciones' : 'Civilizations' },
+              { n: '12K',  label: isES ? 'Años de Historia' : 'Years of History' },
+            ].map(s => (
+              <div key={s.label} className="flex flex-col items-center">
+                <span className="font-cinzel font-black text-gold" style={{ fontSize: '1.4rem', lineHeight: 1 }}>{s.n}</span>
+                <span className="font-cinzel text-smoke uppercase" style={{ fontSize: '0.5rem', letterSpacing: '0.15em', marginTop: '0.2rem' }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── RIGHT: featured battle grid ── */}
+        <div
+          className="lg:w-[420px] xl:w-[480px] w-full flex-shrink-0 grid grid-cols-2 gap-px"
+          style={{ background: 'rgba(201,168,76,0.08)' }}
+          aria-label={isES ? 'Batallas destacadas' : 'Featured battles'}
+        >
+          {FEATURED_BATTLES.map((b, i) => (
+            <div
+              key={b.year}
+              className="bg-slate p-5 flex flex-col gap-2"
+              style={{
+                animation: `fadeUp 0.6s ${0.3 + i * 0.15}s both`,
+                borderLeft: '2px solid rgba(201,168,76,0.15)',
+              }}
+            >
+              <span
+                className="font-cinzel text-gold"
+                style={{ fontSize: '0.6rem', letterSpacing: '0.18em' }}
+              >
+                {b.year}
+              </span>
+              <span
+                className="font-playfair font-bold text-cream"
+                style={{ fontSize: '0.95rem', lineHeight: 1.3 }}
+              >
+                {isES ? b.nameES : b.name}
+              </span>
+              <span
+                className="font-cinzel text-gold/40 mt-auto"
+                style={{ fontSize: '0.55rem', letterSpacing: '0.12em' }}
+              >
+                {isES ? 'Ver análisis →' : 'View analysis →'}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Scroll indicator */}
       <div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-smoke font-cinzel text-[0.6rem] tracking-[0.4em] opacity-0 animate-[fadeUp_1s_1.7s_forwards] pointer-events-none z-10"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-smoke pointer-events-none z-10"
+        style={{ fontFamily: 'var(--font-cinzel)', fontSize: '0.6rem', letterSpacing: '0.4em' }}
         aria-hidden="true"
       >
-        <span>{t(lang, 'home.hero.scroll')}</span>
-        <div className="w-px h-[60px] bg-gradient-to-b from-gold to-transparent animate-scroll-pulse" />
+        <span className="opacity-60">{isES ? 'DESCENDER' : 'SCROLL'}</span>
+        <div className="w-px h-[50px] bg-gradient-to-b from-gold to-transparent animate-scroll-pulse" />
       </div>
     </section>
   )

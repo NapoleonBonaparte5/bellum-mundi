@@ -9,7 +9,7 @@ import Link from 'next/link'
 import type { FlatCivilization, Lang, EraId } from '@/lib/data/types'
 import { ERA_EMOJIS, calcPowerScore } from '@/lib/data/helpers'
 import { ChipScroller } from '@/components/ui/ChipScroller'
-import { getEraName, getCivName } from '@/lib/i18n'
+import { getEraName, getCivName, translateYear } from '@/lib/i18n'
 
 interface CivsClientProps {
   civs: FlatCivilization[]
@@ -120,7 +120,7 @@ export function CivsClient({ civs, eras, lang }: CivsClientProps) {
                   <span className="text-3xl leading-none">{civ.flag}</span>
                   <div className="flex-1 min-w-0">
                     <div className="font-playfair font-bold text-cream text-base leading-tight">{getCivName(lang, civ.name)}</div>
-                    <div className="font-cinzel text-[0.48rem] tracking-[0.1em] text-smoke uppercase mt-0.5">{civ.period}</div>
+                    <div className="font-cinzel text-[0.48rem] tracking-[0.1em] text-smoke uppercase mt-0.5">{translateYear(lang, civ.period)}</div>
                   </div>
                   {/* Score badge */}
                   <div className="flex-shrink-0 text-right">

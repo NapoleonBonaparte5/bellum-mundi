@@ -7,11 +7,23 @@
 
 import type { Lang } from '../data/types'
 
-export function autoTranslateDesc(text: string, lang: Lang): string {
-  if (!text || lang !== 'en') return text;
+// ── FUZZY NORMALIZE ──────────────────────────────────────────
+function normalize(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+}
 
-  // ── COMPLETE PHRASE DICTIONARY (covers every desc in the dataset) ──
-  const FULL = {
+let _normalizedFULL: Map<string, string> | null = null
+function getNormalizedFULL(): Map<string, string> {
+  if (_normalizedFULL) return _normalizedFULL
+  _normalizedFULL = new Map()
+  for (const [es, en] of Object.entries(FULL)) {
+    _normalizedFULL.set(normalize(es), en)
+  }
+  return _normalizedFULL
+}
+
+// ── COMPLETE PHRASE DICTIONARY (module scope — created once) ──
+const FULL: Record<string, string> = {
     // PREHISTORIC
     '61 esqueletos con marcas de violencia — la masacre más antigua documentada': '61 skeletons with marks of violence — the oldest documented massacre',
     'Evidencias de violencia sistemática en la primera aldea permanente': 'Evidence of systematic violence in the first permanent village',
@@ -1496,11 +1508,19 @@ export function autoTranslateDesc(text: string, lang: Lang): string {
     'En abril, el RFC pierde 245 aviones y 319 tripulantes en un mes. Esperanza de vida del piloto: 11 días. Los Richthofen\'s Flying Circus dominan el cielo.': 'In April, the RFC loses 245 aircraft and 319 crew in one month. Pilot life expectancy: 11 days. The Richthofen\'s Flying Circus dominates the sky.',
     'Wavell y O\'Connor con 36.000 hombres destruyen un ejército italiano de 150.000. Capturan 130.000 prisioneros. Mussolini pide ayuda a Hitler.': 'Wavell and or\'Connor with 36,000 men destroy an Italian army of 150,000. They capture 130,000 prisoners. Mussolini asks Hitler for help.',
 
-  };
+    // ── ENTRIES ADDED (were missing from original dict) ─────
+    'El Gran Cañón de Urbano derrumba las murallas — fin de Bizancio': 'Urban\'s Great Cannon breaches the walls — end of Byzantium',
+    'El error de Ney, la Guardia Imperial y el ejército prusiano — fin de Napoleón': 'Ney\'s error, the Imperial Guard and the Prussian army — end of Napoleon',
 
-  // Try exact match first
-  let result = FULL[text.trim()];
-  if (result) return result;
+};
+
+export function autoTranslateDesc(text: string, lang: Lang): string {
+  if (!text || lang !== 'en') return text;
+
+  // Exact match, then normalized fuzzy match
+  const trimmed = text.trim()
+  const result = FULL[trimmed] ?? getNormalizedFULL().get(normalize(trimmed))
+  if (result) return result
 
   // Try substring replacements for partial matches — longest first
   let t = text;
