@@ -27,7 +27,6 @@ export interface Locale {
     educacion: string
     timeline: string
     weapons: string
-    museo: string
     library: string
     civs: string
     premium: string
@@ -100,6 +99,9 @@ export interface Locale {
       planPremiumBadge: string
       planAnnualBadge: string
       planAnnualLabel: string
+      planEduName: string
+      planEduDesc: string
+      planEduBadge: string
     }
     newsletter: {
       eyebrow: string
@@ -122,6 +124,12 @@ export interface Locale {
       compareSlot1: string
       compareSlot2: string
       compareGo: string
+      advancedFilters: string
+      sortChrono: string
+      sortChronoDesc: string
+      sortAlpha: string
+      savedCollection: string
+      removedCollection: string
     }
     commanders: {
       eyebrow: string
@@ -190,6 +198,13 @@ export interface Locale {
     pickerMore: string
     backBtn: string
     historyMilitary: string
+    analysisTab: string
+    simulatorTab: string
+    view3dTab: string
+    comingSoon: string
+    viz3dTitle: string
+    viz3dDesc: string
+    viz3dBadge: string
   }
   search: {
     battles: string

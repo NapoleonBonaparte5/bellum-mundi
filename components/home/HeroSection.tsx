@@ -235,7 +235,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
           </div>
 
           {/* Inline stats bar */}
-          <div className="flex flex-wrap gap-6 items-center" style={{ borderTop: '1px solid rgba(201,168,76,0.2)', paddingTop: '1.5rem' }}>
+          <div className="stats-hero flex flex-wrap gap-6 items-center" style={{ borderTop: '1px solid rgba(201,168,76,0.2)', paddingTop: '1.5rem' }}>
             {[
               { n: '890+', label: isES ? 'Batallas' : 'Battles' },
               { n: '500+', label: isES ? 'Comandantes' : 'Commanders' },

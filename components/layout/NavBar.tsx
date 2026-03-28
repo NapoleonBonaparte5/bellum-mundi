@@ -16,7 +16,7 @@ import type { BellumUser } from '@/lib/data/types'
 import { getStreak, getSavedCount } from '@/lib/utils/collection'
 import {
   IconSword, IconCrown, IconMap, IconScroll, IconColumns,
-  IconChat, IconGraduate, IconTimeline, IconDagger, IconMuseum,
+  IconChat, IconGraduate, IconTimeline, IconDagger,
   IconStar, IconChevronDown,
 } from '@/components/ui/Icons'
 
@@ -45,7 +45,6 @@ const NAV_SECONDARY = (lang: Lang) => [
   { key: 'educacion', label: t(lang, 'nav.educacion'), href: `/${lang}/educacion`,  icon: <IconGraduate size={13} /> },
   { key: 'timeline',  label: t(lang, 'nav.timeline'),  href: `/${lang}/timeline`,   icon: <IconTimeline size={13} /> },
   { key: 'weapons',   label: t(lang, 'nav.weapons'),   href: `/${lang}/armamento`,  icon: <IconDagger size={13} /> },
-  { key: 'museo',     label: t(lang, 'nav.museo'),     href: `/${lang}/museo`,      icon: <IconMuseum size={13} /> },
 ]
 
 // All links (for mobile menu)

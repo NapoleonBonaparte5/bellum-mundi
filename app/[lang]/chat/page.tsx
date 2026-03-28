@@ -24,5 +24,9 @@ export async function generateMetadata({ params }: ChatPageProps): Promise<Metad
 
 export default async function ChatPage({ params }: ChatPageProps) {
   const { lang } = await params
-  return <ChatInterface lang={lang} />
+  return (
+    <div suppressHydrationWarning>
+      <ChatInterface lang={lang} />
+    </div>
+  )
 }

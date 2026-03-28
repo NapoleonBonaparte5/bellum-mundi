@@ -25,7 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/biblioteca',    priority: 0.7,  freq: 'monthly' },
     { path: '/mapa',          priority: 0.6,  freq: 'monthly' },
     { path: '/chat',          priority: 0.7,  freq: 'weekly'  },
-    { path: '/museo',         priority: 0.6,  freq: 'monthly' },
     { path: '/armamento',     priority: 0.7,  freq: 'weekly'  },
     { path: '/timeline',      priority: 0.6,  freq: 'monthly' },
     { path: '/educacion',     priority: 0.8,  freq: 'weekly'  },

@@ -10,9 +10,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/success', '/_next/'],
+        disallow: ['/api/', '/success', '/_next/', '/museo'],
       },
     ],
     sitemap: 'https://bellummundi.com/sitemap.xml',
+    host: 'https://bellummundi.com',
   }
 }

@@ -13,16 +13,9 @@ import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { processContent } from '@/lib/utils/processContent'
-import dynamic from 'next/dynamic'
+import { t } from '@/lib/i18n'
 
-const BattleVisualization = dynamic(
-  () => import('@/components/battles/BattleVisualization').then(m => m.BattleVisualization),
-  { ssr: false, loading: () => (
-    <div className="mb-12 border border-gold/20 bg-slate/30 flex items-center justify-center" style={{ height: 480 }}>
-      <div className="loading-dots"><span /><span /><span /></div>
-    </div>
-  )}
-)
+// const BattleVisualization = dynamic(...)  — disponible próximamente
 
 const LS_KEY = 'bm_queries_used'
 const PREMIUM_THRESHOLD = 3 // show banner after this many queries
@@ -315,7 +308,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
             {battle.tag && <div className="era-badge mt-4">{getTagName(lang, battle.tag)}</div>}
           </div>
           {/* Right: 2×2 quick-stats panel */}
-          <div style={{
+          <div className="battle-stats-quick" style={{
             flex: '0 0 auto',
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -345,7 +338,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
         <div>
 
           {/* Tab bar */}
-          <div className="flex border-b border-gold/20 mb-8 gap-0">
+          <div className="battle-tabs-row flex border-b border-gold/20 mb-8 gap-0">
             <button
               onClick={() => setActiveTab('analysis')}
               className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
@@ -354,7 +347,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                   : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
               }`}
             >
-              ⚡ {isES ? 'Análisis IA' : 'AI Analysis'}
+              {t(lang, 'detail.analysisTab')}
             </button>
             <button
               onClick={() => setActiveTab('counterfactual')}
@@ -364,17 +357,30 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                   : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
               }`}
             >
-              🔀 {isES ? 'Simulador Contrafactual' : 'Counterfactual Simulator'}
+              🔀 {t(lang, 'detail.simulatorTab')}
             </button>
+            {/* Tab Vista 3D — Próximamente */}
             <button
-              onClick={() => { setActiveTab('viz3d'); setSidebarOpen(false) }}
-              className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
-                activeTab === 'viz3d'
-                  ? 'text-gold border-gold'
-                  : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
-              }`}
+              disabled
+              className="font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px text-smoke/40 border-transparent cursor-not-allowed relative"
+              title={t(lang, 'detail.comingSoon')}
             >
-              🗺️ {isES ? 'Vista 3D' : '3D View'}
+              {t(lang, 'detail.view3dTab')}
+              <span style={{
+                position: 'absolute',
+                top: '4px',
+                right: '4px',
+                background: 'var(--crimson)',
+                color: 'var(--cream)',
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.38rem',
+                letterSpacing: '0.1em',
+                padding: '0.1rem 0.3rem',
+                textTransform: 'uppercase',
+                borderRadius: '1px',
+              }}>
+                {isES ? 'Pronto' : 'Soon'}
+              </span>
             </button>
           </div>
 
@@ -500,9 +506,53 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
             </div>
           )}
 
-          {/* ── 3D VISUALIZATION TAB ── */}
+          {/* ── 3D VISUALIZATION TAB — Próximamente ── */}
           {activeTab === 'viz3d' && (
-            <BattleVisualization battle={battle} lang={lang} />
+            <div className="py-20 text-center">
+              <div style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.65rem',
+                letterSpacing: '0.4em',
+                color: 'var(--gold)',
+                textTransform: 'uppercase',
+                marginBottom: '1.5rem',
+                opacity: 0.7,
+              }}>
+                {t(lang, 'detail.comingSoon')}
+              </div>
+              <h3 style={{
+                fontFamily: 'var(--font-playfair)',
+                fontWeight: 700,
+                fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+                color: 'var(--cream)',
+                marginBottom: '1rem',
+              }}>
+                {t(lang, 'detail.viz3dTitle')}
+              </h3>
+              <p style={{
+                fontFamily: 'var(--font-crimson)',
+                fontStyle: 'italic',
+                fontSize: '1.05rem',
+                color: 'var(--mist)',
+                maxWidth: '480px',
+                margin: '0 auto 2rem',
+                lineHeight: 1.7,
+              }}>
+                {t(lang, 'detail.viz3dDesc')}
+              </p>
+              <div style={{
+                display: 'inline-block',
+                border: '1px solid rgba(201,168,76,0.3)',
+                padding: '0.75rem 2rem',
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: '0.6rem',
+                letterSpacing: '0.2em',
+                color: 'rgba(201,168,76,0.5)',
+                textTransform: 'uppercase',
+              }}>
+                {t(lang, 'detail.viz3dBadge')}
+              </div>
+            </div>
           )}
 
           {/* ── ANALYSIS TAB (existing content) ── */}

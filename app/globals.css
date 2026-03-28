@@ -1488,32 +1488,149 @@ input[type="text"]:focus {
   to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* ── FIX 2 — Mobile grids: single column ───────────────── */
-@media (max-width: 900px) {
-  .battles-grid          { grid-template-columns: 1fr !important; }
-  .commanders-grid       { grid-template-columns: 1fr !important; }
-  .cards-grid            { grid-template-columns: 1fr !important; }
-  .cards-grid-commanders { grid-template-columns: 1fr !important; }
-  .index-grid            { grid-template-columns: 1fr !important; }
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE SYSTEM — Bellum Mundi
+   Breakpoints: 768px (tablet) · 480px (teléfono) · hover:none (touch)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Tipografía global */
+  body { font-size: 15px; }
+  p { line-height: 1.65; }
+
+  /* Contenedores */
+  .container-bm { padding: 0 1rem; }
+
+  /* Todas las grids a 1 columna */
+  .battles-grid,
+  .commanders-grid,
+  .cards-grid,
+  .cards-grid-commanders,
+  .index-grid,
+  .era-cards-grid,
+  .legendary-grid { grid-template-columns: 1fr !important; }
+
+  .stats-row    { grid-template-columns: repeat(2, 1fr) !important; }
+  .pricing-grid { grid-template-columns: 1fr !important; }
+  .compare-panel { grid-template-columns: 1fr !important; }
+  .detail-grid  { grid-template-columns: 1fr !important; }
+
+  /* Hero layout: columna única */
+  #hero .flex.lg\:flex-row { flex-direction: column !important; }
+  #hero .lg\:w-\[400px\],
+  #hero .xl\:w-\[460px\] { width: 100% !important; max-height: 280px; }
+
+  /* Panel de batallas en el hero: altura fija en mobile */
+  #hero [style*="height: 440px"] { height: 240px !important; }
+
+  /* Era category bar */
+  .era-cat-item { min-width: 80px !important; padding: 0.5rem 0.5rem !important; }
+
+  /* Cards de batalla */
+  .card-battle { padding: 0.9rem 1rem; }
+  .card-bm { padding: 1rem; }
+  .card-title, .card-bm .card-title { font-size: 1.05rem !important; }
+  .card-combatants { font-size: 0.88rem !important; }
+  .card-desc { font-size: 0.82rem !important; }
+  .legendary-card { height: 180px !important; }
+
+  /* Commander cards */
+  .commander-card-fixed { min-height: auto !important; padding: 1rem; }
+  .pentagon-container svg { width: 70px !important; height: 70px !important; }
+
+  /* Sidebar de batalla: ocultar en mobile */
+  .detail-sidebar { display: none !important; }
+  .detail-sidebar-toggle { display: none !important; }
+
+  /* Tabs de batalla: scroll horizontal */
+  .battle-tabs-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .battle-tabs-row::-webkit-scrollbar { display: none; }
+
+  /* Chat drawer: ancho completo */
+  .chat-fab-drawer { width: 100vw !important; }
+
+  /* Chat FAB: esquina izquierda */
+  .chat-fab { bottom: 1rem !important; left: 1rem !important; width: 48px !important; height: 48px !important; font-size: 1.1rem !important; }
+
+  /* Back to top: esquina derecha */
+  .back-to-top { bottom: 1rem !important; right: 1rem !important; width: 38px !important; height: 38px !important; }
+
+  /* Mapa */
+  .map-mobile-height { height: 50vh !important; min-height: 300px; }
+
+  /* Compare panel commanders */
+  .compare-panel .radar-svg { width: 60px !important; height: 60px !important; }
+
+  /* Pricing */
+  #pricing { padding: 2rem 1rem !important; }
+
+  /* Timeline */
+  .vtl-track { margin: 40px 16px 35px !important; }
+
+  /* Modal */
+  .modal-box { margin: 0.5rem !important; max-width: calc(100vw - 1rem) !important; }
+  .paywall-box { padding: 1.5rem !important; max-width: calc(100vw - 2rem) !important; }
+
+  /* Eyebrow */
+  .eyebrow { letter-spacing: 0.3em !important; font-size: 0.65rem !important; }
+
+  /* Chip scroll */
+  .chips-scroll .chip { font-size: 0.65rem !important; padding: 0.35rem 0.7rem !important; }
+
+  /* NavBar */
+  nav#nav .nav-logo { font-size: 0.95rem !important; }
+
+  /* Footer */
+  footer .grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
 }
 
-/* Mobile adjustments */
-@media (max-width: 640px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .cards-grid-commanders {
-    grid-template-columns: 1fr;
-  }
-  .pricing-grid          { grid-template-columns: 1fr !important; grid-template-columns: 1fr !important; }
-  .stats-row             { grid-template-columns: repeat(2, 1fr) !important; }
-  .index-header {
-    min-height: 28vh;
-  }
-  .back-to-top {
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
+@media (max-width: 480px) {
+  body { font-size: 14px; }
+
+  /* Título hero */
+  h1.font-cinzel { font-size: clamp(2rem, 13vw, 3.5rem) !important; }
+
+  /* Stats en hero */
+  .stats-hero { gap: 1rem !important; }
+  .stats-hero .text-gold { font-size: 1.1rem !important; }
+
+  /* Chips */
+  .chip { font-size: 0.58rem !important; padding: 0.3rem 0.6rem !important; min-height: 34px; }
+
+  /* Batalla individual */
+  .battle-info-bar { flex-direction: column !important; gap: 0.5rem !important; }
+  .battle-stats-quick { grid-template-columns: 1fr 1fr !important; }
+
+  /* Tabs */
+  .battle-tabs-row button { font-size: 0.52rem !important; padding: 0.6rem 0.75rem !important; }
+
+  /* Pricing */
+  #pricing button, #pricing a { width: 100% !important; }
+}
+
+/* Touch devices */
+@media (hover: none) {
+  .card-battle:hover,
+  .card-commander:hover,
+  .card-bm:hover,
+  .legendary-card:hover { transform: none !important; box-shadow: none !important; }
+
+  .btn-primary:hover::after { animation: none !important; }
+
+  /* Área táctil mínima 44px */
+  button,
+  a[href],
+  .chip,
+  .btn-primary,
+  .btn-ghost { min-height: 44px; }
+  .chip { min-height: 36px; }
+
+  nav a { padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════

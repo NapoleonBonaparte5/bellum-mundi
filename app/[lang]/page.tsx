@@ -31,9 +31,14 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
     : 'La enciclopedia más completa de historia militar en español. 8.000+ batallas, 1.200+ comandantes, mapas interactivos y análisis con IA.'
   const ogImage = `${BASE}/opengraph-image.png`
 
+  const keywords = isEN
+    ? ['military history', 'historical battles', 'military commanders', 'world wars strategy', 'ancient warfare', 'AI military analysis', 'battle encyclopedia']
+    : ['historia militar', 'batallas históricas', 'comandantes militares', 'guerras mundiales', 'estrategia militar', 'análisis IA historia', 'enciclopedia batallas']
+
   return {
     title,
     description,
+    keywords,
     alternates: {
       canonical: pageUrl,
       languages: { es: `${BASE}/es`, en: `${BASE}/en`, 'x-default': `${BASE}/es` },
@@ -69,8 +74,8 @@ export default async function HomePage({ params }: HomePageProps) {
         <span
           dangerouslySetInnerHTML={{
             __html: l === 'en'
-              ? '⚔ New: <span class="text-gold-light font-bold">The Battle of Waterloo</span> — Full AI Analysis · Over <span class="text-gold-light font-bold">1,200</span> newsletter subscribers this week'
-              : '⚔ Nuevo: <span class="text-gold-light font-bold">La Batalla de Waterloo</span> — Análisis completo con IA · Más de <span class="text-gold-light font-bold">1.200</span> suscriptores del newsletter esta semana',
+              ? '⚔ New: <span class="text-gold-light font-bold">890+ documented battles</span> · AI analysis across all eras · <span class="text-gold-light font-bold">3D View in development</span>'
+              : '⚔ Nuevo: <span class="text-gold-light font-bold">890+ batallas documentadas</span> · Análisis con IA en todas las eras · <span class="text-gold-light font-bold">Vista 3D en desarrollo</span>',
           }}
         />
       </div>
