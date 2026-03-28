@@ -2709,6 +2709,9 @@ const DOC_NAME_EN = {
   'Responsabilidad de Proteger (R2P)': 'Responsibility to Protect (R2P)',
   'Acuerdos de Abraham — Israel-EAU': 'Abraham Accords — Israel-UAE',
   'Estatuto de Roma — Corte Penal Internacional': 'Rome Statute — International Criminal Court',
+  'Los 14 Puntos de Wilson': "Wilson's Fourteen Points",
+  'Protocolo de Ginebra sobre gases': 'Geneva Protocol on Chemical Weapons',
+  'Resolución 678 ONU — Guerra del Golfo': 'UN Resolution 678 — Gulf War',
 }
 
 // ── TAG TRANSLATIONS ──────────────────────────────────────
@@ -4222,6 +4225,44 @@ const COUNTRY_EN = {
   'Luftwaffe y Regia Marina': 'Luftwaffe y Regia Marina',
   'Japón (Manchuria)': 'Japan (Manchuria)',
 
+  // Commanders as combatant references
+  'César': 'Caesar', 'Aníbal': 'Hannibal', 'Bolívar': 'Bolívar',
+  'Napoleón': 'Napoleon', 'Alejandro': 'Alexander', 'Pompeyo': 'Pompey',
+  'Wellington': 'Wellington', 'Blücher': 'Blücher',
+
+  // Peoples & factions
+  'Realistas': 'Royalists', 'Hugonotes': 'Huguenots', 'Huguenotes': 'Huguenots',
+  'Católicos': 'Catholics', 'Protestantes': 'Protestants',
+  'Almorávides': 'Almoravids', 'Selyúcidas': 'Seljuks', 'Artúqidas': 'Artuqids',
+  'Fatimíes': 'Fatimids', 'Hamdaníes': 'Hamdanids', 'Sasánidas': 'Sassanids',
+  'Ostrogodos': 'Ostrogoths', 'Visigodos': 'Visigoths', 'Ávaros': 'Avars',
+  'Magiares': 'Magyars', 'Husitas': 'Hussites', 'Cátaros': 'Cathars',
+  'Genoveses': 'Genoese', 'Tártaros': 'Tatars', 'Mercenarios': 'Mercenaries',
+  'Señores Feudales': 'Feudal Lords', 'Señores Feudales Japoneses': 'Japanese Feudal Lords',
+
+  // Empires & states
+  'España': 'Spain', 'Otomanos': 'Ottomans',
+  'Califato Abasí': 'Abbasid Caliphate', 'Califato': 'Caliphate',
+  'Persia Sasánida': 'Sassanid Persia', 'Persia Safávida': 'Safavid Persia',
+  'Imperio Gálico': 'Gallic Empire', 'Dacia': 'Dacia',
+  'Sacro Imperio': 'Holy Roman Empire', 'Gran Colombia': 'Gran Colombia',
+  'Guardia Imperial': 'Imperial Guard', 'Corona Española': 'Spanish Crown',
+  'Liga Católica': 'Catholic League', 'Tang China': 'Tang China',
+  'Minamoto': 'Minamoto', 'Taira': 'Taira', 'Tokugawa': 'Tokugawa',
+  'Toyotomi': 'Toyotomi', 'Nobunaga': 'Nobunaga',
+
+  // Verbatim combatant strings
+  'Hijos de Atila entre sí': 'Sons of Attila — civil war',
+  'Sucesores de Alejandro entre sí': 'Successors of Alexander — Diadochi Wars',
+  'Galba vs Otón vs Vitelio vs Vespasiano': 'Galba vs Otho vs Vitellius vs Vespasian',
+  'Señores Feudales Japoneses entre sí': 'Japanese Feudal Lords — civil war',
+  'Ricardo Corazón de León vs Saladino': 'Richard the Lionheart vs Saladin',
+  'Rodrigo Díaz de Vivar vs Moros': 'El Cid vs Moors',
+  'Simón de Montfort vs Cátaros': 'Simon de Montfort vs Cathars',
+  'Rusia (Dmitri Donskói) vs Mongoles': 'Russia (Dmitri Donskoy) vs Mongols',
+  'Sacro Imperio (Otón I) vs Magiares': 'Holy Roman Empire (Otto I) vs Magyars',
+  'San Martín vs Realistas': 'San Martín vs Royalists',
+  'Príncipe Negro vs Francia (Juan II)': 'Black Prince vs France (John II)',
 }
 
 // ── TRANSLATION HELPER ────────────────────────────────────
@@ -4282,9 +4323,13 @@ export function getTagName(lang: Lang, spanishTag: string): string {
 export function translateCombatants(lang: Lang, str: string): string {
   if (lang !== 'en') return str
   let result = str
-  Object.entries(COUNTRY_EN).forEach(([es, en]) => {
-    result = result.replace(new RegExp(`\\b${es.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\b`, 'g'), en)
-  })
+  // Sort longest first to prevent partial matches overriding full phrases
+  const entries = Object.entries(COUNTRY_EN).sort((a, b) => b[0].length - a[0].length)
+  for (const [es, en] of entries) {
+    if (result.includes(es)) {
+      result = result.split(es).join(en)
+    }
+  }
   return result
 }
 

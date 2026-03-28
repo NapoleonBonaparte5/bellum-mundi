@@ -139,9 +139,9 @@ export function BattlesClient({ lang }: BattlesClientProps) {
       <div className="flex items-center gap-4 mb-6">
         <div className="font-cinzel tracking-[0.15em] uppercase flex items-center gap-2">
           <span className="text-gold font-bold text-lg">{filtered.length}</span>
-          <span className="text-mist text-[0.55rem]">{isES ? 'batallas encontradas' : 'battles found'}</span>
+          <span className="text-mist text-[0.72rem]">{isES ? 'batallas encontradas' : 'battles found'}</span>
           {compareMode && selected.length > 0 && (
-            <span className="text-gold text-[0.55rem]">
+            <span className="text-gold text-[0.72rem]">
               · {selected.length}/2 {isES ? 'seleccionadas' : 'selected'}
             </span>
           )}
@@ -157,7 +157,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
           <div className="grid grid-cols-2 gap-4">
             {selected.map(b => (
               <div key={b.slug}>
-                <div className="font-cinzel text-[0.5rem] tracking-[0.15em] text-smoke uppercase mb-1">{b.year}</div>
+                <div className="font-cinzel text-[0.72rem] tracking-[0.15em] text-smoke uppercase mb-1">{b.year}</div>
                 <div className="font-playfair font-bold text-cream text-xl">{b.name}</div>
                 <div className="font-crimson text-smoke text-sm mt-1">{b.combatants}</div>
                 <div className="font-crimson text-parchment-dark text-sm mt-2">{b.desc}</div>
@@ -166,7 +166,7 @@ export function BattlesClient({ lang }: BattlesClientProps) {
           </div>
           <button
             onClick={() => setSelected([])}
-            className="mt-4 font-cinzel text-[0.55rem] tracking-[0.15em] text-smoke hover:text-gold uppercase"
+            className="mt-4 font-cinzel text-[0.72rem] tracking-[0.15em] text-smoke hover:text-gold uppercase"
           >
             {isES ? 'Limpiar selección' : 'Clear selection'}
           </button>

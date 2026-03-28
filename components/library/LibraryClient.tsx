@@ -90,7 +90,7 @@ export function LibraryClient({ docs, eras, lang }: LibraryClientProps) {
       </ChipScroller>
 
       {/* Result counter */}
-      <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-5">
+      <div className="font-cinzel text-[0.72rem] tracking-[0.2em] text-smoke uppercase mb-5">
         <span className="text-gold font-bold text-sm mr-1.5">{filtered.length}</span>
         {isES ? 'documentos' : 'documents'}
       </div>
@@ -105,11 +105,11 @@ export function LibraryClient({ docs, eras, lang }: LibraryClientProps) {
             <Link key={i} href={`/${lang}/biblioteca/${doc.slug}`} className="card-bm flex items-start gap-4">
               <span className="text-2xl flex-shrink-0 mt-0.5">{doc.icon}</span>
               <div className="min-w-0 flex-1">
-                <div className="font-playfair font-bold text-cream text-base leading-tight mb-1">{getDocName(lang, doc.name)}</div>
-                <div className="font-cinzel text-[0.5rem] tracking-[0.12em] text-smoke uppercase">{translateYear(lang, doc.year)}</div>
-                <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke/60 uppercase mt-0.5">{getEraName(lang, doc.eraId as EraId, doc.eraName)}</div>
+                <div className="font-playfair font-bold text-cream text-lg leading-tight mb-1">{getDocName(lang, doc.name)}</div>
+                <div className="font-cinzel text-sm tracking-[0.12em] text-smoke uppercase">{translateYear(lang, doc.year)}</div>
+                <div className="font-cinzel text-[0.7rem] tracking-[0.1em] text-smoke/60 uppercase mt-0.5">{getEraName(lang, doc.eraId as EraId, doc.eraName)}</div>
                 <div className={`doc-badge doc-badge-${doc.category} mt-2`}>{catLabel[doc.category]}</div>
-                <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-gold/50 uppercase mt-2">
+                <div className="font-cinzel text-[0.7rem] tracking-[0.1em] text-gold/50 uppercase mt-2">
                   {isES ? '⚡ Analizar con IA →' : '⚡ Analyze with AI →'}
                 </div>
               </div>

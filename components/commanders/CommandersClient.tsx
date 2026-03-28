@@ -71,7 +71,7 @@ export function CommandersClient({ lang }: CommandersClientProps) {
       </ChipScroller>
 
       {/* Result counter */}
-      <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-5">
+      <div className="font-cinzel text-[0.72rem] tracking-[0.2em] text-smoke uppercase mb-5">
         <span className="text-gold font-bold text-sm mr-1.5">{filtered.length}</span>
         {isES ? 'comandantes' : 'commanders'}
       </div>
@@ -89,9 +89,9 @@ export function CommandersClient({ lang }: CommandersClientProps) {
               className="card-bm commander-card"
             >
               <div style={{ fontSize: '3.5rem', lineHeight: 1, marginBottom: '0.75rem' }}>{c.emoji}</div>
-              <div className="font-playfair font-bold text-cream text-base leading-tight mb-1 line-clamp-2 text-center px-2">{getCmdName(lang, c.name)}</div>
-              <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-gold uppercase mt-1 text-center">{getEraName(lang, c.eraId as EraId, c.eraName ?? '')}</div>
-              <div className="font-cinzel text-[0.44rem] tracking-[0.1em] text-smoke/70 uppercase mt-1 line-clamp-2 text-center px-2">{getRoleName(lang, c.role)}</div>
+              <div className="font-playfair font-bold text-cream text-lg leading-tight mb-1 line-clamp-2 text-center px-2">{getCmdName(lang, c.name)}</div>
+              <div className="font-cinzel text-[0.65rem] tracking-[0.1em] text-gold uppercase mt-1 text-center">{getEraName(lang, c.eraId as EraId, c.eraName ?? '')}</div>
+              <div className="font-cinzel text-[0.62rem] tracking-[0.1em] text-smoke/70 uppercase mt-1 line-clamp-2 text-center px-2">{getRoleName(lang, c.role)}</div>
             </Link>
           ))}
         </div>

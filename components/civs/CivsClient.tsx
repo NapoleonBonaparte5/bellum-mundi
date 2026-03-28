@@ -98,7 +98,7 @@ export function CivsClient({ civs, eras, lang }: CivsClientProps) {
       </ChipScroller>
 
       {/* Result counter */}
-      <div className="font-cinzel text-[0.55rem] tracking-[0.2em] text-smoke uppercase mb-5">
+      <div className="font-cinzel text-[0.72rem] tracking-[0.2em] text-smoke uppercase mb-5">
         <span className="text-gold font-bold text-sm mr-1.5">{filtered.length}</span>
         {isES ? 'civilizaciones' : 'civilizations'}
       </div>
@@ -119,13 +119,13 @@ export function CivsClient({ civs, eras, lang }: CivsClientProps) {
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-3xl leading-none">{civ.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-playfair font-bold text-cream text-base leading-tight">{getCivName(lang, civ.name)}</div>
-                    <div className="font-cinzel text-[0.48rem] tracking-[0.1em] text-smoke uppercase mt-0.5">{translateYear(lang, civ.period)}</div>
+                    <div className="font-playfair font-bold text-cream text-xl leading-tight">{getCivName(lang, civ.name)}</div>
+                    <div className="font-cinzel text-sm tracking-[0.1em] text-smoke uppercase mt-0.5">{translateYear(lang, civ.period)}</div>
                   </div>
                   {/* Score badge */}
                   <div className="flex-shrink-0 text-right">
                     <div className="font-cinzel font-bold text-xl" style={{ color }}>{Math.round(score)}</div>
-                    <div className="font-cinzel text-[0.4rem] tracking-[0.1em] text-smoke uppercase">score</div>
+                    <div className="font-cinzel text-[0.7rem] tracking-[0.1em] text-smoke uppercase">score</div>
                   </div>
                 </div>
 
@@ -144,17 +144,17 @@ export function CivsClient({ civs, eras, lang }: CivsClientProps) {
 
                 {/* Era + actions */}
                 <div className="flex items-center justify-between mt-2">
-                  <div className="font-cinzel text-[0.42rem] tracking-[0.1em] text-gold/60 uppercase">{getEraName(lang, civ.eraId as EraId, civ.eraName)}</div>
+                  <div className="font-cinzel text-[0.7rem] tracking-[0.1em] text-gold/60 uppercase">{getEraName(lang, civ.eraId as EraId, civ.eraName)}</div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={e => { e.preventDefault(); setExpandedIdx(isExpanded ? null : i) }}
-                      className="font-cinzel text-[0.42rem] tracking-[0.1em] text-smoke/50 uppercase hover:text-gold/60 transition-colors"
+                      className="font-cinzel text-[0.7rem] tracking-[0.1em] text-smoke/50 uppercase hover:text-gold/60 transition-colors"
                     >
                       {isExpanded ? (isES ? '▲ cerrar' : '▲ close') : (isES ? '▼ métricas' : '▼ metrics')}
                     </button>
                     <Link
                       href={`/${lang}/civilizaciones/${civ.slug}`}
-                      className="font-cinzel text-[0.42rem] tracking-[0.1em] text-gold/60 uppercase hover:text-gold transition-colors"
+                      className="font-cinzel text-[0.7rem] tracking-[0.1em] text-gold/60 uppercase hover:text-gold transition-colors"
                     >
                       {isES ? '→ análisis' : '→ analysis'}
                     </Link>
