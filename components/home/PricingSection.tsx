@@ -8,10 +8,10 @@ import { useState } from 'react'
 import type { Lang } from '@/lib/data/types'
 import { t } from '@/lib/i18n'
 
-const STRIPE_PRICE_MONTHLY     = process.env.NEXT_PUBLIC_STRIPE_PRICE_CMD_MONTHLY  ?? 'price_1TEremLQnw3S1NGVUciHDGGH'
-const STRIPE_PRICE_ANNUAL      = process.env.NEXT_PUBLIC_STRIPE_PRICE_CMD_ANNUAL   ?? 'price_1TErfcLQnw3S1NGVNa7flWZ7'
-const STRIPE_PRICE_EDU_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRICE_EDU_MONTHLY  ?? ''
-const STRIPE_PRICE_EDU_ANNUAL  = process.env.NEXT_PUBLIC_STRIPE_PRICE_EDU_ANNUAL   ?? ''
+const STRIPE_PRICE_MONTHLY     = process.env.NEXT_PUBLIC_STRIPE_PRICE_COMMANDER_MONTHLY  ?? 'price_1TEremLQnw3S1NGVUciHDGGH'
+const STRIPE_PRICE_ANNUAL      = process.env.NEXT_PUBLIC_STRIPE_PRICE_COMMANDER_ANNUAL   ?? 'price_1TErfcLQnw3S1NGVNa7flWZ7'
+const STRIPE_PRICE_EDU_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRICE_EDU_MONTHLY        ?? ''
+const STRIPE_PRICE_EDU_ANNUAL  = process.env.NEXT_PUBLIC_STRIPE_PRICE_EDU_ANNUAL         ?? ''
 
 interface PricingSectionProps {
   lang: Lang
@@ -59,10 +59,10 @@ export function PricingSection({ lang }: PricingSectionProps) {
     setLoading(null)
   }
 
-  const cmdMonthly  = annual ? '4.19'  : '6.99'
-  const cmdAnnual   = '50.28'
-  const eduMonthly  = annual ? '6.99'  : '9.99'
-  const eduAnnual   = '83.88'
+  const cmdMonthly  = annual ? '7.92'  : '12.99'
+  const cmdAnnual   = '94.99'
+  const eduMonthly  = annual ? '12.50' : '19.99'
+  const eduAnnual   = '149.99'
 
   return (
     <section id="pricing" className="py-20 px-4 md:px-8">
@@ -153,7 +153,7 @@ export function PricingSection({ lang }: PricingSectionProps) {
           <div className="font-crimson italic text-sm mb-6 min-h-[1.2em]"
             style={{ color: annual ? 'var(--emerald-light)' : 'transparent' }}
           >
-            {annual ? (isES ? `€${cmdAnnual} al año — ahorras €33.6` : `€${cmdAnnual}/year — save €33.6`) : '\u00a0'}
+            {annual ? (isES ? `€${cmdAnnual} al año — ahorras €60.89` : `€${cmdAnnual}/year — save €60.89`) : '\u00a0'}
           </div>
           <div className="h-px bg-gold/15 mb-6" />
           <ul className="space-y-3 mb-8">
@@ -228,7 +228,7 @@ export function PricingSection({ lang }: PricingSectionProps) {
           <div className="font-crimson italic text-sm mb-6 min-h-[1.2em]"
             style={{ color: annual ? 'var(--emerald-light)' : 'transparent' }}
           >
-            {annual ? (isES ? `€${eduAnnual} al año — ahorras €36` : `€${eduAnnual}/year — save €36`) : '\u00a0'}
+            {annual ? (isES ? `€${eduAnnual} al año — ahorras €89.89` : `€${eduAnnual}/year — save €89.89`) : '\u00a0'}
           </div>
           <div className="h-px bg-gold/15 mb-6" />
           <ul className="space-y-3 mb-8">

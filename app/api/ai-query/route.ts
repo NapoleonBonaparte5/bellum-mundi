@@ -13,7 +13,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 })
 
-// Rate limiting store (in-memory — use Upstash Redis in production)
+// Rate limiting store (in-memory — premium users only)
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
 const RATE_LIMIT_WINDOW = 60_000  // 1 minute
 
@@ -27,6 +27,33 @@ function getRateLimit(key: string, max: number): { allowed: boolean; remaining: 
   if (entry.count >= max) return { allowed: false, remaining: 0 }
   entry.count++
   return { allowed: true, remaining: max - entry.count }
+}
+
+// Free users: 3 req/day persisted in Supabase (not in-memory — survives restarts)
+async function checkFreeDaily(ip: string): Promise<boolean> {
+  try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    const today = new Date().toISOString().slice(0, 10)
+    const { data } = await admin
+      .from('ai_query_usage')
+      .select('count')
+      .eq('ip', ip)
+      .eq('date', today)
+      .single()
+    const current = (data?.count as number) ?? 0
+    if (current >= 3) return false
+    await admin
+      .from('ai_query_usage')
+      .upsert({ ip, date: today, count: current + 1 }, { onConflict: 'ip,date' })
+    return true
+  } catch {
+    // If Supabase is unavailable, fail open (allow the request)
+    return true
+  }
 }
 
 // ── SYSTEM PROMPTS ──────────────────────────────────────────
@@ -169,15 +196,21 @@ export async function POST(req: NextRequest) {
     const token = authHeader?.replace('Bearer ', '') ?? null
     const isPremium = await checkPremium(token)
 
-    // Rate limit: 200/min for premium, 3/min for free
-    const RATE_MAX = isPremium ? 200 : 3
     if (!booksOnly) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
-      // Use token prefix as key for premium (prevents IP-hopping), IP for free
-      const rateKey = isPremium ? `premium:${(token ?? ip).slice(0, 24)}` : `free:${ip}`
-      const { allowed } = getRateLimit(rateKey, RATE_MAX)
-      if (!allowed) {
-        return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+      if (isPremium) {
+        // Premium: 200 req/min in-memory (token prefix prevents IP-hopping)
+        const rateKey = `premium:${(token ?? ip).slice(0, 24)}`
+        const { allowed } = getRateLimit(rateKey, 200)
+        if (!allowed) {
+          return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+        }
+      } else {
+        // Free: 3 req/day persisted in Supabase
+        const allowed = await checkFreeDaily(ip)
+        if (!allowed) {
+          return NextResponse.json({ error: 'Daily limit reached' }, { status: 429 })
+        }
       }
     }
 
@@ -189,7 +222,7 @@ export async function POST(req: NextRequest) {
     const maxTokens = booksOnly ? 2048 : 8000
 
     const msgStream = anthropic.messages.stream({
-      model: 'claude-opus-4-5',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: [{ role: 'user', content: safePrompt }],
