@@ -11,6 +11,7 @@ export const en: Locale = {
     battles: '⚔ Battles',
     commanders: '👑 Commanders',
     worldmap: '🗺️ World Map',
+    chat: '🤖 AI Chat',
     library: '📜 Library',
     civs: '🏛️ Civilizations',
     premium: 'Premium',

@@ -12,6 +12,7 @@ export const es: Locale = {
     battles: '⚔ Batallas',
     commanders: '👑 Comandantes',
     worldmap: '🗺️ Mapa Global',
+    chat: '🤖 Chat IA',
     library: '📜 Biblioteca',
     civs: '🏛️ Civilizaciones',
     premium: 'Premium',

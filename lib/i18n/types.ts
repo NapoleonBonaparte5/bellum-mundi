@@ -23,6 +23,7 @@ export interface Locale {
     battles: string
     commanders: string
     worldmap: string
+    chat: string
     library: string
     civs: string
     premium: string
