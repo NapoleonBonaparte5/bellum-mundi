@@ -1,7 +1,7 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — NAVIGATION BAR
-// Full nav with mobile hamburger, lang switcher, auth
+// BELLUM MUNDI — NAVIGATION BAR (B4 — two-tier + SVG icons)
+// Primary 5 links + "Más" dropdown with 5 secondary links
 // + Floating Chat FAB (1B) + Streak badge (8B)
 // ═══════════════════════════════════════════════════════════
 
@@ -14,6 +14,11 @@ import { t } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase/client'
 import type { BellumUser } from '@/lib/data/types'
 import { getStreak, getSavedCount } from '@/lib/utils/collection'
+import {
+  IconSword, IconCrown, IconMap, IconScroll, IconColumns,
+  IconChat, IconGraduate, IconTimeline, IconDagger, IconMuseum,
+  IconStar, IconChevronDown,
+} from '@/components/ui/Icons'
 
 // Lazy load ChatInterface only when FAB drawer is opened
 const ChatInterface = dynamic(
@@ -25,32 +30,43 @@ interface NavBarProps {
   lang: Lang
 }
 
-const NAV_LINKS = (lang: Lang) => [
-  { key: 'home',          label: t(lang, 'nav.eras'),        href: `/${lang}#timeline` },
-  { key: 'battles',       label: t(lang, 'nav.battles'),     href: `/${lang}/batallas` },
-  { key: 'commanders',    label: t(lang, 'nav.commanders'),  href: `/${lang}/comandantes` },
-  { key: 'worldmap',      label: t(lang, 'nav.worldmap'),    href: `/${lang}/mapa` },
-  { key: 'chat',          label: t(lang, 'nav.chat'),        href: `/${lang}/chat` },
-  { key: 'educacion',     label: t(lang, 'nav.educacion'),   href: `/${lang}/educacion` },
-  { key: 'timeline',      label: t(lang, 'nav.timeline'),    href: `/${lang}/timeline` },
-  { key: 'weapons',       label: t(lang, 'nav.weapons'),     href: `/${lang}/armamento` },
-  { key: 'museo',         label: t(lang, 'nav.museo'),       href: `/${lang}/museo` },
-  { key: 'library',       label: t(lang, 'nav.library'),     href: `/${lang}/biblioteca` },
-  { key: 'civilizations', label: t(lang, 'nav.civs'),        href: `/${lang}/civilizaciones` },
-  { key: 'premium',       label: t(lang, 'nav.premium'),     href: `/${lang}#pricing` },
-  { key: 'newsletter',    label: t(lang, 'nav.newsletter'),  href: `/${lang}#newsletter` },
+// Primary nav (always visible desktop)
+const NAV_PRIMARY = (lang: Lang) => [
+  { key: 'battles',       label: t(lang, 'nav.battles'),     href: `/${lang}/batallas`,       icon: <IconSword size={13} /> },
+  { key: 'commanders',    label: t(lang, 'nav.commanders'),  href: `/${lang}/comandantes`,    icon: <IconCrown size={13} /> },
+  { key: 'worldmap',      label: t(lang, 'nav.worldmap'),    href: `/${lang}/mapa`,           icon: <IconMap size={13} /> },
+  { key: 'library',       label: t(lang, 'nav.library'),     href: `/${lang}/biblioteca`,     icon: <IconScroll size={13} /> },
+  { key: 'civilizations', label: t(lang, 'nav.civs'),        href: `/${lang}/civilizaciones`, icon: <IconColumns size={13} /> },
+]
+
+// Secondary nav (in "Más" dropdown)
+const NAV_SECONDARY = (lang: Lang) => [
+  { key: 'chat',      label: t(lang, 'nav.chat'),      href: `/${lang}/chat`,       icon: <IconChat size={13} /> },
+  { key: 'educacion', label: t(lang, 'nav.educacion'), href: `/${lang}/educacion`,  icon: <IconGraduate size={13} /> },
+  { key: 'timeline',  label: t(lang, 'nav.timeline'),  href: `/${lang}/timeline`,   icon: <IconTimeline size={13} /> },
+  { key: 'weapons',   label: t(lang, 'nav.weapons'),   href: `/${lang}/armamento`,  icon: <IconDagger size={13} /> },
+  { key: 'museo',     label: t(lang, 'nav.museo'),     href: `/${lang}/museo`,      icon: <IconMuseum size={13} /> },
+]
+
+// All links (for mobile menu)
+const NAV_ALL = (lang: Lang) => [
+  ...NAV_PRIMARY(lang),
+  ...NAV_SECONDARY(lang),
+  { key: 'coleccion', label: lang === 'es' ? 'Mi Colección' : 'My Collection', href: `/${lang}/coleccion`, icon: <IconStar size={13} /> },
 ]
 
 export function NavBar({ lang }: NavBarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [user, setUser] = useState<BellumUser | null>(null)
   const [isPremium, setIsPremium] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [streak, setStreak] = useState(0)
   const [savedCount, setSavedCount] = useState(0)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const moreRef = useRef<HTMLLIElement>(null)
 
   const isOnChatPage = pathname.includes('/chat')
 
@@ -71,26 +87,41 @@ export function NavBar({ lang }: NavBarProps) {
     setSavedCount(getSavedCount())
   }, [])
 
-  // Close chat drawer on Escape
+  // Close chat drawer and more dropdown on Escape / outside click
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setChatOpen(false) }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setChatOpen(false); setMoreOpen(false) }
+    }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node | null)) {
+        setMoreOpen(false)
+      }
+    }
+    if (moreOpen) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [moreOpen])
+
   const switchLang = () => {
     const newLang: Lang = lang === 'es' ? 'en' : 'es'
-    // Replace current lang segment in URL
     const newPath = pathname.replace(`/${lang}`, `/${newLang}`)
     router.push(newPath)
   }
 
-  const links = NAV_LINKS(lang)
+  const primaryLinks = NAV_PRIMARY(lang)
+  const secondaryLinks = NAV_SECONDARY(lang)
+  const allLinks = NAV_ALL(lang)
 
   const isActive = (href: string) => {
     if (href.includes('#')) return false
     return pathname === href || pathname.startsWith(href + '/')
   }
+
+  const hasActiveSecondary = secondaryLinks.some(l => isActive(l.href))
 
   return (
     <>
@@ -111,23 +142,86 @@ export function NavBar({ lang }: NavBarProps) {
           ⚔ BELLUM MUNDI
         </Link>
 
-        {/* Desktop nav links */}
-        <ul className="hidden lg:flex list-none flex-1 justify-center" role="list">
-          {links.map((link, i) => (
+        {/* Desktop nav — primary links + Más dropdown (B4) */}
+        <ul className="hidden lg:flex list-none flex-1 justify-center items-center" role="list">
+          {primaryLinks.map((link, i) => (
             <li key={link.key} className="flex items-center">
               {i > 0 && <span className="w-px h-3 bg-gold/15 flex-shrink-0" aria-hidden="true" />}
               <Link
                 href={link.href}
-                className={`font-cinzel text-[0.6rem] tracking-[0.2em] transition-colors px-3 py-2 uppercase block relative ${
+                className={`font-cinzel text-[0.6rem] tracking-[0.18em] transition-colors px-3 py-2 uppercase flex items-center gap-1.5 relative ${
                   isActive(link.href) ? 'text-gold nav-link-active' : 'text-mist hover:text-gold nav-link'
                 }`}
                 aria-current={isActive(link.href) ? 'page' : undefined}
               >
+                <span className="opacity-60">{link.icon}</span>
                 {link.label}
                 <span className="nav-underline" />
               </Link>
             </li>
           ))}
+
+          {/* Separator */}
+          <li className="flex items-center">
+            <span className="w-px h-3 bg-gold/15 flex-shrink-0" aria-hidden="true" />
+          </li>
+
+          {/* "Más" dropdown */}
+          <li className="flex items-center relative" ref={moreRef}>
+            <button
+              onClick={() => setMoreOpen(o => !o)}
+              className={`font-cinzel text-[0.6rem] tracking-[0.18em] transition-colors px-3 py-2 uppercase flex items-center gap-1 relative ${
+                hasActiveSecondary || moreOpen ? 'text-gold' : 'text-mist hover:text-gold'
+              }`}
+              aria-expanded={moreOpen}
+              aria-haspopup="true"
+            >
+              {lang === 'es' ? 'Más' : 'More'}
+              <IconChevronDown
+                size={10}
+                className={`transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {/* Dropdown panel */}
+            {moreOpen && (
+              <div
+                className="absolute top-full right-0 mt-1 z-[600] min-w-[180px]"
+                style={{
+                  background: 'var(--slate)',
+                  border: '1px solid rgba(201,168,76,0.2)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+                }}
+              >
+                {secondaryLinks.map(link => (
+                  <Link
+                    key={link.key}
+                    href={link.href}
+                    onClick={() => setMoreOpen(false)}
+                    className={`flex items-center gap-2.5 px-4 py-2.5 font-cinzel text-[0.58rem] tracking-[0.16em] uppercase transition-colors border-b border-gold/5 last:border-0 ${
+                      isActive(link.href) ? 'text-gold bg-gold/5' : 'text-mist hover:text-gold hover:bg-gold/5'
+                    }`}
+                  >
+                    <span className="opacity-60">{link.icon}</span>
+                    {link.label}
+                  </Link>
+                ))}
+                <Link
+                  href={`/${lang}/coleccion`}
+                  onClick={() => setMoreOpen(false)}
+                  className={`flex items-center gap-2.5 px-4 py-2.5 font-cinzel text-[0.58rem] tracking-[0.16em] uppercase transition-colors ${
+                    isActive(`/${lang}/coleccion`) ? 'text-gold bg-gold/5' : 'text-mist hover:text-gold hover:bg-gold/5'
+                  }`}
+                >
+                  <span className="opacity-60"><IconStar size={13} /></span>
+                  {lang === 'es' ? 'Colección' : 'Collection'}
+                  {savedCount > 0 && (
+                    <span className="ml-auto font-cinzel text-[0.45rem] text-gold/60 font-bold">{savedCount}</span>
+                  )}
+                </Link>
+              </div>
+            )}
+          </li>
         </ul>
 
         {/* Right side: queries + auth + lang */}
@@ -221,18 +315,21 @@ export function NavBar({ lang }: NavBarProps) {
         aria-hidden={!menuOpen}
       >
         <ul className="list-none py-2" role="list">
-          {links.map(link => (
+          {allLinks.map(link => (
             <li key={link.key} role="none">
               <Link
                 href={link.href}
-                className={`block font-cinzel text-[0.65rem] tracking-[0.2em] hover:bg-gold/5 transition-colors px-6 py-3 uppercase border-b border-gold/5 last:border-0 flex items-center justify-between ${
+                className={`font-cinzel text-[0.65rem] tracking-[0.2em] hover:bg-gold/5 transition-colors px-6 py-3 uppercase border-b border-gold/5 last:border-0 flex items-center gap-2.5 justify-between ${
                   isActive(link.href) ? 'text-gold' : 'text-mist hover:text-gold'
                 }`}
                 onClick={() => setMenuOpen(false)}
                 role="menuitem"
                 tabIndex={menuOpen ? 0 : -1}
               >
-                {link.label}
+                <span className="flex items-center gap-2.5">
+                  <span className="opacity-50">{link.icon}</span>
+                  {link.label}
+                </span>
                 {isActive(link.href) && <span className="w-1 h-1 rounded-full bg-gold flex-shrink-0" />}
               </Link>
             </li>

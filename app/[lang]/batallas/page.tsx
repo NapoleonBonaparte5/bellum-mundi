@@ -35,7 +35,8 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
   return (
     <div className="px-4 md:px-8 pt-8 pb-4 max-w-content mx-auto">
       {/* Page header */}
-      <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+      <div className="epic-header-wrap">
+      <div className="index-header" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
         <div className="eyebrow mb-3 w-full text-center">
           {l === 'en' ? 'Military Encyclopedia' : 'Enciclopedia Militar'}
         </div>
@@ -49,6 +50,7 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
           }
         </p>
         <div className="gold-divider mx-auto" />
+      </div>
       </div>
 
       {/* Gradient separator */}

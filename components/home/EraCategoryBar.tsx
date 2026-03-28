@@ -1,32 +1,37 @@
 'use client'
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — ERA CATEGORY BAR (1D)
+// BELLUM MUNDI — ERA CATEGORY BAR (1D + B8)
 // Horizontal scrollable era chips — scroll-snap + mobile chevrons
+// + inline SVG icons replacing emoji (B8)
 // ═══════════════════════════════════════════════════════════
 
 import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lang } from '@/lib/data/types'
+import {
+  IconShield, IconSword, IconColumns, IconCrown, IconDagger,
+  IconMuseum, IconTimeline, IconGraduate, IconMap, IconCrossedSwords,
+} from '@/components/ui/Icons'
 
 interface Era {
   id: string
   name: string
-  emoji: string
   battles: number
   nameEN: string
+  icon: React.ReactNode
 }
 
 const ERAS: Era[] = [
-  { id:'prehistoric',  name:'Prehistórico',           nameEN:'Prehistoric',     emoji:'🏺', battles: 50  },
-  { id:'ancient',      name:'Antigüedad',              nameEN:'Antiquity',       emoji:'⚔',  battles: 250 },
-  { id:'classical',    name:'Era Clásica',             nameEN:'Classical',       emoji:'🏛',  battles: 250 },
-  { id:'medieval',     name:'Edad Media',              nameEN:'Middle Ages',     emoji:'🗡',  battles: 250 },
-  { id:'early_modern', name:'Edad Moderna',            nameEN:'Early Modern',    emoji:'🔫', battles: 250 },
-  { id:'napoleon',     name:'Era Napoleónica',         nameEN:'Napoleonic',      emoji:'🪖', battles: 200 },
-  { id:'ww1',          name:'Primera Guerra Mundial',  nameEN:'World War I',     emoji:'💣', battles: 200 },
-  { id:'ww2',          name:'Segunda Guerra Mundial',  nameEN:'World War II',    emoji:'✈',  battles: 200 },
-  { id:'cold_war',     name:'Guerra Fría',             nameEN:'Cold War',        emoji:'🚀', battles: 200 },
-  { id:'contemporary', name:'Era Contemporánea',       nameEN:'Contemporary',    emoji:'🌍', battles: 150 },
+  { id:'prehistoric',  name:'Prehistórico',           nameEN:'Prehistoric',     battles: 50,  icon: <IconShield size={18} /> },
+  { id:'ancient',      name:'Antigüedad',              nameEN:'Antiquity',       battles: 250, icon: <IconSword size={18} /> },
+  { id:'classical',    name:'Era Clásica',             nameEN:'Classical',       battles: 250, icon: <IconColumns size={18} /> },
+  { id:'medieval',     name:'Edad Media',              nameEN:'Middle Ages',     battles: 250, icon: <IconCrown size={18} /> },
+  { id:'early_modern', name:'Edad Moderna',            nameEN:'Early Modern',    battles: 250, icon: <IconDagger size={18} /> },
+  { id:'napoleon',     name:'Era Napoleónica',         nameEN:'Napoleonic',      battles: 200, icon: <IconMuseum size={18} /> },
+  { id:'ww1',          name:'Primera Guerra Mundial',  nameEN:'World War I',     battles: 200, icon: <IconCrossedSwords size={18} /> },
+  { id:'ww2',          name:'Segunda Guerra Mundial',  nameEN:'World War II',    battles: 200, icon: <IconMap size={18} /> },
+  { id:'cold_war',     name:'Guerra Fría',             nameEN:'Cold War',        battles: 200, icon: <IconTimeline size={18} /> },
+  { id:'contemporary', name:'Era Contemporánea',       nameEN:'Contemporary',    battles: 150, icon: <IconGraduate size={18} /> },
 ]
 
 interface EraCategoryBarProps {
@@ -124,7 +129,7 @@ export function EraCategoryBar({ lang }: EraCategoryBarProps) {
               }}
               title={isES ? era.name : era.nameEN}
             >
-              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{era.emoji}</span>
+              <span style={{ lineHeight: 1, color: 'var(--mist)', display: 'flex' }}>{era.icon}</span>
               <span
                 style={{
                   fontFamily: 'var(--font-cinzel)',

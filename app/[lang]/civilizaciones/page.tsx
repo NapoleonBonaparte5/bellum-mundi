@@ -35,7 +35,8 @@ export default async function CivsPage({ params }: CivsPageProps) {
 
   return (
     <div className="px-4 md:px-8 pt-8 pb-4 max-w-content mx-auto">
-      <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+      <div className="epic-header-wrap">
+      <div className="index-header" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
         <div className="eyebrow mb-3 w-full text-center">{isEN ? 'Military Encyclopedia' : 'Enciclopedia Militar'}</div>
         <h1 className="font-playfair font-bold text-cream mb-4 w-full text-center" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)' }}>
           🏛️ {isEN ? 'Civilizations' : 'Civilizaciones'}
@@ -47,6 +48,7 @@ export default async function CivsPage({ params }: CivsPageProps) {
           }
         </p>
         <div className="gold-divider mx-auto" />
+      </div>
       </div>
       <CivsClient civs={civs} eras={eraIds} lang={l} />
     </div>

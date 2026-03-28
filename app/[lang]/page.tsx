@@ -8,6 +8,7 @@ import type { Lang } from '@/lib/data/types'
 
 import { HeroSection } from '@/components/home/HeroSection'
 import { EraCategoryBar } from '@/components/home/EraCategoryBar'
+import { LegendaryBattlesSection } from '@/components/home/LegendaryBattlesSection'
 import { EditorialSection } from '@/components/home/EditorialSection'
 import { TimelineSection } from '@/components/home/TimelineSection'
 import { PricingSection } from '@/components/home/PricingSection'
@@ -79,6 +80,9 @@ export default async function HomePage({ params }: HomePageProps) {
 
       {/* Era category bar */}
       <EraCategoryBar lang={l} />
+
+      {/* Legendary battles 3×2 grid (B5) */}
+      <LegendaryBattlesSection lang={l} />
 
       {/* Editorial blocks */}
       <EditorialSection lang={l} />

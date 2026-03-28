@@ -8,18 +8,22 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
 
-// ── Batalla del Día — 10 batallas icónicas (1A) ───────────
+// ── Batalla del Día — 14 batallas icónicas (B6: deterministic by date) ─
 const DAILY_BATTLES = [
-  { slug: 'batalla-de-maraton',          nameES: 'Batalla de Maratón',           nameEN: 'Battle of Marathon',       year: '490 a.C.' },
-  { slug: 'batalla-de-las-termopilas',   nameES: 'Batalla de las Termópilas',    nameEN: 'Battle of Thermopylae',    year: '480 a.C.' },
-  { slug: 'batalla-de-cannas',           nameES: 'Batalla de Cannas',            nameEN: 'Battle of Cannae',         year: '216 a.C.' },
-  { slug: 'batalla-de-hastings',         nameES: 'Batalla de Hastings',          nameEN: 'Battle of Hastings',       year: '1066' },
-  { slug: 'caida-de-constantinopla',     nameES: 'Caída de Constantinopla',      nameEN: 'Fall of Constantinople',   year: '1453' },
-  { slug: 'batalla-de-lepanto',          nameES: 'Batalla de Lepanto',           nameEN: 'Battle of Lepanto',        year: '1571' },
-  { slug: 'batalla-de-austerlitz',       nameES: 'Batalla de Austerlitz',        nameEN: 'Battle of Austerlitz',     year: '1805' },
-  { slug: 'batalla-de-waterloo',         nameES: 'Batalla de Waterloo',          nameEN: 'Battle of Waterloo',       year: '1815' },
-  { slug: 'batalla-de-stalingrado',      nameES: 'Batalla de Stalingrado',       nameEN: 'Battle of Stalingrad',     year: '1942' },
-  { slug: 'dia-d-operacion-overlord',    nameES: 'Día D — Operación Overlord',   nameEN: 'D-Day — Operation Overlord', year: '1944' },
+  { slug: 'batalla-de-maraton',          nameES: 'Batalla de Maratón',           nameEN: 'Battle of Marathon',         year: '490 a.C.', factES: '10.000 atenienses vencieron a 25.000 persas', factEN: '10,000 Athenians defeated 25,000 Persians' },
+  { slug: 'batalla-de-las-termopilas',   nameES: 'Batalla de las Termópilas',    nameEN: 'Battle of Thermopylae',      year: '480 a.C.', factES: '300 espartanos — el sacrificio que salvó Grecia', factEN: '300 Spartans — the sacrifice that saved Greece' },
+  { slug: 'batalla-de-cannas',           nameES: 'Batalla de Cannas',            nameEN: 'Battle of Cannae',           year: '216 a.C.', factES: 'El envolvimiento perfecto: 70.000 romanos en una tarde', factEN: 'The perfect encirclement: 70,000 Romans in one afternoon' },
+  { slug: 'batalla-de-gaugamela',        nameES: 'Batalla de Gaugamela',         nameEN: 'Battle of Gaugamela',        year: '331 a.C.', factES: 'Alejandro Magno conquista el Imperio Persa', factEN: 'Alexander the Great conquers the Persian Empire' },
+  { slug: 'batalla-de-hastings',         nameES: 'Batalla de Hastings',          nameEN: 'Battle of Hastings',         year: '1066',     factES: 'Un día que transformó para siempre la lengua inglesa', factEN: 'One day that forever transformed the English language' },
+  { slug: 'caida-de-constantinopla',     nameES: 'Caída de Constantinopla',      nameEN: 'Fall of Constantinople',     year: '1453',     factES: '1.000 años de Imperio Romano de Oriente terminaron en un día', factEN: '1,000 years of Eastern Roman Empire ended in one day' },
+  { slug: 'batalla-de-lepanto',          nameES: 'Batalla de Lepanto',           nameEN: 'Battle of Lepanto',          year: '1571',     factES: '400 galeras: el fin de la supremacía naval otomana', factEN: '400 galleys: the end of Ottoman naval supremacy' },
+  { slug: 'batalla-de-viena',            nameES: 'Batalla de Viena',             nameEN: 'Battle of Vienna',           year: '1683',     factES: 'Europa occidental se salvó del avance otomano', factEN: 'Western Europe was saved from the Ottoman advance' },
+  { slug: 'batalla-de-austerlitz',       nameES: 'Batalla de Austerlitz',        nameEN: 'Battle of Austerlitz',       year: '1805',     factES: 'La obra maestra de Napoleón: 73.000 vs 85.000', factEN: "Napoleon's masterpiece: 73,000 vs 85,000" },
+  { slug: 'batalla-de-waterloo',         nameES: 'Batalla de Waterloo',          nameEN: 'Battle of Waterloo',         year: '1815',     factES: '200.000 soldados — el fin del dominio napoleónico', factEN: '200,000 soldiers — the end of Napoleon\'s dominion' },
+  { slug: 'batalla-del-somme',           nameES: 'Batalla del Somme',            nameEN: 'Battle of the Somme',        year: '1916',     factES: '60.000 bajas británicas en el primer día', factEN: '60,000 British casualties on the first day' },
+  { slug: 'batalla-de-verdun',           nameES: 'Batalla de Verdún',            nameEN: 'Battle of Verdun',           year: '1916',     factES: '300.000 muertos en 10 meses — el infierno del frente oeste', factEN: '300,000 dead in 10 months — the hell of the Western Front' },
+  { slug: 'batalla-de-stalingrado',      nameES: 'Batalla de Stalingrado',       nameEN: 'Battle of Stalingrad',       year: '1942',     factES: '2 millones de bajas — el punto de inflexión de la guerra', factEN: '2 million casualties — the turning point of the war' },
+  { slug: 'dia-d-operacion-overlord',    nameES: 'Día D — Operación Overlord',   nameEN: 'D-Day — Operation Overlord', year: '1944',     factES: 'La mayor operación anfibia de la historia: 156.000 soldados', factEN: 'The largest amphibious operation in history: 156,000 troops' },
 ]
 
 // 20 iconic battles across all eras — hardcoded for hero performance
@@ -57,13 +61,31 @@ export function HeroSection({ lang }: HeroSectionProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const feedRef  = useRef<HTMLDivElement>(null)
   const [paused, setPaused] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
   const isES = lang === 'es'
 
-  // Batalla del Día — random on mount, stable via useMemo (1A)
-  const dailyBattle = useMemo(
-    () => DAILY_BATTLES[Math.floor(Math.random() * DAILY_BATTLES.length)],
-    []
-  )
+  // Batalla del Día — deterministic by calendar date (B6)
+  const dailyBattle = useMemo(() => {
+    const d = new Date()
+    const idx = (d.getFullYear() * 365 + d.getMonth() * 31 + d.getDate()) % DAILY_BATTLES.length
+    return DAILY_BATTLES[idx]
+  }, [])
+
+  // Parallax scroll (B2)
+  useEffect(() => {
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // ── Particle canvas ───────────────────────────────────────
   useEffect(() => {
@@ -142,6 +164,19 @@ export function HeroSection({ lang }: HeroSectionProps) {
       {/* Canvas background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true" />
 
+      {/* Parallax mist layer (B2) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 1,
+          transform: `translateY(${scrollY * 0.25}px)`,
+          background: `radial-gradient(ellipse 70% 50% at 25% 35%, rgba(201,168,76,0.04) 0%, transparent 55%),
+                       radial-gradient(ellipse 60% 40% at 75% 60%, rgba(139,26,26,0.05) 0%, transparent 55%)`,
+          willChange: 'transform',
+        }}
+        aria-hidden="true"
+      />
+
       {/* Dramatic radial gradient overlay (1C) */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -213,7 +248,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
               </div>
             ))}
           </div>
-          {/* ── Batalla del Día banner (1A) ── */}
+          {/* ── Batalla del Día banner (B6 — deterministic) ── */}
           <div
             className="w-full mt-8"
             style={{
@@ -241,29 +276,44 @@ export function HeroSection({ lang }: HeroSectionProps) {
             >
               {isES ? 'Batalla del Día' : 'Battle of the Day'}
             </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-playfair)',
-                fontWeight: 700,
-                fontSize: '1rem',
-                color: 'var(--cream)',
-                flex: 1,
-                minWidth: '180px',
-              }}
-            >
-              {isES ? dailyBattle.nameES : dailyBattle.nameEN}
-            </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-cinzel)',
-                fontSize: '0.6rem',
-                letterSpacing: '0.15em',
-                color: 'var(--gold)',
-                flexShrink: 0,
-              }}
-            >
-              {dailyBattle.year}
-            </span>
+            <div style={{ flex: 1, minWidth: '180px' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-playfair)',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  color: 'var(--cream)',
+                  display: 'block',
+                  lineHeight: 1.2,
+                }}
+              >
+                {isES ? dailyBattle.nameES : dailyBattle.nameEN}
+                <span
+                  style={{
+                    fontFamily: 'var(--font-cinzel)',
+                    fontSize: '0.58rem',
+                    letterSpacing: '0.12em',
+                    color: 'var(--gold)',
+                    marginLeft: '0.6rem',
+                    fontWeight: 400,
+                  }}
+                >
+                  {dailyBattle.year}
+                </span>
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-crimson)',
+                  fontStyle: 'italic',
+                  fontSize: '0.85rem',
+                  color: 'var(--smoke)',
+                  display: 'block',
+                  marginTop: '0.2rem',
+                }}
+              >
+                {isES ? dailyBattle.factES : dailyBattle.factEN}
+              </span>
+            </div>
             <Link
               href={`/${lang}/batallas/${dailyBattle.slug}`}
               style={{
@@ -278,7 +328,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--gold-light)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--gold)' }}
             >
-              {isES ? '→ Ver análisis completo' : '→ View full analysis'}
+              {isES ? '→ Ver análisis' : '→ View analysis'}
             </Link>
           </div>
         </div>

@@ -35,7 +35,8 @@ export default async function MapPage({ params }: MapPageProps) {
   return (
     <div>
       <div className="px-4 md:px-8 max-w-content mx-auto">
-        <div className="index-header mb-6" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+        <div className="epic-header-wrap">
+        <div className="index-header" style={{ width:'100%', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
           <div className="eyebrow mb-3 w-full text-center">
             {l === 'en' ? 'Historical Cartography' : 'Cartografía Histórica'}
           </div>
@@ -49,6 +50,7 @@ export default async function MapPage({ params }: MapPageProps) {
             }
           </p>
           <div className="gold-divider mx-auto" />
+        </div>
         </div>
       </div>
       <WorldMapClient battles={battles} lang={l} />
