@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { FlatBattle, Lang, EraId } from '@/lib/data/types'
 import { getAllBattles, ERA_EMOJIS } from '@/lib/data/helpers'
@@ -22,8 +23,10 @@ export function BattlesClient({ lang }: BattlesClientProps) {
   const battles = useMemo(() => getAllBattles(), [])
   const eras = useMemo(() => ERAS.map(e => ({ id: e.id, name: e.name })), [])
   const isES = lang === 'es'
+  const searchParams = useSearchParams()
+  const initialEra = searchParams.get('era') ?? 'all'
   const [query, setQuery] = useState('')
-  const [eraFilter, setEraFilter] = useState<string>('all')
+  const [eraFilter, setEraFilter] = useState<string>(initialEra)
   const [page, setPage] = useState(1)
   const [compareMode, setCompareMode] = useState(false)
   const [selected, setSelected] = useState<FlatBattle[]>([])

@@ -75,7 +75,7 @@ export function EraCategoryBar({ lang }: EraCategoryBarProps) {
         {ERAS.map((era, i) => (
           <button
             key={era.id}
-            onClick={() => router.push(`/${lang}/batallas`)}
+            onClick={() => router.push(`/${lang}/batallas?era=${era.id}`)}
             className="era-cat-item flex flex-col items-center justify-center gap-1 px-5 py-4 flex-shrink-0 cursor-pointer"
             style={{
               borderRight: i < ERAS.length - 1 ? '1px solid rgba(201,168,76,0.08)' : 'none',

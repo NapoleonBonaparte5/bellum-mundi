@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import type { Lang } from '@/lib/data/types'
 import { BattlesClient } from '@/components/battles/BattlesClient'
 
@@ -53,8 +54,10 @@ export default async function BattlesPage({ params }: BattlesPageProps) {
       {/* Gradient separator */}
       <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent)', margin: '0 0 2rem' }} />
 
-      {/* Interactive client component loads data directly */}
-      <BattlesClient lang={l} />
+      {/* Interactive client component — Suspense required for useSearchParams */}
+      <Suspense fallback={null}>
+        <BattlesClient lang={l} />
+      </Suspense>
     </div>
   )
 }
