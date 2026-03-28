@@ -27,6 +27,7 @@ export interface Locale {
     educacion: string
     timeline: string
     weapons: string
+    museo: string
     library: string
     civs: string
     premium: string

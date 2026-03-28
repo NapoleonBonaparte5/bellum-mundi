@@ -25,6 +25,7 @@ const NAV_LINKS = (lang: Lang) => [
   { key: 'educacion',     label: t(lang, 'nav.educacion'),   href: `/${lang}/educacion` },
   { key: 'timeline',      label: t(lang, 'nav.timeline'),    href: `/${lang}/timeline` },
   { key: 'weapons',       label: t(lang, 'nav.weapons'),     href: `/${lang}/armamento` },
+  { key: 'museo',         label: t(lang, 'nav.museo'),       href: `/${lang}/museo` },
   { key: 'library',       label: t(lang, 'nav.library'),     href: `/${lang}/biblioteca` },
   { key: 'civilizations', label: t(lang, 'nav.civs'),        href: `/${lang}/civilizaciones` },
   { key: 'premium',       label: t(lang, 'nav.premium'),     href: `/${lang}#pricing` },

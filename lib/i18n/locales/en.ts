@@ -15,6 +15,7 @@ export const en: Locale = {
     educacion: '🎓 Education',
     timeline: '📊 Timeline',
     weapons: '🗡️ Weapons',
+    museo: '🏛️ Museum 3D',
     library: '📜 Library',
     civs: '🏛️ Civilizations',
     premium: 'Premium',
