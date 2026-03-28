@@ -12,6 +12,16 @@ import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { processContent } from '@/lib/utils/processContent'
+import dynamic from 'next/dynamic'
+
+const BattleVisualization = dynamic(
+  () => import('@/components/battles/BattleVisualization').then(m => m.BattleVisualization),
+  { ssr: false, loading: () => (
+    <div className="mb-12 border border-gold/20 bg-slate/30 flex items-center justify-center" style={{ height: 480 }}>
+      <div className="loading-dots"><span /><span /><span /></div>
+    </div>
+  )}
+)
 
 const LS_KEY = 'bm_queries_used'
 const PREMIUM_THRESHOLD = 3 // show banner after this many queries
@@ -116,8 +126,8 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
   const [queriesLeft, setQueriesLeft] = useState(3)
   const [showPremiumBanner, setShowPremiumBanner] = useState(false)
 
-  // Counterfactual simulator
-  const [activeTab, setActiveTab]                     = useState<'analysis' | 'counterfactual'>('analysis')
+  // Counterfactual simulator + 3D tab
+  const [activeTab, setActiveTab]                     = useState<'analysis' | 'counterfactual' | 'viz3d'>('analysis')
   const [cfContent, setCfContent]                     = useState<string | null>(null)
   const [cfLoading, setCfLoading]                     = useState(false)
   const [cfQuestion, setCfQuestion]                   = useState('')
@@ -308,6 +318,16 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
             >
               🔀 {isES ? 'Simulador Contrafactual' : 'Counterfactual Simulator'}
             </button>
+            <button
+              onClick={() => setActiveTab('viz3d')}
+              className={`font-cinzel text-[0.6rem] tracking-[0.2em] uppercase px-5 py-3 transition-all border-b-2 -mb-px ${
+                activeTab === 'viz3d'
+                  ? 'text-gold border-gold'
+                  : 'text-smoke border-transparent hover:text-mist hover:border-gold/30'
+              }`}
+            >
+              🗺️ {isES ? 'Vista 3D' : '3D View'}
+            </button>
           </div>
 
           {/* ── COUNTERFACTUAL SIMULATOR TAB ── */}
@@ -430,6 +450,11 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── 3D VISUALIZATION TAB ── */}
+          {activeTab === 'viz3d' && (
+            <BattleVisualization battle={battle} lang={lang} />
           )}
 
           {/* ── ANALYSIS TAB (existing content) ── */}
