@@ -13,6 +13,8 @@ interface CommandersPageProps {
   params: Promise<{ lang: string }>
 }
 
+const BASE = 'https://bellummundi.com'
+
 export async function generateMetadata({ params }: CommandersPageProps): Promise<Metadata> {
   const { lang } = await params
   const isEN = lang === 'en'
@@ -21,6 +23,14 @@ export async function generateMetadata({ params }: CommandersPageProps): Promise
     description: isEN
       ? '109 military commanders from all eras — from Alexander the Great to Eisenhower. Profiles and AI analysis.'
       : '109 comandantes militares de todas las eras — de Alejandro Magno a Eisenhower. Perfiles y análisis con IA.',
+    alternates: {
+      canonical: `${BASE}/${lang}/comandantes`,
+      languages: {
+        es: `${BASE}/es/comandantes`,
+        en: `${BASE}/en/comandantes`,
+        'x-default': `${BASE}/es/comandantes`,
+      },
+    },
   }
 }
 

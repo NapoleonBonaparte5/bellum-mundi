@@ -14,6 +14,8 @@ interface CivsPageProps {
   params: Promise<{ lang: string }>
 }
 
+const BASE = 'https://bellummundi.com'
+
 export async function generateMetadata({ params }: CivsPageProps): Promise<Metadata> {
   const { lang } = await params
   const isEN = lang === 'en'
@@ -22,6 +24,14 @@ export async function generateMetadata({ params }: CivsPageProps): Promise<Metad
     description: isEN
       ? 'Military civilizations from all eras — power ratings, periods and battles.'
       : 'Civilizaciones militares de todas las eras — poder militar, períodos y batallas.',
+    alternates: {
+      canonical: `${BASE}/${lang}/civilizaciones`,
+      languages: {
+        es: `${BASE}/es/civilizaciones`,
+        en: `${BASE}/en/civilizaciones`,
+        'x-default': `${BASE}/es/civilizaciones`,
+      },
+    },
   }
 }
 

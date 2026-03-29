@@ -71,7 +71,10 @@ export default async function HomePage({ params }: HomePageProps) {
     url: 'https://bellummundi.com',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://bellummundi.com/{search_term_string}',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `https://bellummundi.com/${l}/batallas?q={search_term_string}`,
+      },
       'query-input': 'required name=search_term_string',
     },
   }

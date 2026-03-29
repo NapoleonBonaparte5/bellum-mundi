@@ -105,6 +105,12 @@ export function NavBar({ lang }: NavBarProps) {
     return () => document.removeEventListener('mousedown', handler)
   }, [moreOpen])
 
+  // Lock body scroll when mobile menu is open (prevents background scroll on iOS)
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
+
   const switchLang = () => {
     const newLang: Lang = lang === 'es' ? 'en' : 'es'
     const newPath = pathname.replace(`/${lang}`, `/${newLang}`)
@@ -313,7 +319,18 @@ export function NavBar({ lang }: NavBarProps) {
         role="menu"
         aria-hidden={!menuOpen}
       >
-        <ul className="list-none py-2" role="list">
+        {/* Close button row */}
+        <div className="flex justify-end px-4 pt-3 pb-1">
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="text-smoke hover:text-gold transition-colors text-2xl leading-none p-1"
+            aria-label={lang === 'en' ? 'Close menu' : 'Cerrar menú'}
+            tabIndex={menuOpen ? 0 : -1}
+          >
+            ×
+          </button>
+        </div>
+        <ul className="list-none pb-2" role="list">
           {allLinks.map(link => (
             <li key={link.key} role="none">
               <Link
@@ -398,7 +415,7 @@ export function NavBar({ lang }: NavBarProps) {
           aria-label={lang === 'en' ? 'Open AI chat' : 'Abrir chat IA'}
           style={{
             position: 'fixed',
-            bottom: '1.5rem',
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
             left: '1.5rem',
             right: 'auto',
             zIndex: 900,

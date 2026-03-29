@@ -207,8 +207,8 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
             })
           : Promise.resolve(),
         (booksRes.ok && booksRes.body)
-          ? readStream(booksRes.body, setBooksContent).then(() => setBooksLoading(false))
-          : Promise.resolve(),
+          ? readStream(booksRes.body, setBooksContent).finally(() => setBooksLoading(false))
+          : Promise.resolve().then(() => setBooksLoading(false)),
       ])
     } catch {
       setAiContent(`<p>${isES ? 'Error al obtener el análisis. Inténtalo de nuevo.' : 'Error fetching analysis. Please try again.'}</p>`)

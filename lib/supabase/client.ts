@@ -12,11 +12,18 @@ export const supabase = createClient(
 )
 
 // ── DATABASE TYPES (expandable as we migrate to real DB) ───
+export type PlanType = 'free' | 'premium' | 'educator' | 'institutional'
+
 export interface DbProfile {
   id: string
   name: string
-  plan: 'free' | 'premium'
+  plan: PlanType
   created_at: string
+}
+
+/** Returns true for any paid plan. Use instead of `plan === 'premium'` checks. */
+export function isPremiumPlan(plan: string): boolean {
+  return plan === 'premium' || plan === 'educator' || plan === 'institutional'
 }
 
 export interface DbNewsletterSubscriber {
@@ -56,7 +63,7 @@ export async function subscribeToNewsletter(email: string) {
   return supabase.from('newsletter_subscribers').insert({ email })
 }
 
-export async function updateUserPlan(userId: string, plan: 'free' | 'premium') {
+export async function updateUserPlan(userId: string, plan: PlanType) {
   return supabase.from('profiles').update({ plan }).eq('id', userId)
 }
 

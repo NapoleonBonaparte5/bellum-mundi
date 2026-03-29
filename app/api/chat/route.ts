@@ -10,7 +10,9 @@ export const maxDuration = 120
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
-// Rate limiting — 40 req/min per IP
+// Premium users: in-memory 40 req/min. NOTE: In Vercel serverless each cold start
+// creates a new instance and resets this Map. This is acceptable for premium users
+// (generous limit). Free users use Supabase-persisted daily limits instead.
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
 const RATE_LIMIT_MAX = 40
 const RATE_LIMIT_WINDOW = 60_000
@@ -25,6 +27,60 @@ function checkRateLimit(ip: string): boolean {
   if (entry.count >= RATE_LIMIT_MAX) return false
   entry.count++
   return true
+}
+
+// Server-side premium validation via Supabase service role
+async function checkPremium(token: string | null): Promise<boolean> {
+  if (!token) return false
+  try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    const { data: { user } } = await admin.auth.getUser(token)
+    if (!user) return false
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single()
+    return (
+      profile?.plan === 'premium' ||
+      profile?.plan === 'educator' ||
+      profile?.plan === 'institutional'
+    )
+  } catch {
+    return false
+  }
+}
+
+// Free users: 5 chat messages/day persisted in Supabase (keyed by 'chat:' + ip)
+async function checkFreeDaily(ip: string): Promise<boolean> {
+  try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    const today = new Date().toISOString().slice(0, 10)
+    const key = `chat:${ip}`
+    const { data } = await admin
+      .from('ai_query_usage')
+      .select('count')
+      .eq('ip', key)
+      .eq('date', today)
+      .single()
+    const current = (data?.count as number) ?? 0
+    if (current >= 5) return false
+    await admin
+      .from('ai_query_usage')
+      .upsert({ ip: key, date: today, count: current + 1 }, { onConflict: 'ip,date' })
+    return true
+  } catch (err) {
+    console.warn('[chat] Supabase usage check failed, failing open', err)
+    return true
+  }
 }
 
 // ── System prompts ───────────────────────────────────────────
@@ -74,13 +130,30 @@ TUTOR MODE ACTIVE:
 You only cover military history topics. If asked about something else, redirect politely.`
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
 
-  if (!checkRateLimit(ip)) {
-    return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
-      status: 429,
-      headers: { 'Content-Type': 'application/json' },
-    })
+  // Server-side premium validation
+  const authHeader = req.headers.get('authorization')
+  const token = authHeader?.replace('Bearer ', '') ?? null
+  const isPremium = await checkPremium(token)
+
+  if (isPremium) {
+    // Premium: 40 req/min in-memory
+    if (!checkRateLimit(ip)) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+  } else {
+    // Free: 5 messages/day via Supabase
+    const allowed = await checkFreeDaily(ip)
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Daily limit reached' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
   }
 
   let body: { messages: { role: string; content: string }[]; lang?: string; tutorMode?: boolean }

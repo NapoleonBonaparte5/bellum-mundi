@@ -50,8 +50,9 @@ async function checkFreeDaily(ip: string): Promise<boolean> {
       .from('ai_query_usage')
       .upsert({ ip, date: today, count: current + 1 }, { onConflict: 'ip,date' })
     return true
-  } catch {
+  } catch (err) {
     // If Supabase is unavailable, fail open (allow the request)
+    console.warn('[ai-query] Supabase usage check failed, failing open', err)
     return true
   }
 }

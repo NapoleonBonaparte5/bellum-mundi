@@ -15,6 +15,8 @@ interface LibraryPageProps {
   params: Promise<{ lang: string }>
 }
 
+const BASE = 'https://bellummundi.com'
+
 export async function generateMetadata({ params }: LibraryPageProps): Promise<Metadata> {
   const { lang } = await params
   const isEN = lang === 'en'
@@ -23,6 +25,14 @@ export async function generateMetadata({ params }: LibraryPageProps): Promise<Me
     description: isEN
       ? 'Historical documents, treaties, and works that changed military history.'
       : 'Documentos históricos, tratados y obras que cambiaron la historia militar.',
+    alternates: {
+      canonical: `${BASE}/${lang}/biblioteca`,
+      languages: {
+        es: `${BASE}/es/biblioteca`,
+        en: `${BASE}/en/biblioteca`,
+        'x-default': `${BASE}/es/biblioteca`,
+      },
+    },
   }
 }
 

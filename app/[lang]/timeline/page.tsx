@@ -5,7 +5,13 @@
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { getAllBattles } from '@/lib/data/helpers'
-import { GlobalTimeline } from '@/components/timeline/GlobalTimeline'
+import dynamic from 'next/dynamic'
+
+// Dynamic import with ssr:false — canvas/SVG timeline uses browser APIs
+const GlobalTimeline = dynamic(
+  () => import('@/components/timeline/GlobalTimeline').then(m => m.GlobalTimeline),
+  { ssr: false }
+)
 
 interface PageProps {
   params: Promise<{ lang: Lang }>

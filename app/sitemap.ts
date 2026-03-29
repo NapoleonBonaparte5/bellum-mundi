@@ -20,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     { path: '',               priority: 1.0,  freq: 'weekly'  },
     { path: '/batallas',      priority: 0.9,  freq: 'weekly'  },
-    { path: '/comandantes',   priority: 0.8,  freq: 'weekly'  },
+    { path: '/comandantes',   priority: 0.9,  freq: 'weekly'  },
     { path: '/civilizaciones',priority: 0.7,  freq: 'monthly' },
     { path: '/biblioteca',    priority: 0.7,  freq: 'monthly' },
     { path: '/mapa',          priority: 0.6,  freq: 'monthly' },
@@ -44,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url:             `${BASE}/${lang}/batallas/${b.slug}`,
       lastModified:    now,
       changeFrequency: 'monthly' as const,
-      priority:        0.7,
+      priority:        0.8,
     }))
   )
 

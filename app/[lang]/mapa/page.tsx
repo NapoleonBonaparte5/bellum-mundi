@@ -6,9 +6,15 @@
 import type { Metadata } from 'next'
 import type { Lang } from '@/lib/data/types'
 import { getAllBattles } from '@/lib/data/helpers'
+import dynamic from 'next/dynamic'
 
 export const revalidate = 3600
-import { WorldMapClient } from '@/components/map/WorldMapClient'
+
+// Dynamic import with ssr:false — Leaflet requires browser globals (window, document)
+const WorldMapClient = dynamic(
+  () => import('@/components/map/WorldMapClient').then(m => m.WorldMapClient),
+  { ssr: false }
+)
 
 interface MapPageProps {
   params: Promise<{ lang: string }>

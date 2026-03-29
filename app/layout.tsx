@@ -78,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       style={{ background: '#0A0806', color: '#F9F5ED' }}
     >
       <head>
+        <meta name="color-scheme" content="dark" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {process.env.NEXT_PUBLIC_SUPABASE_URL && (
