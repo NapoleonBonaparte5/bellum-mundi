@@ -9,6 +9,7 @@ import Link from 'next/link'
 import type { FlatDoc, Era, Lang } from '@/lib/data/types'
 import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
+import { getDocName, getEraName, translateYear } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 
 interface DocDetailClientProps {
@@ -278,13 +279,13 @@ export function DocDetailClient({ doc, era, lang }: DocDetailClientProps) {
           <span>/</span>
           <Link href={`/${lang}/biblioteca`} className="hover:text-gold transition-colors">{isES ? 'Biblioteca' : 'Library'}</Link>
           <span>/</span>
-          <span className="text-mist">{doc.name}</span>
+          <span className="text-mist">{getDocName(lang, doc.name)}</span>
         </nav>
 
         <div className="text-5xl mb-6">{doc.icon}</div>
-        <div className="eyebrow mb-4">{eraEmoji} {era.name} · {doc.year}</div>
+        <div className="eyebrow mb-4">{eraEmoji} {getEraName(lang, era.id, era.name)} · {translateYear(lang, doc.year)}</div>
         <h1 className="font-playfair font-black text-cream mb-4 leading-tight" style={{ fontSize: 'clamp(1.8rem,5vw,3.5rem)' }}>
-          {doc.name}
+          {getDocName(lang, doc.name)}
         </h1>
         <div className={`doc-badge doc-badge-${doc.category} mb-2`}>{catLabel}</div>
       </header>
@@ -369,8 +370,8 @@ export function DocDetailClient({ doc, era, lang }: DocDetailClientProps) {
                 <Link key={i} href={`/${lang}/biblioteca/${slugify(d.name)}`} className="card-bm flex items-start gap-4">
                   <span className="text-2xl flex-shrink-0 mt-0.5">{d.icon}</span>
                   <div>
-                    <div className="font-playfair font-bold text-cream text-base leading-tight mb-1">{d.name}</div>
-                    <div className="font-cinzel text-[0.5rem] tracking-[0.12em] text-smoke uppercase">{d.year}</div>
+                    <div className="font-playfair font-bold text-cream text-base leading-tight mb-1">{getDocName(lang, d.name)}</div>
+                    <div className="font-cinzel text-[0.5rem] tracking-[0.12em] text-smoke uppercase">{translateYear(lang, d.year)}</div>
                   </div>
                 </Link>
               ))}

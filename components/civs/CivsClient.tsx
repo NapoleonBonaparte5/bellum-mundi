@@ -62,6 +62,7 @@ function BattleModal({
 
   const run = useCallback(async () => {
     if (loading || started) return
+    window.scrollTo({ top: 0 })
     setStarted(true)
     setLoading(true)
     setContent('')

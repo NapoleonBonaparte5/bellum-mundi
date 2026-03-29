@@ -10,7 +10,7 @@ import Image from 'next/image'
 import type { FlatBattle, Era, Lang } from '@/lib/data/types'
 import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
-import { getTagName, translateCombatants, translateYear, getBattleName, getEraName, autoTranslateDesc } from '@/lib/i18n'
+import { getTagName, translateCombatants, translateYear, getBattleName, getEraName, autoTranslateDesc, getTacticName, getTacticOrigin, getWeaponName, getWeaponPeriod } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { processContent } from '@/lib/utils/processContent'
 import { t } from '@/lib/i18n'
@@ -782,8 +782,8 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                     className="text-left flex items-center gap-2 hover:text-gold transition-colors group" disabled={topicLoading || rateLimited}>
                     <span className="text-lg flex-shrink-0">{tactic.icon}</span>
                     <div>
-                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{tactic.name}</div>
-                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{tactic.origin}</div>
+                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{getTacticName(lang, tactic.name)}</div>
+                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{getTacticOrigin(lang, tactic.origin)}</div>
                     </div>
                   </button>
                 ))}
@@ -803,8 +803,8 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                     className="text-left flex items-center gap-2 hover:text-gold transition-colors group" disabled={topicLoading || rateLimited}>
                     <span className="text-lg flex-shrink-0">{weapon.icon}</span>
                     <div>
-                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{weapon.name}</div>
-                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{weapon.period}</div>
+                      <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors">{getWeaponName(lang, weapon.name)}</div>
+                      <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-smoke uppercase">{getWeaponPeriod(lang, weapon.period)}</div>
                     </div>
                   </button>
                 ))}
