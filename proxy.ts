@@ -1,12 +1,18 @@
 // ═══════════════════════════════════════════════════════════
-// BELLUM MUNDI — NEXT.JS MIDDLEWARE
-// Security headers · Redirects · Edge rate limiting
+// BELLUM MUNDI — NEXT.JS PROXY (middleware for Next.js 16+)
+// Security headers · Redirects · Edge rate limiting · Auth
 // ═══════════════════════════════════════════════════════════
 
+import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
+// ── Protected routes (require active Supabase session) ──────
+const PROTECTED_PATTERN = /^\/(es|en)\/(chat|coleccion)(\/|$|\?)/
+
 // ── In-memory rate limit store (per Edge isolate) ───────────
-// For multi-instance production, replace with Upstash Redis.
+// NOTE: Each serverless/edge cold start creates a new isolate and resets
+// this Map. This is acceptable for the default limit (60 req/min).
+// For stricter production enforcement, replace with Upstash Redis.
 const store = new Map<string, { count: number; resetAt: number }>()
 
 const LIMITS = {
@@ -43,8 +49,36 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   return res
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
+  let response = NextResponse.next({ request: req })
+
+  // ── Auth: protected routes require an active session ────
+  // Only /[lang]/chat and /[lang]/coleccion are gated.
+  // All other routes are public; API access is gated in route handlers.
+  if (PROTECTED_PATTERN.test(pathname)) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return req.cookies.getAll() },
+          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              req.cookies.set(name, value)
+              response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2])
+            })
+          },
+        },
+      }
+    )
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      const lang = pathname.match(/^\/(es|en)/)?.[1] ?? 'es'
+      return NextResponse.redirect(new URL(`/${lang}#pricing`, req.url))
+    }
+    return applySecurityHeaders(response)
+  }
 
   // ── Redirects ────────────────────────────────────────────
   // Legacy bare routes → localised
@@ -76,8 +110,7 @@ export function proxy(req: NextRequest) {
     }
   }
 
-  const res = NextResponse.next()
-  return applySecurityHeaders(res)
+  return applySecurityHeaders(response)
 }
 
 export const config = {
