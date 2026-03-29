@@ -15,16 +15,27 @@ interface BattlesPageProps {
   params: Promise<{ lang: string }>
 }
 
+const BASE = 'https://bellummundi.com'
+
 export async function generateMetadata({ params }: BattlesPageProps): Promise<Metadata> {
   const { lang } = await params
   const l = lang as Lang
   const isEN = l === 'en'
+  const pageUrl = `${BASE}/${l}/batallas`
 
   return {
     title: isEN ? 'All Battles' : 'Todas las Batallas',
     description: isEN
       ? '429 historical battles from all eras and civilizations. Filter by era, search by name, compare battles with AI.'
       : '429 batallas históricas de todas las eras y civilizaciones. Filtra por era, busca por nombre, compara batallas con IA.',
+    alternates: {
+      canonical: pageUrl,
+      languages: {
+        es: `${BASE}/es/batallas`,
+        en: `${BASE}/en/batallas`,
+        'x-default': `${BASE}/es/batallas`,
+      },
+    },
   }
 }
 

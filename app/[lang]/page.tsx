@@ -64,8 +64,24 @@ export default async function HomePage({ params }: HomePageProps) {
   const { lang } = await params
   const l = lang as Lang
 
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Bellum Mundi',
+    url: 'https://bellummundi.com',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://bellummundi.com/{search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       {/* Announcement bar */}
       <div
         className="bg-gradient-to-r from-blood to-crimson py-2.5 px-8 text-center font-cinzel text-[0.62rem] tracking-[0.2em] text-parchment relative"

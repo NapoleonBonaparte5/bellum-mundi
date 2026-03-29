@@ -64,13 +64,13 @@ export async function generateMetadata({ params }: BattlePageProps): Promise<Met
       url: pageUrl,
       type: 'article',
       siteName: 'Bellum Mundi',
-      images: [{ url: `${BASE}/opengraph-image.png`, width: 1200, height: 630, alt: name }],
+      images: [{ url: `${BASE}/${l}/batallas/${slug}/opengraph-image`, width: 1200, height: 630, alt: name }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} · Bellum Mundi`,
       description,
-      images: [`${BASE}/opengraph-image.png`],
+      images: [`${BASE}/${l}/batallas/${slug}/opengraph-image`],
     },
   }
 }
@@ -106,6 +106,15 @@ export default async function BattlePage({ params }: BattlePageProps) {
       name,
       description: combatants,
       startDate: battle.year,
+      endDate: battle.year,
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+      location: (battle.lat && battle.lng)
+        ? { '@type': 'Place', name: battle.tag, geo: { '@type': 'GeoCoordinates', latitude: battle.lat, longitude: battle.lng } }
+        : { '@type': 'VirtualLocation', url: `${BASE}/${l}/batallas/${slug}` },
+      image: `${BASE}/opengraph-image.png`,
+      organizer: { '@type': 'Organization', name: 'Bellum Mundi', url: BASE },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR', availability: 'https://schema.org/InStock', url: `${BASE}/${l}/batallas/${slug}` },
     },
   }
 

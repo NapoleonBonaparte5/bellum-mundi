@@ -2,7 +2,7 @@
 // BELLUM MUNDI — ROOT LAYOUT
 // ═══════════════════════════════════════════════════════════
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Cinzel, Playfair_Display, Crimson_Pro, IM_Fell_English } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -40,6 +40,13 @@ const imFell = IM_Fell_English({
   variable: '--bm-fell',
   display: 'swap',
 })
+
+// ── VIEWPORT ───────────────────────────────────────────────
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0A0806',
+}
 
 // ── DEFAULT METADATA ───────────────────────────────────────
 export const metadata: Metadata = {
