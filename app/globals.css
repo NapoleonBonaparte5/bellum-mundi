@@ -1555,7 +1555,7 @@ input[type="text"]:focus {
   .chat-fab-drawer { width: 100vw !important; }
 
   /* Chat FAB: esquina izquierda */
-  .chat-fab { bottom: 1rem !important; left: 1rem !important; width: 48px !important; height: 48px !important; font-size: 1.1rem !important; }
+  .chat-fab { bottom: 4.5rem !important; right: 1rem !important; width: 48px !important; height: 48px !important; font-size: 1.1rem !important; }
 
   /* Back to top: esquina derecha */
   .back-to-top { bottom: 1rem !important; right: 1rem !important; width: 38px !important; height: 38px !important; }

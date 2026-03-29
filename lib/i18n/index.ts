@@ -86,6 +86,7 @@ export { getCivName }       from './data-translations/civs'
 export { getDocName }       from './data-translations/docs'
 export { getEraName, getEraOverview } from './data-translations/eras'
 export { autoTranslateDesc, translateDesc } from './data-translations/descriptions'
+export { getTacticName, getTacticOrigin, getWeaponName, getWeaponPeriod } from './data-translations/tactics'
 
 // translateYear stays here (pure function, no dictionary needed)
 export function translateYear(lang: SupportedLang, year: string): string {

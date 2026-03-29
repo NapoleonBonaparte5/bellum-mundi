@@ -10,7 +10,7 @@ import Image from 'next/image'
 import type { FlatBattle, Era, Lang } from '@/lib/data/types'
 import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
-import { getTagName, translateCombatants, translateYear, getBattleName, getEraName } from '@/lib/i18n'
+import { getTagName, translateCombatants, translateYear, getBattleName, getEraName, autoTranslateDesc } from '@/lib/i18n'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 import { processContent } from '@/lib/utils/processContent'
 import { t } from '@/lib/i18n'
@@ -294,17 +294,17 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
           <span>/</span>
           <Link href={`/${lang}/batallas`} className="hover:text-gold transition-colors">{isES ? 'Batallas' : 'Battles'}</Link>
           <span>/</span>
-          <span className="text-mist">{battle.name}</span>
+          <span className="text-mist">{getBattleName(lang, battle.name)}</span>
         </nav>
         <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {/* Left: title + meta */}
           <div style={{ flex: '1 1 55%', minWidth: 0 }}>
             <div className="eyebrow mb-4 detail-meta-enter">{eraEmoji} {getEraName(lang, era.id, era.name)} · {translateYear(lang, battle.year)}</div>
             <h1 className="font-playfair font-black text-cream mb-4 leading-tight detail-title-enter" style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}>
-              {battle.name}
+              {getBattleName(lang, battle.name)}
             </h1>
             <p className="font-crimson italic text-parchment-dark text-xl mb-4 detail-combatants-enter">{translateCombatants(lang, battle.combatants)}</p>
-            {battle.desc && <p className="font-crimson text-smoke text-lg max-w-2xl">{battle.desc}</p>}
+            {battle.desc && <p className="font-crimson text-smoke text-lg max-w-2xl">{autoTranslateDesc(battle.desc, lang)}</p>}
             {battle.tag && <div className="era-badge mt-4">{getTagName(lang, battle.tag)}</div>}
           </div>
           {/* Right: 2×2 quick-stats panel */}
@@ -319,7 +319,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
           }}>
             {[
               { label: isES ? 'Año' : 'Year',         value: translateYear(lang, battle.year) },
-              { label: isES ? 'Era' : 'Era',           value: era.name },
+              { label: isES ? 'Era' : 'Era',           value: getEraName(lang, era.id, era.name) },
               { label: isES ? 'Combatientes' : 'Combatants', value: translateCombatants(lang, battle.combatants) },
               { label: isES ? 'Tipo' : 'Type',         value: battle.tag ? getTagName(lang, battle.tag) : '—' },
             ].map(({ label, value }) => (
@@ -822,7 +822,7 @@ export function BattleDetailClient({ battle, era, lang }: BattleDetailClientProp
                 {related.map((b, i) => (
                   <Link key={i} href={`/${lang}/batallas/${slugify(b.name)}`} className="group">
                     <div className="font-cinzel text-[0.45rem] tracking-[0.12em] text-smoke uppercase mb-0.5">{b.year}</div>
-                    <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors leading-tight">{b.name}</div>
+                    <div className="font-crimson text-cream text-sm group-hover:text-gold transition-colors leading-tight">{getBattleName(lang, b.name)}</div>
                   </Link>
                 ))}
               </div>

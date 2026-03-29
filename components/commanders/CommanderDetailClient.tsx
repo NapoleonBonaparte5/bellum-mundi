@@ -10,7 +10,7 @@ import type { FlatCommander, Era, Lang } from '@/lib/data/types'
 import { supabase } from '@/lib/supabase/client'
 import { ERA_EMOJIS, slugify } from '@/lib/data/helpers'
 import { AILoadingState } from '@/components/ui/AILoadingState'
-import { getRoleName, getEraName } from '@/lib/i18n'
+import { getRoleName, getEraName, getCmdName, getBattleName, translateCombatants, getTacticName, getTacticOrigin, getWeaponName, getWeaponPeriod } from '@/lib/i18n'
 
 interface CommanderDetailClientProps {
   commander: FlatCommander
@@ -164,12 +164,12 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
           <span>/</span>
           <Link href={`/${lang}/comandantes`} className="hover:text-gold transition-colors">{isES ? 'Comandantes' : 'Commanders'}</Link>
           <span>/</span>
-          <span className="text-mist">{commander.name}</span>
+          <span className="text-mist">{getCmdName(lang, commander.name)}</span>
         </nav>
         <div className="text-6xl mb-6">{commander.emoji}</div>
         <div className="eyebrow mb-4">{eraEmoji} {getEraName(lang, era.id, era.name)}</div>
         <h1 className="font-playfair font-black text-cream mb-3 leading-tight" style={{ fontSize: 'clamp(2rem,6vw,4rem)' }}>
-          {commander.name}
+          {getCmdName(lang, commander.name)}
         </h1>
         <p className="font-cinzel text-[0.65rem] tracking-[0.3em] text-gold uppercase">{getRoleName(lang, commander.role)}</p>
       </header>
@@ -245,8 +245,8 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
                 <button key={i} onClick={() => runTopicQuery(tactic.name, isES ? 'táctica' : 'tactic')}
                   className="card-bm era-topic-card text-left w-full" disabled={topicLoading || rateLimited}>
                   <span className="text-2xl mb-2 block">{tactic.icon}</span>
-                  <div className="font-playfair font-bold text-cream text-base leading-tight">{tactic.name}</div>
-                  <div className="font-crimson text-smoke text-sm mt-1">{tactic.origin}</div>
+                  <div className="font-playfair font-bold text-cream text-base leading-tight">{getTacticName(lang, tactic.name)}</div>
+                  <div className="font-crimson text-smoke text-sm mt-1">{getTacticOrigin(lang, tactic.origin)}</div>
                   <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-gold/60 uppercase mt-3">
                     {isES ? '⚡ Consultar con IA' : '⚡ Query with AI'}
                   </div>
@@ -265,8 +265,8 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
                 <button key={i} onClick={() => runTopicQuery(weapon.name, isES ? 'arma' : 'weapon')}
                   className="card-bm era-topic-card text-left w-full" disabled={topicLoading || rateLimited}>
                   <span className="text-2xl mb-2 block">{weapon.icon}</span>
-                  <div className="font-playfair font-bold text-cream text-base leading-tight">{weapon.name}</div>
-                  <div className="font-crimson text-smoke text-sm mt-1">{weapon.period}</div>
+                  <div className="font-playfair font-bold text-cream text-base leading-tight">{getWeaponName(lang, weapon.name)}</div>
+                  <div className="font-crimson text-smoke text-sm mt-1">{getWeaponPeriod(lang, weapon.period)}</div>
                   <div className="font-cinzel text-[0.45rem] tracking-[0.1em] text-gold/60 uppercase mt-3">
                     {isES ? '⚡ Consultar con IA' : '⚡ Query with AI'}
                   </div>
@@ -302,8 +302,8 @@ export function CommanderDetailClient({ commander, era, lang }: CommanderDetailC
               {relatedBattles.map((b, i) => (
                 <Link key={i} href={`/${lang}/batallas/${slugify(b.name)}`} className="card-bm block">
                   <div className="font-cinzel text-[0.5rem] tracking-[0.15em] text-smoke uppercase mb-1">{b.year}</div>
-                  <div className="font-playfair font-bold text-cream text-base leading-tight">{b.name}</div>
-                  <div className="font-crimson text-smoke text-sm mt-1">{b.combatants}</div>
+                  <div className="font-playfair font-bold text-cream text-base leading-tight">{getBattleName(lang, b.name)}</div>
+                  <div className="font-crimson text-smoke text-sm mt-1">{translateCombatants(lang, b.combatants)}</div>
                 </Link>
               ))}
             </div>

@@ -421,7 +421,7 @@ export function NavBar({ lang }: NavBarProps) {
           aria-label={lang === 'en' ? 'Open AI chat' : 'Abrir chat IA'}
           style={{
             position: 'fixed',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)',
             right: '1.5rem',
             left: 'auto',
             zIndex: 900,
