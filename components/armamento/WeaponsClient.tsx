@@ -8,7 +8,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import type { FlatWeapon, Lang, EraId } from '@/lib/data/types'
 import { ERA_COLORS, ERA_EMOJIS } from '@/lib/data/helpers'
-import { getEraName, translateYear } from '@/lib/i18n'
+import { getEraName, translateYear, getWeaponName, getWeaponPeriod } from '@/lib/i18n'
 import { processContent } from '@/lib/utils/processContent'
 import { AILoadingState } from '@/components/ui/AILoadingState'
 
@@ -102,9 +102,13 @@ export function WeaponsClient({ weapons, lang }: WeaponsClientProps) {
     const q = search.toLowerCase()
     return weapons.filter(w => {
       const matchEra  = activeEra === 'all' || w.eraId === activeEra
+      const translatedName   = getWeaponName(lang, w.name).toLowerCase()
+      const translatedPeriod = getWeaponPeriod(lang, w.period).toLowerCase()
       const matchText = !q ||
         w.name.toLowerCase().includes(q) ||
+        translatedName.includes(q) ||
         w.period.toLowerCase().includes(q) ||
+        translatedPeriod.includes(q) ||
         w.eraName.toLowerCase().includes(q)
       return matchEra && matchText
     })
@@ -271,11 +275,11 @@ export function WeaponsClient({ weapons, lang }: WeaponsClientProps) {
                           <span className="text-2xl flex-shrink-0 mt-0.5">{w.icon}</span>
                           <div className="min-w-0">
                             <div className="font-cinzel text-[0.62rem] tracking-wider text-mist group-hover:text-gold transition-colors leading-snug mb-1 line-clamp-2">
-                              {w.name}
+                              {getWeaponName(lang, w.name)}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-cinzel text-[0.48rem] tracking-[0.1em] text-smoke uppercase">
-                                {w.period}
+                                {getWeaponPeriod(lang, w.period)}
                               </span>
                               <span
                                 className="font-cinzel text-[0.44rem] tracking-[0.1em] px-1 py-0.5 uppercase"
@@ -329,10 +333,10 @@ export function WeaponsClient({ weapons, lang }: WeaponsClientProps) {
                       {eraLabel(selected.eraId)} · {getCategory(selected.icon, lang)}
                     </div>
                     <h2 className="font-cinzel text-gold text-sm font-bold leading-snug">
-                      {selected.name}
+                      {getWeaponName(lang, selected.name)}
                     </h2>
                     <div className="font-cinzel text-[0.5rem] tracking-wider text-smoke uppercase mt-1">
-                      {selected.period}
+                      {getWeaponPeriod(lang, selected.period)}
                     </div>
                   </div>
                   <button
