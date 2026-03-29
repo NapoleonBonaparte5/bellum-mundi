@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     apiVersion: '2025-02-24.acacia',
   })
   try {
-    const { priceId, email, userId } = await req.json()
+    const { priceId, email, userId, lang = 'en' } = await req.json()
 
     if (!priceId || !email) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 })
@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/es#pricing`,
-      locale: 'es',
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${lang}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${lang}#pricing`,
+      locale: lang === 'es' ? 'es' : 'en',
       subscription_data: {
         metadata: { supabase_user_id: userId ?? '' },
       },

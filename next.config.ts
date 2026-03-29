@@ -28,8 +28,8 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://unpkg.com https://en.wikipedia.org https://*.wikipedia.org https://js.stripe.com https://www.google-analytics.com https://region1.google-analytics.com https://cdn.jsdelivr.net",
-              "frame-src 'none'",
+              "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://unpkg.com https://en.wikipedia.org https://*.wikipedia.org https://js.stripe.com https://www.google-analytics.com https://region1.google-analytics.com https://cdn.jsdelivr.net https://*.tile.openstreetmap.org",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               "object-src 'none'",
               "base-uri 'self'",
             ].join('; '),
@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      { source: '/', destination: '/es', permanent: false },
+      { source: '/', destination: '/en', permanent: false },
     ]
   },
 }

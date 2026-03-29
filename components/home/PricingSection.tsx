@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { useState } from 'react'
+import Link from 'next/link'
 import type { Lang } from '@/lib/data/types'
 import { t } from '@/lib/i18n'
 
@@ -48,7 +49,7 @@ export function PricingSection({ lang }: PricingSectionProps) {
       const res  = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, email: trimmed }),
+        body: JSON.stringify({ priceId, email: trimmed, lang }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -129,9 +130,12 @@ export function PricingSection({ lang }: PricingSectionProps) {
               </li>
             ))}
           </ul>
-          <button className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-mist border border-gold/20 hover:border-gold hover:text-gold transition-colors">
+          <Link
+            href={`/${lang}#auth`}
+            className="block w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-mist border border-gold/20 hover:border-gold hover:text-gold transition-colors text-center"
+          >
             {isES ? 'Crear cuenta gratis' : 'Create free account'}
-          </button>
+          </Link>
         </div>
 
         {/* ── COMANDANTE (PREMIUM) — featured ───────────────── */}
@@ -280,7 +284,8 @@ export function PricingSection({ lang }: PricingSectionProps) {
           ) : (
             <button
               onClick={() => setShowEmailForm('edu')}
-              className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-gold border border-gold/40 hover:bg-gold/10 transition-colors"
+              disabled={!STRIPE_PRICE_EDU_MONTHLY && !STRIPE_PRICE_EDU_ANNUAL}
+              className="w-full py-4 font-cinzel text-[0.65rem] tracking-[0.2em] uppercase font-bold text-gold border border-gold/40 hover:bg-gold/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isES ? 'Comenzar ahora →' : 'Start now →'}
             </button>

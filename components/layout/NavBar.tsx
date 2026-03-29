@@ -276,7 +276,10 @@ export function NavBar({ lang }: NavBarProps) {
               )}
             </div>
           ) : (
-            <button className="hidden md:block border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-3 py-2 hover:text-gold hover:border-gold transition-colors">
+            <button
+              onClick={() => router.push(`/${lang}#auth`)}
+              className="hidden md:block border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-3 py-2 hover:text-gold hover:border-gold transition-colors"
+            >
               {lang === 'en' ? 'Sign In' : 'Entrar'}
             </button>
           )}
@@ -355,7 +358,10 @@ export function NavBar({ lang }: NavBarProps) {
         {/* Mobile auth row */}
         <div className="px-6 pb-4 flex gap-3 border-t border-gold/10 pt-3">
           {!user && (
-            <button className="flex-1 border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 hover:text-gold hover:border-gold transition-colors">
+            <button
+              onClick={() => { setMenuOpen(false); router.push(`/${lang}#auth`) }}
+              className="flex-1 border border-gold/30 text-mist font-cinzel text-[0.6rem] tracking-[0.15em] uppercase py-2 hover:text-gold hover:border-gold transition-colors"
+            >
               {lang === 'en' ? 'Sign In' : 'Entrar'}
             </button>
           )}
@@ -416,8 +422,8 @@ export function NavBar({ lang }: NavBarProps) {
           style={{
             position: 'fixed',
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
-            left: '1.5rem',
-            right: 'auto',
+            right: '1.5rem',
+            left: 'auto',
             zIndex: 900,
             width: '56px',
             height: '56px',

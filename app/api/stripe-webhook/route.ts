@@ -53,6 +53,20 @@ export async function POST(req: NextRequest) {
       break
     }
 
+    // Subscription plan change → update plan accordingly
+    case 'customer.subscription.updated': {
+      const sub = event.data.object as Stripe.Subscription
+      const customerId = sub.customer as string
+      const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer
+      const status = sub.status
+      if (customer.email) {
+        const plan = (status === 'active' || status === 'trialing') ? 'premium' : 'free'
+        await supabase.from('profiles').update({ plan }).eq('email', customer.email)
+        console.log(`↔ Subscription updated (${status}): ${customer.email} → ${plan}`)
+      }
+      break
+    }
+
     // Subscription cancelled / expired → downgrade to free
     case 'customer.subscription.deleted':
     case 'invoice.payment_failed': {

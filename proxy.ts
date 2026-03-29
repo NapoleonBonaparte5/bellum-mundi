@@ -94,9 +94,9 @@ export async function proxy(req: NextRequest) {
   if (pathname === '/biblioteca' || pathname === '/biblioteca/') {
     return NextResponse.redirect(new URL('/es/biblioteca', req.url), 301)
   }
-  // Root → /es
+  // Root → /en
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/es', req.url), 301)
+    return NextResponse.redirect(new URL('/en', req.url), 301)
   }
 
   // ── API rate limiting ────────────────────────────────────

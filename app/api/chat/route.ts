@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       try {
         const s = await anthropic.messages.stream({
-          model: 'claude-sonnet-4-6',
+          model: 'claude-sonnet-4-20250514',
           max_tokens: 2048,
           system: systemPrompt,
           messages: validMessages,

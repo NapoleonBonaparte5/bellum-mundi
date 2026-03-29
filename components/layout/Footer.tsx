@@ -77,12 +77,12 @@ export function Footer({ lang }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <span
-                  className="font-crimson text-smoke text-sm hover:text-gold transition-colors cursor-pointer"
-                  onClick={() => alert('API — próximamente / coming soon')}
+                <a
+                  href="mailto:hola@bellummundi.com?subject=API%20Access"
+                  className="font-crimson text-smoke text-sm hover:text-gold transition-colors"
                 >
                   API
-                </span>
+                </a>
               </li>
             </ul>
           </div>
@@ -130,7 +130,7 @@ export function Footer({ lang }: FooterProps) {
             {[
               { label: lang === 'en' ? 'Privacy Policy' : 'Política de Privacidad', href: `/${lang}/privacidad` },
               { label: lang === 'en' ? 'Terms of Use' : 'Términos de Uso', href: `/${lang}/terminos` },
-              { label: lang === 'en' ? 'Affiliates' : 'Afiliados', href: `/${lang}/afiliados` },
+              { label: lang === 'en' ? 'Contact' : 'Contacto', href: `mailto:hola@bellummundi.com` },
             ].map(item => (
               <Link
                 key={item.href}

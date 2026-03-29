@@ -63,10 +63,3 @@ export async function subscribeToNewsletter(email: string) {
   return supabase.from('newsletter_subscribers').insert({ email })
 }
 
-export async function updateUserPlan(userId: string, plan: PlanType) {
-  return supabase.from('profiles').update({ plan }).eq('id', userId)
-}
-
-export async function insertProfile(userId: string, name: string) {
-  return supabase.from('profiles').insert({ id: userId, name, plan: 'free' })
-}

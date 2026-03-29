@@ -11,6 +11,7 @@ import { Footer } from '@/components/layout/Footer'
 import { Toaster } from '@/components/ui/Toaster'
 import { BackToTopButton } from '@/components/ui/BackToTopButton'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
+import { LangSync } from '@/components/ui/LangSync'
 
 export const SUPPORTED_LANGS: Lang[] = ['es', 'en']
 
@@ -35,8 +36,8 @@ export async function generateMetadata({ params }: LangLayoutProps): Promise<Met
       },
     },
     description: isEN
-      ? 'The most complete military history encyclopedia. 8,000+ battles, 1,200+ commanders, interactive maps and AI analysis.'
-      : 'La enciclopedia más completa de historia militar. 8.000+ batallas, 1.200+ comandantes, mapas interactivos y análisis con IA.',
+      ? 'The most complete military history encyclopedia. 890+ battles, 500+ commanders, interactive maps and AI analysis.'
+      : 'La enciclopedia más completa de historia militar. 890+ batallas, 500+ comandantes, mapas interactivos y análisis con IA.',
   }
 }
 
@@ -52,6 +53,7 @@ export default async function LangLayout({ children, params }: LangLayoutProps) 
 
   return (
     <>
+      <LangSync lang={validLang} />
       {/* Skip to content — accessibility */}
       <a
         href="#main-content"

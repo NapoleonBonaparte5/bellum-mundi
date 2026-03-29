@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   const pageUrl = `${BASE}/${l}`
   const title = isEN ? 'Bellum Mundi — Universal Military History Encyclopedia' : 'Bellum Mundi — Historia Militar Universal'
   const description = isEN
-    ? 'The most complete military history encyclopedia. 8,000+ battles, 1,200+ commanders, interactive maps and AI analysis. From Antiquity to the 21st Century.'
-    : 'La enciclopedia más completa de historia militar en español. 8.000+ batallas, 1.200+ comandantes, mapas interactivos y análisis con IA.'
+    ? 'The most complete military history encyclopedia. 890+ battles, 500+ commanders, interactive maps and AI analysis. From Antiquity to the 21st Century.'
+    : 'La enciclopedia más completa de historia militar en español. 890+ batallas, 500+ comandantes, mapas interactivos y análisis con IA.'
   const ogImage = `${BASE}/opengraph-image.png`
 
   const keywords = isEN
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
     keywords,
     alternates: {
       canonical: pageUrl,
-      languages: { es: `${BASE}/es`, en: `${BASE}/en`, 'x-default': `${BASE}/es` },
+      languages: { es: `${BASE}/es`, en: `${BASE}/en`, 'x-default': `${BASE}/en` },
     },
     openGraph: {
       title,
